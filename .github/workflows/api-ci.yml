@@ -1,0 +1,51 @@
+name: API CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - feature/**
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+jobs:
+  build-and-verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore PharmaQMS.API/PharmaQMS.API.csproj
+
+      - name: Build (no warnings as errors)
+        run: dotnet build PharmaQMS.API/PharmaQMS.API.csproj --configuration Release --no-restore
+
+      - name: Publish (smoke check)
+        run: dotnet publish PharmaQMS.API/PharmaQMS.API.csproj --configuration Release --no-build --output ./artifacts/publish
+
+      - name: Run tests if present
+        shell: pwsh
+        run: |
+          $testProjects = Get-ChildItem -Path . -Recurse -Filter "*.csproj" |
+            Where-Object { $_.Name -match "Test|Tests" }
+
+          if (-not $testProjects) {
+            Write-Host "No test projects found. Skipping tests."
+            exit 0
+          }
+
+          foreach ($project in $testProjects) {
+            Write-Host "Running tests in $($project.FullName)"
+            dotnet test $project.FullName --configuration Release --no-build --verbosity normal
+          }
