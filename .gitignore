@@ -416,3 +416,19 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Angular SPA (PharmaQMS.SPA)
+# Ignore node modules, build output, Angular cache and local env files for the SPA project
+PharmaQMS.SPA/node_modules/
+PharmaQMS.SPA/dist/
+PharmaQMS.SPA/.angular/
+PharmaQMS.SPA/npm-debug.log*
+PharmaQMS.SPA/yarn-error.log*
+PharmaQMS.SPA/.env
+PharmaQMS.SPA/.env.*
+# Editor folders inside the SPA
+PharmaQMS.SPA/.vscode/
+PharmaQMS.SPA/.idea/
+
+# Copilot commands ignore
+.github/copilot-instructions.md
