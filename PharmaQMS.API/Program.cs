@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using PharmaQMS.API.Data;
 using PharmaQMS.API.Models.Entities;
 using PharmaQMS.API.Services;
-using PharmaQMS.API.Endpoints;
+using PharmaQMS.API.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -97,7 +97,7 @@ try
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
         Log.Information("Ensuring database exists...");
-        await dbContext.Database.EnsureCreatedAsync();
+        await dbContext.Database.MigrateAsync();
 
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AuthUser>>();
@@ -114,6 +114,9 @@ try
         app.MapOpenApi();
     }
 
+    // Apply sanitization middleware early in the pipeline
+    app.UseSanitization();
+
     app.UseHttpsRedirection();
 
     app.UseCors("SpaDev");
@@ -121,7 +124,6 @@ try
     app.UseAuthentication();
     app.UseAuthorization();
 
-    app.MapApiInfoEndpoints();
     app.MapControllers();
 
     app.Run();
