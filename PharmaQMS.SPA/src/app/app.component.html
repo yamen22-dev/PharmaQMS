@@ -51,7 +51,8 @@
             <p class="user-name">
               {{ session.firstName }} {{ session.lastName }}
             </p>
-            <p class="user-role">QA Manager</p>
+            
+            <p class="user-role">{{ session.roles[0] }}</p>
           </div>
         </div>
         <button

@@ -7,7 +7,7 @@ import { AuthService } from './core/services/auth.service';
   selector: 'app-root',
   standalone: true,
   imports: [CommonModule, RouterLink, RouterOutlet, AsyncPipe],
-  templateUrl: './app.component.html',
+  templateUrl: "./app.component.html",
   styleUrl: './app.component.css'
 })
 export class AppComponent {
