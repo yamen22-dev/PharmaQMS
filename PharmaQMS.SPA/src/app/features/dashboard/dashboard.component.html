@@ -1,0 +1,51 @@
+<section
+  class="card dashboard-card"
+  *ngIf="session$ | async as session; else anonymous"
+>
+  <div class="session-info">
+    <p class="session-note">
+      💡 Sessie verloopt automatisch na 15 minuten inactiviteit.
+    </p>
+  </div>
+
+  <div class="dashboard-header">
+    <div>
+      <p class="eyebrow">Authenticated session</p>
+      <h2>{{ session.firstName }} {{ session.lastName }}</h2>
+      <p>{{ session.email }}</p>
+    </div>
+
+    <button class="secondary-button" type="button" (click)="logout()">
+      Logout
+    </button>
+  </div>
+
+  <div class="grid-2 details-grid">
+    <div>
+      <h3>Roles</h3>
+      <ul>
+        <li *ngFor="let role of session.roles">{{ role }}</li>
+      </ul>
+    </div>
+
+    <div>
+      <h3>Token expiry</h3>
+      <p>
+        Access token expires at
+        {{ session.accessTokenExpiresUtc | date: "medium" }}
+      </p>
+      <p>
+        Refresh token expires at
+        {{ session.refreshTokenExpiresUtc | date: "medium" }}
+      </p>
+    </div>
+  </div>
+</section>
+
+<ng-template #anonymous>
+  <section class="card dashboard-card">
+    <h2>Session unavailable</h2>
+    <p>Use the login page to authenticate.</p>
+    <a routerLink="/login" class="primary-button">Go to login</a>
+  </section>
+</ng-template>
