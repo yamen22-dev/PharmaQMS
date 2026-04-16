@@ -52,8 +52,6 @@ export class LoginComponent {
         error: (error: unknown) => {
           console.error("Login error:", error);
           this.errorMessage = this.extractErrorMessage(error);
-          console.log("Extracted error message:", this.errorMessage);
-          console.log("errorMessage property:", this.errorMessage);
           // Force change detection to ensure the error message is displayed
           this.cdr.markForCheck();
           this.cdr.detectChanges();
@@ -62,32 +60,19 @@ export class LoginComponent {
   }
 
   private extractErrorMessage(error: unknown): string {
-    console.log("=== ERROR EXTRACTION START ===");
-    console.log("Error:", error);
-    console.log("Error type:", error?.constructor?.name);
 
     if (error instanceof HttpErrorResponse) {
-      console.log("✓ HttpErrorResponse detected");
-      console.log("Status code:", error.status);
-      console.log("Status text:", error.statusText);
-      console.log("Error body:", error.error);
-
       // Check if error.error exists and is an object
       if (error.error && typeof error.error === "object") {
-        console.log("✓ error.error is an object");
-        console.log("Keys in error.error:", Object.keys(error.error));
-
         // Try title first
         if ("title" in error.error) {
           const title = (error.error as any).title;
-          console.log("✓ Found title:", title);
           return title || "An error occurred";
         }
 
         // Try detail
         if ("detail" in error.error) {
           const detail = (error.error as any).detail;
-          console.log("✓ Found detail:", detail);
           return detail || "An error occurred";
         }
       }
@@ -97,18 +82,15 @@ export class LoginComponent {
         error.statusText &&
         error.statusText.toLowerCase() !== "unknown error"
       ) {
-        console.log("✓ Using statusText:", error.statusText);
         return error.statusText;
       }
 
       // Last resort based on status
       if (error.status === 401) {
-        console.log("✓ Using default 401 message");
         return "Ongeldige gebruikersnaam of wachtwoord.";
       }
     }
 
-    console.log("=== ERROR EXTRACTION END ===");
     return "An error occurred. Please try again.";
   }
 }
