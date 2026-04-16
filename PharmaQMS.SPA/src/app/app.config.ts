@@ -3,7 +3,13 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
+import { sanitizationInterceptor } from "./core/interceptors/sanitization.interceptor";
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideRouter(routes), provideHttpClient(withInterceptors([authInterceptor]))]
+  providers: [
+    provideRouter(routes),
+    provideHttpClient(
+      withInterceptors([sanitizationInterceptor, authInterceptor]),
+    ),
+  ],
 };

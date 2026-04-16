@@ -5,8 +5,9 @@
       "Microsoft.AspNetCore": "Warning"
     }
   },
+  "AllowedHosts": "*",
   "ConnectionStrings": {
-    "AuthDb": "Server=localhost;Database=pharma_auth;User=root;Password=yamen;Pooling=true;MinimumPoolSize=5;MaximumPoolSize=50;"
+    "AuthDb": "Server=YOUR_SERVER;Database=pharma_auth;User=YOUR_USER;Password=YOUR_PASSWORD;Pooling=true;MinimumPoolSize=5;MaximumPoolSize=50;"
   },
   "Jwt": {
     "Issuer": "pharma-qms",
