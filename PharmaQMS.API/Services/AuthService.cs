@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using PharmaQMS.API.Data;
 using PharmaQMS.API.DTOs.Auth;
@@ -21,8 +22,14 @@ public class AuthService : IAuthService
     private readonly string _audience;
     private readonly int _accessTokenMinutes;
     private readonly int _refreshTokenDays;
+    private readonly int _maxFailedAccessAttempts;
+    private readonly TimeSpan _defaultLockoutTimeSpan;
 
-    public AuthService(UserManager<AuthUser> userManager, AuthDbContext dbContext, IConfiguration configuration)
+    public AuthService(
+        UserManager<AuthUser> userManager,
+        AuthDbContext dbContext,
+        IConfiguration configuration,
+        IOptions<IdentityOptions> identityOptions)
     {
         _userManager = userManager;
         _dbContext = dbContext;
@@ -33,6 +40,10 @@ public class AuthService : IAuthService
 
         _accessTokenMinutes = configuration.GetValue<int?>("Jwt:AccessTokenMinutes") ?? 15;
         _refreshTokenDays = configuration.GetValue<int?>("Jwt:RefreshTokenDays") ?? 7;
+        _maxFailedAccessAttempts = identityOptions.Value.Lockout.MaxFailedAccessAttempts;
+        _defaultLockoutTimeSpan = identityOptions.Value.Lockout.DefaultLockoutTimeSpan <= TimeSpan.Zero
+            ? TimeSpan.FromMinutes(15)
+            : identityOptions.Value.Lockout.DefaultLockoutTimeSpan;
         _signingKey = Encoding.UTF8.GetBytes(key);
     }
 
@@ -49,6 +60,18 @@ public class AuthService : IAuthService
             return AuthenticationResult.Failure("Invalid email or password.", StatusCodes.Status401Unauthorized);
         }
 
+        var lockoutEnabled = await _userManager.GetLockoutEnabledAsync(user);
+        if (!lockoutEnabled)
+        {
+            var setLockoutEnabledResult = await _userManager.SetLockoutEnabledAsync(user, true);
+            if (!setLockoutEnabledResult.Succeeded)
+            {
+                return AuthenticationResult.Failure("Failed to update account lockout state.", StatusCodes.Status500InternalServerError);
+            }
+
+            user = await _userManager.FindByIdAsync(user.Id) ?? user;
+        }
+
         if (await _userManager.IsLockedOutAsync(user))
         {
             return AuthenticationResult.Failure("Account is temporarily locked. Try again later.", StatusCodes.Status423Locked);
@@ -56,17 +79,40 @@ public class AuthService : IAuthService
 
         if (!await _userManager.CheckPasswordAsync(user, request.Password))
         {
-            await _userManager.AccessFailedAsync(user);
+            var accessFailedResult = await _userManager.AccessFailedAsync(user);
+            if (!accessFailedResult.Succeeded)
+            {
+                return AuthenticationResult.Failure("Failed to update account lockout state.", StatusCodes.Status500InternalServerError);
+            }
+
+            user = await _userManager.FindByIdAsync(user.Id) ?? user;
 
             if (await _userManager.IsLockedOutAsync(user))
             {
                 return AuthenticationResult.Failure("Account is temporarily locked. Try again later.", StatusCodes.Status423Locked);
             }
 
+            var accessFailedCount = await _userManager.GetAccessFailedCountAsync(user);
+            if (_maxFailedAccessAttempts > 0 && accessFailedCount >= _maxFailedAccessAttempts)
+            {
+                var lockoutEndUtc = DateTimeOffset.UtcNow.Add(_defaultLockoutTimeSpan);
+                var forceLockoutResult = await _userManager.SetLockoutEndDateAsync(user, lockoutEndUtc);
+                if (!forceLockoutResult.Succeeded)
+                {
+                    return AuthenticationResult.Failure("Failed to update account lockout state.", StatusCodes.Status500InternalServerError);
+                }
+
+                return AuthenticationResult.Failure("Account is temporarily locked. Try again later.", StatusCodes.Status423Locked);
+            }
+
             return AuthenticationResult.Failure("Invalid email or password.", StatusCodes.Status401Unauthorized);
         }
 
-        await _userManager.ResetAccessFailedCountAsync(user);
+        var resetFailedCountResult = await _userManager.ResetAccessFailedCountAsync(user);
+        if (!resetFailedCountResult.Succeeded)
+        {
+            return AuthenticationResult.Failure("Failed to reset failed login attempts.", StatusCodes.Status500InternalServerError);
+        }
 
         var response = await IssueTokensAsync(user, cancellationToken);
         return AuthenticationResult.Success(response);

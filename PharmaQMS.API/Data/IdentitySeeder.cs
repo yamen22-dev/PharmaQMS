@@ -62,6 +62,49 @@ public static class IdentitySeeder
                     throw new InvalidOperationException($"Failed seeding user '{seedUser.Email}': {FormatErrors(createResult.Errors)}");
                 }
             }
+            else
+            {
+                var requiresUpdate = false;
+
+                if (!user.LockoutEnabled)
+                {
+                    user.LockoutEnabled = true;
+                    requiresUpdate = true;
+                }
+
+                if (!user.EmailConfirmed)
+                {
+                    user.EmailConfirmed = true;
+                    requiresUpdate = true;
+                }
+
+                if (!string.Equals(user.UserName, seedUser.Email, StringComparison.OrdinalIgnoreCase))
+                {
+                    user.UserName = seedUser.Email;
+                    requiresUpdate = true;
+                }
+
+                if (!string.Equals(user.FirstName, seedUser.FirstName, StringComparison.Ordinal))
+                {
+                    user.FirstName = seedUser.FirstName;
+                    requiresUpdate = true;
+                }
+
+                if (!string.Equals(user.LastName, seedUser.LastName, StringComparison.Ordinal))
+                {
+                    user.LastName = seedUser.LastName;
+                    requiresUpdate = true;
+                }
+
+                if (requiresUpdate)
+                {
+                    var updateResult = await userManager.UpdateAsync(user);
+                    if (!updateResult.Succeeded)
+                    {
+                        throw new InvalidOperationException($"Failed updating user '{seedUser.Email}': {FormatErrors(updateResult.Errors)}");
+                    }
+                }
+            }
 
             var currentRoles = await userManager.GetRolesAsync(user);
 

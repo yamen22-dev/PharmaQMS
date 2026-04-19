@@ -46,7 +46,12 @@ try
 
 
     // Add ASP.NET Core Identity
-    builder.Services.AddIdentity<AuthUser, IdentityRole>()
+    builder.Services.AddIdentity<AuthUser, IdentityRole>(options =>
+    {
+        options.Lockout.AllowedForNewUsers = true;
+        options.Lockout.MaxFailedAccessAttempts = 5;
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+    })
         .AddEntityFrameworkStores<AuthDbContext>()
         .AddDefaultTokenProviders();
 
