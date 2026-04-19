@@ -1,0 +1,46 @@
+<section class="card auth-card">
+  <div class="auth-header">
+    <div class="logo-icon">📋</div>
+    <h1>PharmaQMS</h1>
+    <p class="tagline">QUALITY MANAGEMENT SYSTEM</p>
+  </div>
+
+  <h2>Aanmelden</h2>
+  <p>Log in met uw organisatieaccount.</p>
+
+  <form class="form-grid" [formGroup]="form" (ngSubmit)="submit()">
+    <div class="form-row">
+      <label for="email">GEBRUIKERSNAAM</label>
+      <input
+        id="email"
+        type="email"
+        formControlName="email"
+        autocomplete="email"
+        placeholder="jan.devries"
+      />
+      <small *ngIf="submitted && form.controls.email.invalid"
+        >Een geldig e-mailadres is vereist.</small
+      >
+    </div>
+
+    <div class="form-row">
+      <label for="password">WACHTWOORD</label>
+      <input
+        id="password"
+        type="password"
+        formControlName="password"
+        autocomplete="current-password"
+        placeholder="••••••••"
+      />
+      <small *ngIf="submitted && form.controls.password.invalid"
+        >Wachtwoord is vereist.</small
+      >
+    </div>
+
+    <div *ngIf="errorMessage" class="error-box">{{ errorMessage }}</div>
+
+    <button class="primary-button" type="submit" [disabled]="isSubmitting">
+      {{ isSubmitting ? "Bezig met aanmelden..." : "Aanmelden" }}
+    </button>
+  </form>
+</section>

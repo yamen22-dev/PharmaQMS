@@ -1,0 +1,80 @@
+<ng-container *ngIf="session$ | async as session; else authLayout">
+  <div class="app-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-branding">
+        <div class="logo-icon">📋</div>
+        <div>
+          <p class="brand-name">PharmaQMS</p>
+          <p class="brand-tagline">QUALITY MANAGEMENT</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <h3 class="nav-title">NAVIGATIE</h3>
+        <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">📊</span>
+          <span>Dashboard</span>
+        </a>
+        <a href="#" class="nav-item">
+          <span class="nav-icon">🏭</span>
+          <span>Grondstoffen & Lots</span>
+        </a>
+        <a href="#" class="nav-item">
+          <span class="nav-icon">📝</span>
+          <span>BMR</span>
+        </a>
+        <a href="#" class="nav-item">
+          <span class="nav-icon">✓</span>
+          <span>Quality Control</span>
+        </a>
+        <a href="#" class="nav-item">
+          <span class="nav-icon">⚠️</span>
+          <span>Deviaties & CAPA</span>
+        </a>
+        <a href="#" class="nav-item">
+          <span class="nav-icon">📄</span>
+          <span>Rapportage</span>
+        </a>
+        <a href="#" class="nav-item">
+          <span class="nav-icon">🔍</span>
+          <span>Audit Trail</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile">
+          <div class="avatar">
+            {{ session.firstName.charAt(0) }}{{ session.lastName.charAt(0) }}
+          </div>
+          <div class="user-info">
+            <p class="user-name">
+              {{ session.firstName }} {{ session.lastName }}
+            </p>
+            
+            <p class="user-role">{{ session.roles[0] }}</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          class="logout-btn"
+          (click)="logout()"
+          title="Logout"
+        >
+          →
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</ng-container>
+
+<ng-template #authLayout>
+  <div class="auth-wrapper">
+    <router-outlet></router-outlet>
+  </div>
+</ng-template>

@@ -432,3 +432,12 @@ PharmaQMS.SPA/.idea/
 
 # Copilot commands ignore
 .github/copilot-instructions.md
+# ASP.NET Core appsettings - keep example templates but exclude local/secret configs
+PharmaQMS.API/appsettings.json
+PharmaQMS.API/appsettings.Development.json
+PharmaQMS.API/appsettings.*.local.json
+PharmaQMS.API/appsettings.Production.json
+PharmaQMS.API/user-secrets/
+
+# Connection strings and API keys should never be committed
+*.local.json

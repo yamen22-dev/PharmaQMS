@@ -1,0 +1,71 @@
+.auth-card {
+  width: min(500px, 95vw);
+  margin: 0 auto;
+  padding: 3rem;
+  background: #ffffff;
+  border: none;
+  border-radius: 1.25rem;
+  box-shadow: 0 20px 25px rgba(15, 23, 42, 0.15);
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.logo-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.auth-header h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.5rem;
+  color: #1a2647;
+  font-weight: 700;
+}
+
+.tagline {
+  margin: 0;
+  font-size: 0.7rem;
+  color: #64748b;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.auth-card h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.5rem;
+  color: #1a2647;
+}
+
+.auth-card>p {
+  margin: 0 0 1.5rem;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+small {
+  display: block;
+  color: #dc2626;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+.session-note {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  text-align: center;
+  background: #fffbeb;
+  border-radius: 0.5rem;
+  color: #92400e;
+  font-size: 0.85rem;
+}
+
+.switch-link {
+  margin-bottom: 0;
+  margin-top: 1rem;
+}
