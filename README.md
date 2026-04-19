@@ -136,14 +136,11 @@ The SPA calls the API at:
 - JSON payloads cleaned of dangerous characters and control characters
 - Automatic via middleware (transparent to controllers)
 - Attribute-level validation on DTOs
-- See: [Backend sanitization details](SANITIZATION_BACKEND.md)
-
 ### Frontend Sanitization (Angular SPA)
 - Automatic HTTP interceptor sanitizes all request/response payloads
 - Angular `DomSanitizer` for safe HTML rendering
 - Custom form validators with sanitization checks
 - SafeHtmlPipe for template-level HTML safety
-- See: [Frontend sanitization guide](SANITIZATION_SPA.md)
 
 **Key features:**
 - Removes HTML tags, JavaScript protocols, event handlers
@@ -157,6 +154,9 @@ The SPA calls the API at:
 - 5 role-based access levels (QAManager, QCAnalyst, ProductionAnalyst, WarehouseOperator, Viewer)
 - Four-eyes principle enforced for batch sign-offs (Sprint 2+)
 
+**Threat mitigation — Weak Access Control:**
+Bedreiging #49 is het risico op zwakke toegangscontrole waardoor ongeautoriseerde toegang tot gevoelige gegevens mogelijk wordt. Hiervoor heb ik in `Program.cs` een standaard autorisatiebeleid ingesteld met `.SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());`, waardoor alle endpoints standaard authenticatie vereisen. Alleen acties of controllers gemarkeerd met `[AllowAnonymous]` vallen buiten deze standaardbeveiliging. Zie ter illustratie regel 200-203 van Program.cs.
+
 ### Secrets Management
 - Database credentials stored locally, never in Git
 - JWT signing keys managed via `user-secrets` or environment variables
@@ -165,9 +165,15 @@ The SPA calls the API at:
 
 ## Default test accounts
 
-All seeded users use password:
+All seeded users use the password you configured in `Seed:DefaultUserPassword`
+(via user-secrets or environment variables).
 
-- **Password@123**
+Example (local development):
+
+```bash
+cd PharmaQMS.API
+dotnet user-secrets set "Seed:DefaultUserPassword" "your-strong-dev-password"
+```
 
 ⚠️ **IMPORTANT FOR DEVELOPMENT ONLY** - Change these passwords in production!
 
@@ -191,7 +197,7 @@ Example login request:
 ```bash
 curl -k -X POST https://localhost:7008/api/v1/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"qa.manager@pharmaqms.local","password":"Password@123"}'
+  -d '{"email":"qa.manager@pharmaqms.local","password":"your-strong-dev-password"}'
 ```
 
 ## Troubleshooting
@@ -223,7 +229,7 @@ kill -9 <PID>
 ```
 
 ### HTTPS certificate errors
-
+If you get the statuscode 0 you're likely running into HTTPS issues. So to solve it do the following:
 Run:
 
 ```bash

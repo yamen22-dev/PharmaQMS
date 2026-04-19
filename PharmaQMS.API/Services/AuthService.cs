@@ -17,6 +17,7 @@ public class AuthService : IAuthService
 {
     private readonly UserManager<AuthUser> _userManager;
     private readonly AuthDbContext _dbContext;
+    private readonly ILogger<AuthService> _logger;
     private readonly byte[] _signingKey;
     private readonly string _issuer;
     private readonly string _audience;
@@ -28,11 +29,13 @@ public class AuthService : IAuthService
     public AuthService(
         UserManager<AuthUser> userManager,
         AuthDbContext dbContext,
+        ILogger<AuthService> logger,
         IConfiguration configuration,
         IOptions<IdentityOptions> identityOptions)
     {
         _userManager = userManager;
         _dbContext = dbContext;
+        _logger = logger;
 
         _issuer = configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("Configuration value 'Jwt:Issuer' is missing.");
         _audience = configuration["Jwt:Audience"] ?? throw new InvalidOperationException("Configuration value 'Jwt:Audience' is missing.");
@@ -57,6 +60,7 @@ public class AuthService : IAuthService
         var user = await _userManager.FindByEmailAsync(request.Email);
         if (user is null)
         {
+            _logger.LogWarning("Login failed for unknown email {Email}.", request.Email);
             return AuthenticationResult.Failure("Invalid email or password.", StatusCodes.Status401Unauthorized);
         }
 
@@ -74,6 +78,7 @@ public class AuthService : IAuthService
 
         if (await _userManager.IsLockedOutAsync(user))
         {
+            _logger.LogWarning("Login blocked because account {UserId} is locked.", user.Id);
             return AuthenticationResult.Failure("Account is temporarily locked. Try again later.", StatusCodes.Status423Locked);
         }
 
@@ -89,6 +94,7 @@ public class AuthService : IAuthService
 
             if (await _userManager.IsLockedOutAsync(user))
             {
+                _logger.LogWarning("Account {UserId} locked after failed login attempts.", user.Id);
                 return AuthenticationResult.Failure("Account is temporarily locked. Try again later.", StatusCodes.Status423Locked);
             }
 
@@ -102,9 +108,11 @@ public class AuthService : IAuthService
                     return AuthenticationResult.Failure("Failed to update account lockout state.", StatusCodes.Status500InternalServerError);
                 }
 
+                _logger.LogWarning("Account {UserId} force-locked after reaching failed attempt threshold.", user.Id);
                 return AuthenticationResult.Failure("Account is temporarily locked. Try again later.", StatusCodes.Status423Locked);
             }
 
+            _logger.LogWarning("Invalid password attempt for user {UserId}.", user.Id);
             return AuthenticationResult.Failure("Invalid email or password.", StatusCodes.Status401Unauthorized);
         }
 
@@ -115,6 +123,7 @@ public class AuthService : IAuthService
         }
 
         var response = await IssueTokensAsync(user, cancellationToken);
+        _logger.LogInformation("Login succeeded for user {UserId}.", user.Id);
         return AuthenticationResult.Success(response);
     }
 
@@ -130,6 +139,7 @@ public class AuthService : IAuthService
 
         if (tokenRecord is null)
         {
+            _logger.LogWarning("Refresh failed: token not found.");
             return AuthenticationResult.Failure("Invalid refresh token.", StatusCodes.Status400BadRequest);
         }
 
@@ -138,11 +148,13 @@ public class AuthService : IAuthService
         {
             await RevokeAllActiveTokensAsync(tokenRecord.UserId, "Refresh token reuse detected.", cancellationToken);
             await _dbContext.SaveChangesAsync(cancellationToken);
+            _logger.LogWarning("Refresh token reuse detected for user {UserId}; active tokens revoked.", tokenRecord.UserId);
             return AuthenticationResult.Failure("Refresh token reuse detected.", StatusCodes.Status401Unauthorized);
         }
 
         if (tokenRecord.ExpiresUtc <= now)
         {
+            _logger.LogWarning("Refresh failed: expired token for user {UserId}.", tokenRecord.UserId);
             return AuthenticationResult.Failure("Refresh token has expired.", StatusCodes.Status401Unauthorized);
         }
 
@@ -153,6 +165,7 @@ public class AuthService : IAuthService
         }
 
         var response = await IssueRotatedTokensAsync(user, tokenRecord, cancellationToken);
+        _logger.LogInformation("Refresh succeeded for user {UserId}.", user.Id);
         return AuthenticationResult.Success(response);
     }
 
@@ -176,6 +189,7 @@ public class AuthService : IAuthService
             tokenRecord.RevokedUtc = DateTime.UtcNow;
             tokenRecord.RevokeReason = "Revoked by user.";
             await _dbContext.SaveChangesAsync(cancellationToken);
+            _logger.LogInformation("Refresh token revoked for user {UserId}.", tokenRecord.UserId);
         }
 
         return AuthenticationResult.SuccessNoContent();
