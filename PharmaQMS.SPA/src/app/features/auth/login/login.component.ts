@@ -62,6 +62,10 @@ export class LoginComponent {
   private extractErrorMessage(error: unknown): string {
 
     if (error instanceof HttpErrorResponse) {
+      if (error.status === 429) {
+        return "Too many requests. Please try again in a moment.";
+      }
+
       // Check if error.error exists and is an object
       if (error.error && typeof error.error === "object") {
         // Try title first
