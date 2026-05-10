@@ -1,23 +1,40 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { guestGuard } from "./core/guards/guest.guard";
+import { roleGuard } from "./core/guards/role.guard";
 
 export const routes: Routes = [
   {
-    path: 'login',
-    loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent)
+    path: "login",
+    canActivate: [guestGuard],
+    loadComponent: () =>
+      import("./features/auth/login/login.component").then(
+        (m) => m.LoginComponent,
+      ),
   },
   {
-    path: 'dashboard',
+    path: "dashboard",
     canActivate: [authGuard],
-    loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent)
+    loadComponent: () =>
+      import("./features/dashboard/dashboard.component").then(
+        (m) => m.DashboardComponent,
+      ),
   },
   {
-    path: '',
-    pathMatch: 'full',
-    redirectTo: 'dashboard'
+    path: "raw-materials",
+    canActivate: [authGuard, roleGuard(["QAManager", "WarehouseOperator"])],
+    loadComponent: () =>
+      import("./features/raw-materials/raw-materials.component").then(
+        (m) => m.RawMaterialsComponent,
+      ),
   },
   {
-    path: '**',
-    redirectTo: 'dashboard'
-  }
+    path: "",
+    pathMatch: "full",
+    redirectTo: "dashboard",
+  },
+  {
+    path: "**",
+    redirectTo: "dashboard",
+  },
 ];

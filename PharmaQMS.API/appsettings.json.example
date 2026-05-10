@@ -7,8 +7,8 @@
   },
   "AllowedHosts": "*",
   "ConnectionStrings": {
-    "AuthDb": "Server=YOUR_SERVER;Database=pharma_auth;User=YOUR_USER;Password=YOUR_PASSWORD;Pooling=true;MinimumPoolSize=5;MaximumPoolSize=50;",
-    "DomainDb": "Server=YOUR_SERVER;Database=pharma_domain;User=YOUR_USER;Password=YOUR_PASSWORD;Pooling=true;MinimumPoolSize=5;MaximumPoolSize=100;"
+    "AuthDb": "Server=YOUR_SERVER;Database=pharma_auth;User=pharma_qms_dev;Password=j~P64jb6S%c@;Pooling=true;MinimumPoolSize=5;MaximumPoolSize=50;",
+    "DomainDb": "Server=YOUR_SERVER;Database=pharma_domain;User=pharma_qms_dev;Password=j~P64jb6S%c@;Pooling=true;MinimumPoolSize=5;MaximumPoolSize=100;"
   },
   "Jwt": {
     "Issuer": "pharma-qms",

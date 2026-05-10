@@ -14,12 +14,16 @@ namespace PharmaQMS.API.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
-
+    
     public AuthController(IAuthService authService)
     {
         _authService = authService;
     }
-
+    [HttpGet("status")]
+    public IActionResult Status()
+    {
+        return Ok(new { Status = "Auth API is running." });
+    }
     [HttpPost("login")]
     [EnableRateLimiting("auth-login")]
     [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
