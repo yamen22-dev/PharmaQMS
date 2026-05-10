@@ -36,6 +36,8 @@ try
     builder.Services.AddControllers();
     builder.Services.AddProblemDetails();
     builder.Services.AddMemoryCache();
+    builder.Services.AddHttpContextAccessor();
+    builder.Services.AddScoped<AuditTrailInterceptor>();
     builder.Services.AddRequestTimeouts(options =>
     {
         options.DefaultPolicy = new Microsoft.AspNetCore.Http.Timeouts.RequestTimeoutPolicy
@@ -127,17 +129,29 @@ try
 
     // Add DbContexts
     var authDbConnectionString = builder.Configuration.GetConnectionString("AuthDb");
+    var domainDbConnectionString = builder.Configuration.GetConnectionString("DomainDb");
     if (string.IsNullOrWhiteSpace(authDbConnectionString))
     {
         throw new InvalidOperationException("ConnectionStrings:AuthDb is missing.");
     }
 
+    if (string.IsNullOrWhiteSpace(domainDbConnectionString))
+    {
+        throw new InvalidOperationException("ConnectionStrings:DomainDb is missing.");
+    }
+
     if (!builder.Environment.IsDevelopment())
     {
-        var csBuilder = new MySqlConnectionStringBuilder(authDbConnectionString);
-        if (csBuilder.SslMode is MySqlSslMode.None or MySqlSslMode.Preferred)
+        var authCsBuilder = new MySqlConnectionStringBuilder(authDbConnectionString);
+        if (authCsBuilder.SslMode is MySqlSslMode.None or MySqlSslMode.Preferred)
         {
             throw new InvalidOperationException("Production AuthDb connection must enforce TLS. Configure SslMode=Required, VerifyCA, or VerifyFull.");
+        }
+
+        var domainCsBuilder = new MySqlConnectionStringBuilder(domainDbConnectionString);
+        if (domainCsBuilder.SslMode is MySqlSslMode.None or MySqlSslMode.Preferred)
+        {
+            throw new InvalidOperationException("Production DomainDb connection must enforce TLS. Configure SslMode=Required, VerifyCA, or VerifyFull.");
         }
     }
 
@@ -149,6 +163,17 @@ try
             mySqlOptions.CommandTimeout(15);
             mySqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(5), null);
         });
+    });
+
+    builder.Services.AddDbContext<DomainDbContext>((serviceProvider, options) =>
+    {
+        options.UseMySql(domainDbConnectionString, ServerVersion.AutoDetect(domainDbConnectionString), mySqlOptions =>
+        {
+            mySqlOptions.CommandTimeout(15);
+            mySqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(5), null);
+        });
+        options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+        options.AddInterceptors(serviceProvider.GetRequiredService<AuditTrailInterceptor>());
     });
 
 
@@ -204,6 +229,7 @@ try
 
     // Add Services
     builder.Services.AddScoped<IAuthService, AuthService>();
+    builder.Services.AddScoped<IRawMaterialService, RawMaterialService>();
 
     // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
     builder.Services.AddOpenApi();
@@ -221,8 +247,10 @@ try
     using (var scope = app.Services.CreateScope())
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
+        var domainDbContext = scope.ServiceProvider.GetRequiredService<DomainDbContext>();
         Log.Information("Ensuring database exists...");
         await dbContext.Database.MigrateAsync();
+        await domainDbContext.Database.MigrateAsync();
 
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AuthUser>>();
