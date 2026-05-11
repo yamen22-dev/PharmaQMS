@@ -1,0 +1,39 @@
+<section class="raw-materials-page">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Grondstoffen & Lots</p>
+      <h1>Raw material management</h1>
+      <p class="page-description">
+        Register and maintain raw materials from a dedicated module view.
+      </p>
+    </div>
+
+    <button
+      *ngIf="session$ | async as session"
+      [hidden]="!canCreateRawMaterial(session)"
+      type="button"
+      class="primary-button new-material-btn"
+      (click)="openNewRawMaterialForm()"
+    >
+      New raw material
+    </button>
+  </header>
+
+  <div *ngIf="showSuccessAlert" class="alert alert-success">
+    <div class="alert-content">
+      <strong>Success!</strong> {{ successMessage }}
+    </div>
+    <button
+      type="button"
+      class="alert-close"
+      (click)="closeSuccessAlert()"
+      aria-label="Dismiss success message"
+    ></button>
+  </div>
+
+  <section class="content-card" *ngIf="showForm">
+    <app-raw-material-form
+      (formSubmit)="onFormSubmit($event)"
+    ></app-raw-material-form>
+  </section>
+</section>

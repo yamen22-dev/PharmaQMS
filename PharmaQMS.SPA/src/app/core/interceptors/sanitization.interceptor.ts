@@ -14,6 +14,14 @@ import { SanitizationService } from "../services/sanitization.service";
  */
 export const sanitizationInterceptor: HttpInterceptorFn = (req, next) => {
   const sanitizer = inject(SanitizationService);
+  const isAuthEndpoint =
+    req.url.includes("/auth/login") ||
+    req.url.includes("/auth/refresh") ||
+    req.url.includes("/auth/revoke");
+
+  if (isAuthEndpoint) {
+    return next(req);
+  }
 
   // Check if this is a JSON request that needs sanitization
   const shouldSanitizeRequest =

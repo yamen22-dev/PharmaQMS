@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using System.Threading.RateLimiting;
 using System.Net;
 using MySqlConnector;
+using Scalar.AspNetCore;
 using PharmaQMS.API.Data;
 using PharmaQMS.API.Models.Entities;
 using PharmaQMS.API.Services;
@@ -16,7 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.AddServerHeader = false;
+    // options.AddServerHeader = false;
     options.Limits.MaxRequestBodySize = 64 * 1024;
     options.Limits.RequestHeadersTimeout = TimeSpan.FromSeconds(15);
     options.Limits.KeepAliveTimeout = TimeSpan.FromSeconds(30);
@@ -36,6 +37,8 @@ try
     builder.Services.AddControllers();
     builder.Services.AddProblemDetails();
     builder.Services.AddMemoryCache();
+    builder.Services.AddHttpContextAccessor();
+    builder.Services.AddScoped<AuditTrailInterceptor>();
     builder.Services.AddRequestTimeouts(options =>
     {
         options.DefaultPolicy = new Microsoft.AspNetCore.Http.Timeouts.RequestTimeoutPolicy
@@ -127,17 +130,29 @@ try
 
     // Add DbContexts
     var authDbConnectionString = builder.Configuration.GetConnectionString("AuthDb");
+    var domainDbConnectionString = builder.Configuration.GetConnectionString("DomainDb");
     if (string.IsNullOrWhiteSpace(authDbConnectionString))
     {
         throw new InvalidOperationException("ConnectionStrings:AuthDb is missing.");
     }
 
+    if (string.IsNullOrWhiteSpace(domainDbConnectionString))
+    {
+        throw new InvalidOperationException("ConnectionStrings:DomainDb is missing.");
+    }
+
     if (!builder.Environment.IsDevelopment())
     {
-        var csBuilder = new MySqlConnectionStringBuilder(authDbConnectionString);
-        if (csBuilder.SslMode is MySqlSslMode.None or MySqlSslMode.Preferred)
+        var authCsBuilder = new MySqlConnectionStringBuilder(authDbConnectionString);
+        if (authCsBuilder.SslMode is MySqlSslMode.None or MySqlSslMode.Preferred)
         {
             throw new InvalidOperationException("Production AuthDb connection must enforce TLS. Configure SslMode=Required, VerifyCA, or VerifyFull.");
+        }
+
+        var domainCsBuilder = new MySqlConnectionStringBuilder(domainDbConnectionString);
+        if (domainCsBuilder.SslMode is MySqlSslMode.None or MySqlSslMode.Preferred)
+        {
+            throw new InvalidOperationException("Production DomainDb connection must enforce TLS. Configure SslMode=Required, VerifyCA, or VerifyFull.");
         }
     }
 
@@ -149,6 +164,17 @@ try
             mySqlOptions.CommandTimeout(15);
             mySqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(5), null);
         });
+    });
+
+    builder.Services.AddDbContext<DomainDbContext>((serviceProvider, options) =>
+    {
+        options.UseMySql(domainDbConnectionString, ServerVersion.AutoDetect(domainDbConnectionString), mySqlOptions =>
+        {
+            mySqlOptions.CommandTimeout(15);
+            mySqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(5), null);
+        });
+        options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+        options.AddInterceptors(serviceProvider.GetRequiredService<AuditTrailInterceptor>());
     });
 
 
@@ -204,6 +230,7 @@ try
 
     // Add Services
     builder.Services.AddScoped<IAuthService, AuthService>();
+    builder.Services.AddScoped<IRawMaterialService, RawMaterialService>();
 
     // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
     builder.Services.AddOpenApi();
@@ -221,8 +248,17 @@ try
     using (var scope = app.Services.CreateScope())
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
-        Log.Information("Ensuring database exists...");
+        var domainDbContext = scope.ServiceProvider.GetRequiredService<DomainDbContext>();
+        Log.Information("Ensuring AuthDb exists...");
+        await EnsureMySqlDatabaseExistsAsync(authDbConnectionString);
+        Log.Information("Ensuring DomainDb exists...");
+        await EnsureMySqlDatabaseExistsAsync(domainDbConnectionString);
+
+        Log.Information("Applying AuthDb migrations...");
         await dbContext.Database.MigrateAsync();
+
+        Log.Information("Applying DomainDb migrations...");
+        await domainDbContext.Database.MigrateAsync();
 
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AuthUser>>();
@@ -261,7 +297,8 @@ try
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
     {
-        app.MapOpenApi();
+        app.MapOpenApi().AllowAnonymous();
+        app.MapScalarApiReference().AllowAnonymous();
     }
     else
     {
@@ -278,7 +315,7 @@ try
         context.Response.Headers["Referrer-Policy"] = "no-referrer";
         context.Response.Headers["X-Permitted-Cross-Domain-Policies"] = "none";
         context.Response.Headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()";
-        context.Response.Headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'; base-uri 'none';";
+        context.Response.Headers["Content-Security-Policy"] = BuildContentSecurityPolicy(context.Request.Path);
         await next();
     });
 
@@ -307,4 +344,34 @@ catch (Exception ex)
 finally
 {
     Log.CloseAndFlush();
+}
+
+static async Task EnsureMySqlDatabaseExistsAsync(string connectionString, CancellationToken cancellationToken = default)
+{
+    var builder = new MySqlConnectionStringBuilder(connectionString);
+    if (string.IsNullOrWhiteSpace(builder.Database))
+    {
+        throw new InvalidOperationException("MySQL connection string must specify a database name.");
+    }
+
+    var databaseName = builder.Database;
+    builder.Database = string.Empty;
+    builder.ConnectionTimeout = 5;
+
+    await using var connection = new MySqlConnection(builder.ConnectionString);
+    await connection.OpenAsync(cancellationToken);
+
+    await using var command = connection.CreateCommand();
+    command.CommandText = $"CREATE DATABASE IF NOT EXISTS `{databaseName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;";
+    await command.ExecuteNonQueryAsync(cancellationToken);
+}
+
+static string BuildContentSecurityPolicy(PathString path)
+{
+    if (path.StartsWithSegments("/scalar"))
+    {
+        return "default-src 'self'; script-src 'self' 'unsafe-inline'; script-src-elem 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; style-src-elem 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; font-src 'self' data:; frame-ancestors 'none'; base-uri 'none';";
+    }
+
+    return "default-src 'none'; frame-ancestors 'none'; base-uri 'none';";
 }

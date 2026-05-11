@@ -52,17 +52,19 @@ public class AuthService : IAuthService
 
     public async Task<AuthenticationResult> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
     {
-        if (request is null || string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
+        try
         {
-            return AuthenticationResult.Failure("Email and password are required.", StatusCodes.Status400BadRequest);
-        }
+            if (request is null || string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
+            {
+                return AuthenticationResult.Failure("Email and password are required.", StatusCodes.Status400BadRequest);
+            }
 
-        var user = await _userManager.FindByEmailAsync(request.Email);
-        if (user is null)
-        {
-            _logger.LogWarning("Login failed for unknown email {Email}.", request.Email);
-            return AuthenticationResult.Failure("Invalid email or password.", StatusCodes.Status401Unauthorized);
-        }
+            var user = await _userManager.FindByEmailAsync(request.Email);
+            if (user is null)
+            {
+                _logger.LogWarning("Login failed for unknown email {Email}.", request.Email);
+                return AuthenticationResult.Failure("Invalid email or password.", StatusCodes.Status401Unauthorized);
+            }
 
         var lockoutEnabled = await _userManager.GetLockoutEnabledAsync(user);
         if (!lockoutEnabled)
@@ -116,15 +118,21 @@ public class AuthService : IAuthService
             return AuthenticationResult.Failure("Invalid email or password.", StatusCodes.Status401Unauthorized);
         }
 
-        var resetFailedCountResult = await _userManager.ResetAccessFailedCountAsync(user);
-        if (!resetFailedCountResult.Succeeded)
-        {
-            return AuthenticationResult.Failure("Failed to reset failed login attempts.", StatusCodes.Status500InternalServerError);
-        }
+            var resetFailedCountResult = await _userManager.ResetAccessFailedCountAsync(user);
+            if (!resetFailedCountResult.Succeeded)
+            {
+                return AuthenticationResult.Failure("Failed to reset failed login attempts.", StatusCodes.Status500InternalServerError);
+            }
 
-        var response = await IssueTokensAsync(user, cancellationToken);
-        _logger.LogInformation("Login succeeded for user {UserId}.", user.Id);
-        return AuthenticationResult.Success(response);
+            var response = await IssueTokensAsync(user, cancellationToken);
+            _logger.LogInformation("Login succeeded for user {UserId}.", user.Id);
+            return AuthenticationResult.Success(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error during login for {Email}.", request?.Email ?? "<null>");
+            throw;
+        }
     }
 
     public async Task<AuthenticationResult> RefreshAsync(RefreshTokenRequest request, CancellationToken cancellationToken = default)

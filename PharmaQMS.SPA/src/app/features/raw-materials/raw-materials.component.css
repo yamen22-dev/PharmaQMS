@@ -1,0 +1,147 @@
+.raw-materials-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.25rem 0;
+}
+
+.eyebrow {
+  margin: 0 0 0.25rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6b7280;
+  font-weight: 700;
+}
+
+.page-header h1 {
+  margin: 0;
+  color: #1a2647;
+  font-size: 2rem;
+  line-height: 1.1;
+}
+
+.page-description {
+  margin: 0.5rem 0 0;
+  color: #64748b;
+  max-width: 42rem;
+}
+
+.new-material-btn {
+  align-self: flex-start;
+  white-space: nowrap;
+}
+
+.content-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.overview-card {
+  padding: 2rem;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+  border: 1px solid #dbe7f5;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+.overview-card p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.overview-card h2 {
+  margin: 0.25rem 0 0;
+  color: #1a2647;
+  font-size: 1.5rem;
+}
+
+.overview-pill {
+  display: inline-flex;
+  margin-top: 0.85rem;
+  padding: 0.5rem 0.75rem;
+  background: #eff6ff;
+  color: #1e5a96;
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  font-size: 0.875rem;
+}
+
+.alert {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.alert-content {
+  min-width: 0;
+}
+
+.alert-close {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  flex: 0 0 auto;
+}
+
+.alert-close:hover {
+  opacity: 0.8;
+}
+
+.overview-card h2 {
+  margin: 0 0 0.5rem;
+  color: #1a2647;
+}
+
+.alert {
+  padding: 1rem 1.25rem;
+  border-radius: 0.75rem;
+  font-size: 0.95rem;
+}
+
+.alert-success {
+  background-color: #e8f5e9;
+  border: 1px solid #4caf50;
+  color: #2e7d32;
+}
+
+.alert-success strong {
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+  }
+
+  .new-material-btn {
+    width: 100%;
+  }
+
+  .overview-card {
+    padding: 1.25rem;
+  }
+
+  .alert {
+    align-items: center;
+  }
+}
