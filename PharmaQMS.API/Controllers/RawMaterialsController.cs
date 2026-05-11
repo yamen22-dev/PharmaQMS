@@ -7,7 +7,7 @@ namespace PharmaQMS.API.Controllers;
 
 [ApiController]
 [Route("api/v1/raw-materials")]
-// [Authorize(Roles = RoleNames.QAManager + "," + RoleNames.WarehouseOperator)]
+[Authorize(Roles = RoleNames.QAManager + "," + RoleNames.WarehouseOperator)]
 public class RawMaterialsController : ControllerBase
 {
     private readonly IRawMaterialService _rawMaterialService;

@@ -76,11 +76,26 @@ export class RawMaterialFormComponent implements OnDestroy {
     const maxValue = parseFloat(
       control.get("maxSpecificationLimit")?.value || 0,
     );
+    const maxControl = control.get("maxSpecificationLimit");
+
+    if (!maxControl) {
+      return null;
+    }
 
     if (minValue >= 0 && maxValue >= 0 && minValue > maxValue) {
-      control.get("maxSpecificationLimit")?.setErrors({ minMaxInvalid: true });
+      const existing = maxControl.errors ?? {};
+      if (!existing["minMaxInvalid"]) {
+        maxControl.setErrors({ ...existing, minMaxInvalid: true });
+      }
       return { minMaxInvalid: true };
     }
+
+    const existing = maxControl.errors ?? {};
+    if (existing["minMaxInvalid"]) {
+      delete existing["minMaxInvalid"];
+      maxControl.setErrors(Object.keys(existing).length ? existing : null);
+    }
+
     return null;
   }
 
