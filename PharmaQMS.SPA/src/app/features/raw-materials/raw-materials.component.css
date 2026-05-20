@@ -1,7 +1,7 @@
 .raw-materials-page {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.5rem;
 }
 
 .page-header {
@@ -12,26 +12,11 @@
   padding: 0.25rem 0;
 }
 
-.eyebrow {
-  margin: 0 0 0.25rem;
-  font-size: 0.75rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #6b7280;
-  font-weight: 700;
-}
-
 .page-header h1 {
   margin: 0;
   color: #1a2647;
   font-size: 2rem;
   line-height: 1.1;
-}
-
-.page-description {
-  margin: 0.5rem 0 0;
-  color: #64748b;
-  max-width: 42rem;
 }
 
 .new-material-btn {
@@ -41,44 +26,189 @@
 
 .content-card {
   background: #ffffff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e2e8f0;
   border-radius: 1rem;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
   overflow: hidden;
 }
 
-.overview-card {
-  padding: 2rem;
-  background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
-  border: 1px solid #dbe7f5;
-  border-radius: 1rem;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 1rem;
 }
 
-.overview-card p {
+.stat-card {
+  padding: 1rem 1.25rem;
+  border-radius: 0.85rem;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+.stat-card h2 {
   margin: 0;
-  color: #6b7280;
-  font-size: 0.75rem;
+  font-size: 1.5rem;
+    color: #1e5a96;
+  }
+  
+  .stat-card p {
+    margin: 0.35rem 0 0;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #94a3b8;
+    font-weight: 700;
+  }
+  
+  .stat-card--warning h2 {
+    color: #d97706;
+  }
+  
+  .table-card {
+    padding: 0;
+  }
+  
+  .table-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  
+  .search-field {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    background: #ffffff;
+    width: min(100%, 360px);
+  }
+  
+  .search-icon {
+    display: inline-flex;
+    width: 1rem;
+    height: 1rem;
+    color: #94a3b8;
+  }
+  
+  .search-icon svg {
+    width: 1rem;
+    height: 1rem;
+    fill: currentColor;
+  }
+  
+  .search-input {
+    border: 0;
+    outline: none;
+    width: 100%;
+    font-size: 0.9rem;
+    background: transparent;
+    color: #1f2937;
+  }
+  
+  .filter-field {
+    min-width: 180px;
+  }
+  
+  .filter-select {
+    width: 100%;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 0.55rem 0.8rem;
+    background: #ffffff;
+    font-size: 0.9rem;
+    color: #1f2937;
+  }
+  
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .data-table th {
+    text-align: left;
+    padding: 0.8rem 1.25rem 0.6rem;
+    font-size: 0.68rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  color: #94a3b8;
   font-weight: 700;
 }
 
-.overview-card h2 {
-  margin: 0.25rem 0 0;
-  color: #1a2647;
-  font-size: 1.5rem;
+.data-table td {
+  padding: 0.85rem 1.25rem;
+  border-top: 1px solid #eef2f7;
+  color: #1f2937;
 }
 
-.overview-pill {
-  display: inline-flex;
-  margin-top: 0.85rem;
-  padding: 0.5rem 0.75rem;
-  background: #eff6ff;
+.data-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.material-link {
   color: #1e5a96;
-  border: 1px solid #bfdbfe;
+  font-weight: 600;
+}
+
+.category-pill {
+  display: inline-flex;
+  align-items: center;
+    padding: 0.2rem 0.6rem;
   border-radius: 999px;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid transparent;
+  }
+  
+  .category-pill--active {
+    background: #e0f2fe;
+    color: #0c4a6e;
+    border-color: #bae6fd;
+  }
+  
+  .category-pill--excipient {
+    background: #fef3c7;
+    color: #92400e;
+    border-color: #fde68a;
+  }
+  
+  .category-pill--packaging {
+    background: #ede9fe;
+    color: #5b21b6;
+    border-color: #ddd6fe;
+  }
+  
+  .category-pill--solvent {
+    background: #dcfce7;
+    color: #166534;
+    border-color: #bbf7d0;
+  }
+  
+  .category-pill--other {
+    background: #f1f5f9;
+    color: #475569;
+    border-color: #e2e8f0;
+  }
+  
+  .table-empty {
+    text-align: center;
+    padding: 1.5rem;
+    color: #64748b;
+  }
+  
+  .table-state {
+    padding: 1.5rem;
+    text-align: center;
+    color: #64748b;
+  }
+  
+  .table-state--error {
+    color: #b91c1c;
 }
 
 .alert {
@@ -86,6 +216,9 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
+  padding: 1rem 1.25rem;
+    border-radius: 0.75rem;
+    font-size: 0.95rem;
 }
 
 .alert-content {
@@ -107,17 +240,6 @@
   opacity: 0.8;
 }
 
-.overview-card h2 {
-  margin: 0 0 0.5rem;
-  color: #1a2647;
-}
-
-.alert {
-  padding: 1rem 1.25rem;
-  border-radius: 0.75rem;
-  font-size: 0.95rem;
-}
-
 .alert-success {
   background-color: #e8f5e9;
   border: 1px solid #4caf50;
@@ -137,11 +259,12 @@
     width: 100%;
   }
 
-  .overview-card {
-    padding: 1.25rem;
+    .table-toolbar {
+      flex-direction: column;
+      align-items: stretch;
   }
 
-  .alert {
-    align-items: center;
+    .search-field {
+      width: 100%;
   }
 }

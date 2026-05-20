@@ -1,0 +1,86 @@
+<section class="raw-material-detail-page">
+  <header class="page-header">
+      <div>
+          <p class="eyebrow">
+              Grondstoffen & Lots
+              <span *ngIf="detail"> / {{ detail.name }}</span>
+          </p>
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+              <a routerLink="/dashboard" class="breadcrumb-item">Dashboard</a>
+              <span class="breadcrumb-separator">/</span>
+              <a routerLink="/raw-materials" class="breadcrumb-item">Raw Materials</a>
+              <span class="breadcrumb-separator">/</span>
+              <span class="breadcrumb-current">Register</span>
+          </nav>
+          <h1>Grondstof detail</h1>
+      </div>
+  </header>
+
+  <div *ngIf="isLoading" class="state-card">Laden...</div>
+  <div *ngIf="errorMessage" class="state-card state-card--error">
+    {{ errorMessage }}
+  </div>
+
+  <ng-container *ngIf="detail && !isLoading">
+    <section class="detail-grid">
+      <div class="content-card detail-card">
+        <h2>Stamgegevens</h2>
+        <div class="detail-rows">
+          <div class="detail-row">
+            <span class="detail-label">Naam</span>
+            <span class="detail-value">{{ detail.name }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Farmaceutische API</span>
+            <span class="detail-value">
+              {{ detail.pharmaceuticalApi || "-" }}
+            </span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Categorie</span>
+            <span class="detail-value">
+              <span [ngClass]="getCategoryClass(detail.category)">
+                {{ getCategoryLabel(detail.category) }}
+              </span>
+            </span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Eenheid</span>
+            <span class="detail-value">{{ detail.unit }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Specgrens (min/max)</span>
+            <span class="detail-value">
+              {{
+                formatSpecLimits(
+                  detail.minSpecificationLimit,
+                  detail.maxSpecificationLimit
+                )
+              }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-card detail-card">
+        <h2>Lotoverzicht</h2>
+        <div class="lots-list" *ngIf="detail.lots.length; else emptyLots">
+          <div class="lot-row" *ngFor="let lot of detail.lots">
+            <span class="lot-number">{{ lot.lotNumber }}</span>
+            <span [ngClass]="getStatusClass(lot.status)">
+              {{ getStatusLabel(lot.status) }}
+            </span>
+          </div>
+        </div>
+        <ng-template #emptyLots>
+          <p class="empty-text">Geen lots gevonden.</p>
+        </ng-template>
+      </div>
+    </section>
+
+    <section class="content-card detail-card description-card">
+      <h2>Omschrijving</h2>
+      <p class="description-text">{{ getDescription(detail.notes) }}</p>
+    </section>
+  </ng-container>
+</section>

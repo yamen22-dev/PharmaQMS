@@ -234,6 +234,8 @@ try
 
     // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
     builder.Services.AddOpenApi();
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen();
 
     // Configure Serilog for the host, read full config from app configuration
     builder.Host.UseSerilog((context, services, configuration) =>
@@ -299,6 +301,12 @@ try
     {
         app.MapOpenApi().AllowAnonymous();
         app.MapScalarApiReference().AllowAnonymous();
+        app.UseSwagger();
+        app.UseSwaggerUI(options =>
+        {
+            options.SwaggerEndpoint("/swagger/v1/swagger.json", "PharmaQMS API v1");
+            options.RoutePrefix = "swagger";
+        });
     }
     else
     {

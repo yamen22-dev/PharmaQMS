@@ -2,38 +2,104 @@
   <header class="page-header">
     <div>
       <p class="eyebrow">Grondstoffen & Lots</p>
-      <h1>Raw material management</h1>
-      <p class="page-description">
-        Register and maintain raw materials from a dedicated module view.
-      </p>
+      <h1>Grondstoffen overzicht</h1>
     </div>
 
-    <button
-      *ngIf="session$ | async as session"
-      [hidden]="!canCreateRawMaterial(session)"
-      type="button"
-      class="primary-button new-material-btn"
-      (click)="openNewRawMaterialForm()"
-    >
-      New raw material
-    </button>
+  <button
+    *ngIf="canCreate"
+    type="button"
+    class="primary-button new-material-btn"
+    [routerLink]="['/raw-materials/new']"
+  >
+    Nieuwe grondstof
+  </button>
   </header>
 
-  <div *ngIf="showSuccessAlert" class="alert alert-success">
-    <div class="alert-content">
-      <strong>Success!</strong> {{ successMessage }}
+  <section class="stats-grid">
+    <div class="stat-card stat-card--primary">
+      <h2>{{ stats.totalRegistered }}</h2>
+      <p>Totaal geregistreerd</p>
     </div>
-    <button
-      type="button"
-      class="alert-close"
-      (click)="closeSuccessAlert()"
-      aria-label="Dismiss success message"
-    ></button>
-  </div>
-
-  <section class="content-card" *ngIf="showForm">
-    <app-raw-material-form
-      (formSubmit)="onFormSubmit($event)"
-    ></app-raw-material-form>
+    <div class="stat-card">
+      <h2>{{ stats.activeSubstances }}</h2>
+      <p>Werkzame stoffen</p>
+    </div>
+    <div class="stat-card">
+      <h2>{{ stats.excipients }}</h2>
+      <p>Hulpstoffen</p>
+    </div>
+    <div class="stat-card stat-card--warning">
+      <h2>{{ stats.lotsInQuarantine }}</h2>
+      <p>Lots in quarantaine</p>
+    </div>
   </section>
+
+  <section class="content-card table-card">
+    <div class="table-toolbar">
+      <div class="search-field">
+        <span class="search-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+            <path
+              d="M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16Zm0-14a6 6 0 1 0 0 12 6 6 0 0 0 0-12Zm9.7 15.3-3.6-3.6a1 1 0 0 0-1.4 1.4l3.6 3.6a1 1 0 0 0 1.4-1.4Z"
+            />
+          </svg>
+        </span>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Zoek op naam of API..."
+          [value]="searchTerm"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+      <div class="filter-field">
+        <select [(ngModel)]="selectedCategory" (ngModelChange)="applyFilters()">
+          <option *ngFor="let option of categoryOptions" [value]="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <div *ngIf="isLoading" class="table-state">Laden...</div>
+    <div *ngIf="errorMessage" class="table-state table-state--error">
+      {{ errorMessage }}
+    </div>
+
+    <table *ngIf="!isLoading && !errorMessage" class="data-table">
+      <thead>
+        <tr>
+          <th>Naam</th>
+          <th>Farmaceutische API</th>
+          <th>Categorie</th>
+          <th>Eenheid</th>
+          <th>Actieve lots</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let material of filteredMaterials">
+          <td>
+            <a
+              [routerLink]="['/raw-materials', material.id]"
+              class="material-link"
+            >
+              {{ material.name }}
+            </a>
+          </td>
+          <td>{{ formatPharmaceuticalApi(material.pharmaceuticalApi) }}</td>
+          <td>
+            <span [ngClass]="getCategoryClass(material.category)">
+              {{ getCategoryLabel(material.category) }}
+            </span>
+          </td>
+          <td>{{ material.unit }}</td>
+          <td>{{ material.activeLots }}</td>
+        </tr>
+        <tr *ngIf="filteredMaterials.length === 0">
+          <td colspan="5" class="table-empty">Geen grondstoffen gevonden.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
 </section>

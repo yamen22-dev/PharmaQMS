@@ -129,19 +129,9 @@ public class SanitizationMiddleware
         return response.ContentType?.Contains("application/json", StringComparison.OrdinalIgnoreCase) ?? false;
     }
 
-    private static Dictionary<string, object?> SanitizeJsonDocument(JsonElement element)
+    private static object? SanitizeJsonDocument(JsonElement element)
     {
-        var result = new Dictionary<string, object?>();
-
-        if (element.ValueKind == JsonValueKind.Object)
-        {
-            foreach (var prop in element.EnumerateObject())
-            {
-                result[prop.Name] = SanitizeJsonValue(prop.Value);
-            }
-        }
-
-        return result;
+        return SanitizeJsonValue(element);
     }
 
     private static object? SanitizeJsonValue(JsonElement element)
