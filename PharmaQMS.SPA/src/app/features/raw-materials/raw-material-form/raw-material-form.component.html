@@ -1,4 +1,12 @@
 <div class="form-container">
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a routerLink="/dashboard" class="breadcrumb-item">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <a routerLink="/raw-materials" class="breadcrumb-item">Raw Materials</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Register</span>
+  </nav>
+
   <h2>Register Raw Material</h2>
 
   <form [formGroup]="form" (ngSubmit)="onSubmit()">
@@ -7,135 +15,128 @@
       <strong>Error:</strong> {{ serverError }}
     </div>
 
-    <!-- Name -->
-    <div class="form-group">
-      <label for="name">Material Name <span class="required">*</span></label>
-      <input
-        type="text"
-        id="name"
-        formControlName="name"
-        class="form-input"
-        [class.input-error]="form.get('name')?.invalid && submitted"
-        placeholder="e.g., Paracetamol Grade A"
-      />
-      <small *ngIf="getFieldError('name')" class="error-text">{{ getFieldError('name') }}</small>
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="name">Material Name <span class="required">*</span></label>
+        <input
+          type="text"
+          id="name"
+          formControlName="name"
+          class="form-input"
+          [class.input-error]="form.get('name')?.invalid && submitted"
+          placeholder="e.g., Paracetamol Grade A"
+        />
+        <small *ngIf="getFieldError('name')" class="error-text">{{ getFieldError('name') }}</small>
+      </div>
+
+      <div class="form-group">
+        <label for="pharmaceuticalApi">Pharmaceutical API <span class="required">*</span></label>
+        <input
+          type="text"
+          id="pharmaceuticalApi"
+          formControlName="pharmaceuticalApi"
+          class="form-input"
+          [class.input-error]="form.get('pharmaceuticalApi')?.invalid && submitted"
+          placeholder="e.g., Acetaminophen"
+        />
+        <small *ngIf="getFieldError('pharmaceuticalApi')" class="error-text">{{ getFieldError('pharmaceuticalApi') }}</small>
+      </div>
+
+      <div class="form-group">
+        <label for="category">Category <span class="required">*</span></label>
+        <select
+          id="category"
+          formControlName="category"
+          class="form-input"
+          [class.input-error]="form.get('category')?.invalid && submitted"
+        >
+          <option value="">-- Select Category --</option>
+          <option *ngFor="let option of categoryOptions" [value]="option.value">{{ option.label }}</option>
+        </select>
+        <small *ngIf="getFieldError('category')" class="error-text">{{ getFieldError('category') }}</small>
+      </div>
+
+      <div class="form-group">
+        <label for="unit">Unit <span class="required">*</span></label>
+        <input
+          type="text"
+          id="unit"
+          formControlName="unit"
+          class="form-input"
+          [class.input-error]="form.get('unit')?.invalid && submitted"
+          placeholder="e.g., mg, g, kg"
+        />
+        <small *ngIf="getFieldError('unit')" class="error-text">{{ getFieldError('unit') }}</small>
+      </div>
+
+      <div class="form-group">
+        <label for="minSpecificationLimit">Min Specification Limit <span class="required">*</span></label>
+        <input
+          type="number"
+          id="minSpecificationLimit"
+          formControlName="minSpecificationLimit"
+          class="form-input"
+          [class.input-error]="form.get('minSpecificationLimit')?.invalid && submitted"
+          placeholder="e.g., 98.0"
+          step="0.01"
+        />
+        <small *ngIf="getFieldError('minSpecificationLimit')" class="error-text">{{ getFieldError('minSpecificationLimit') }}</small>
+      </div>
+
+      <div class="form-group">
+        <label for="maxSpecificationLimit">Max Specification Limit <span class="required">*</span></label>
+        <input
+          type="number"
+          id="maxSpecificationLimit"
+          formControlName="maxSpecificationLimit"
+          class="form-input"
+          [class.input-error]="form.get('maxSpecificationLimit')?.invalid && submitted"
+          placeholder="e.g., 102.0"
+          step="0.01"
+        />
+        <small *ngIf="getFieldError('maxSpecificationLimit')" class="error-text">{{ getFieldError('maxSpecificationLimit') }}</small>
+      </div>
+
+      <div class="form-group full-width">
+        <label for="supplier">Supplier <span class="required">*</span></label>
+        <input
+          type="text"
+          id="supplier"
+          formControlName="supplier"
+          class="form-input"
+          [class.input-error]="form.get('supplier')?.invalid && submitted"
+          placeholder="e.g., ChemCorp Inc."
+        />
+        <small *ngIf="getFieldError('supplier')" class="error-text">{{ getFieldError('supplier') }}</small>
+      </div>
+
+      <div class="form-group">
+        <label for="cepNumber">CEP Number</label>
+        <input
+          type="text"
+          id="cepNumber"
+          formControlName="cepNumber"
+          class="form-input"
+          placeholder="e.g., CEP12345"
+        />
+        <small class="info-text">Optional: Certificate of Suitability number</small>
+      </div>
+
+      <div class="form-group full-width">
+        <label for="notes">Notes</label>
+        <textarea
+          id="notes"
+          formControlName="notes"
+          class="form-input"
+          rows="4"
+          placeholder="Any additional notes..."
+        ></textarea>
+        <small class="info-text">Optional: Additional information about the raw material</small>
+      </div>
     </div>
 
-    <!-- Pharmaceutical API -->
-    <div class="form-group">
-      <label for="pharmaceuticalApi">Pharmaceutical API <span class="required">*</span></label>
-      <input
-        type="text"
-        id="pharmaceuticalApi"
-        formControlName="pharmaceuticalApi"
-        class="form-input"
-        [class.input-error]="form.get('pharmaceuticalApi')?.invalid && submitted"
-        placeholder="e.g., Acetaminophen"
-      />
-      <small *ngIf="getFieldError('pharmaceuticalApi')" class="error-text">{{ getFieldError('pharmaceuticalApi') }}</small>
-    </div>
-
-    <!-- Category -->
-    <div class="form-group">
-      <label for="category">Category <span class="required">*</span></label>
-      <select
-        id="category"
-        formControlName="category"
-        class="form-input"
-        [class.input-error]="form.get('category')?.invalid && submitted"
-      >
-        <option value="">-- Select Category --</option>
-        <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
-      </select>
-      <small *ngIf="getFieldError('category')" class="error-text">{{ getFieldError('category') }}</small>
-    </div>
-
-    <!-- Unit -->
-    <div class="form-group">
-      <label for="unit">Unit <span class="required">*</span></label>
-      <input
-        type="text"
-        id="unit"
-        formControlName="unit"
-        class="form-input"
-        [class.input-error]="form.get('unit')?.invalid && submitted"
-        placeholder="e.g., mg, g, kg"
-      />
-      <small *ngIf="getFieldError('unit')" class="error-text">{{ getFieldError('unit') }}</small>
-    </div>
-
-    <!-- Min Specification Limit -->
-    <div class="form-group">
-      <label for="minSpecificationLimit">Min Specification Limit <span class="required">*</span></label>
-      <input
-        type="number"
-        id="minSpecificationLimit"
-        formControlName="minSpecificationLimit"
-        class="form-input"
-        [class.input-error]="form.get('minSpecificationLimit')?.invalid && submitted"
-        placeholder="e.g., 98.0"
-        step="0.01"
-      />
-      <small *ngIf="getFieldError('minSpecificationLimit')" class="error-text">{{ getFieldError('minSpecificationLimit') }}</small>
-    </div>
-
-    <!-- Max Specification Limit -->
-    <div class="form-group">
-      <label for="maxSpecificationLimit">Max Specification Limit <span class="required">*</span></label>
-      <input
-        type="number"
-        id="maxSpecificationLimit"
-        formControlName="maxSpecificationLimit"
-        class="form-input"
-        [class.input-error]="form.get('maxSpecificationLimit')?.invalid && submitted"
-        placeholder="e.g., 102.0"
-        step="0.01"
-      />
-      <small *ngIf="getFieldError('maxSpecificationLimit')" class="error-text">{{ getFieldError('maxSpecificationLimit') }}</small>
-    </div>
-
-    <!-- Supplier -->
-    <div class="form-group">
-      <label for="supplier">Supplier <span class="required">*</span></label>
-      <input
-        type="text"
-        id="supplier"
-        formControlName="supplier"
-        class="form-input"
-        [class.input-error]="form.get('supplier')?.invalid && submitted"
-        placeholder="e.g., ChemCorp Inc."
-      />
-      <small *ngIf="getFieldError('supplier')" class="error-text">{{ getFieldError('supplier') }}</small>
-    </div>
-
-    <!-- CEP Number (Optional) -->
-    <div class="form-group">
-      <label for="cepNumber">CEP Number</label>
-      <input
-        type="text"
-        id="cepNumber"
-        formControlName="cepNumber"
-        class="form-input"
-        placeholder="e.g., CEP12345"
-      />
-      <small class="info-text">Optional: Certificate of Suitability number</small>
-    </div>
-
-    <!-- Notes (Optional) -->
-    <div class="form-group">
-      <label for="notes">Notes</label>
-      <textarea
-        id="notes"
-        formControlName="notes"
-        class="form-input"
-        rows="3"
-        placeholder="Any additional notes..."
-      ></textarea>
-      <small class="info-text">Optional: Additional information about the raw material</small>
-    </div>
-
-    <!-- Submit Button -->
     <div class="form-actions">
+      <a routerLink="/raw-materials" class="btn btn-secondary">Back to list</a>
       <button
         type="submit"
         class="btn btn-primary"

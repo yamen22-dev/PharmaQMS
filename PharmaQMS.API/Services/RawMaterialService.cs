@@ -14,6 +14,54 @@ public class RawMaterialService : IRawMaterialService
         _domainDbContext = domainDbContext;
     }
 
+    public async Task<IReadOnlyList<RawMaterialOverviewResponse>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        return await _domainDbContext.RawMaterials
+            .AsNoTracking()
+            .OrderBy(x => x.Name)
+            .Select(x => new RawMaterialOverviewResponse(
+                x.Id,
+                x.Name,
+                x.PharmaceuticalApi,
+                x.Category.ToString(),
+                x.Unit,
+                x.Lots.Count(l => l.Status != LotStatus.Rejected),
+                x.Lots.Count(l => l.Status == LotStatus.Quarantine)))
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<RawMaterialDetailResponse?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var entity = await _domainDbContext.RawMaterials
+            .AsNoTracking()
+            .Include(x => x.Lots)
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+        if (entity is null)
+        {
+            return null;
+        }
+
+        var lots = entity.Lots
+            .OrderBy(x => x.LotNumber)
+            .Select(x => new RawMaterialLotResponse(
+                x.Id,
+                x.LotNumber,
+                x.Status.ToString()))
+            .ToList();
+
+        return new RawMaterialDetailResponse(
+            entity.Id,
+            entity.Name,
+            entity.PharmaceuticalApi,
+            entity.Category.ToString(),
+            entity.Unit,
+            entity.MinSpecificationLimit,
+            entity.MaxSpecificationLimit,
+            entity.Notes,
+            lots);
+    }
+
     public async Task<RawMaterialResponse> CreateAsync(CreateRawMaterialRequest request, CancellationToken cancellationToken = default)
     {
         if (request.MinSpecificationLimit > request.MaxSpecificationLimit)

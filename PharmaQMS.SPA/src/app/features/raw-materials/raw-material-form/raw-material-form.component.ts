@@ -2,10 +2,8 @@ import { CommonModule } from "@angular/common";
 import {
   Component,
   inject,
-  OnDestroy,
-  Output,
-  EventEmitter,
 } from "@angular/core";
+import { RouterLink } from "@angular/router";
 import {
   FormBuilder,
   FormGroup,
@@ -14,6 +12,7 @@ import {
   AbstractControl,
   ValidationErrors,
 } from "@angular/forms";
+import { RawMaterialService } from "../../../core/services/raw-material.service";
 import {
   CreateRawMaterialRequest,
   RawMaterialCategory,
@@ -23,24 +22,27 @@ import {
 @Component({
   selector: "app-raw-material-form",
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: "./raw-material-form.component.html",
-  styleUrl: "./raw-material-form.component.css",
+  styleUrls: ["./raw-material-form.component.css"],
 })
-export class RawMaterialFormComponent implements OnDestroy {
-  @Output() formSubmit = new EventEmitter<CreateRawMaterialRequest>();
-  @Output() formStatusChange = new EventEmitter<{
-    isValid: boolean;
-    isLoading: boolean;
-  }>();
-
+export class RawMaterialFormComponent {
   private readonly fb = inject(FormBuilder);
+  private readonly rawMaterialService = inject(RawMaterialService);
 
   form: FormGroup;
   isLoading = false;
   submitted = false;
   serverError: string | null = null;
-  categories = Object.values(RawMaterialCategory);
+  successMessage: string | null = null;
+  showSuccessAlert = false;
+
+  categoryOptions = Object.values(RawMaterialCategory).map((value) => ({
+    value,
+    label: this.getCategoryLabel(value),
+  }));
+
+  unitOptions = ["kg", "g", "mg", "l", "ml", "pcs"];
 
   constructor() {
     this.form = this.fb.group(
@@ -57,16 +59,12 @@ export class RawMaterialFormComponent implements OnDestroy {
           "",
           [Validators.required, Validators.pattern(/^\d+(\.\d{1,2})?$/)],
         ],
-        supplier: ["", [Validators.required, Validators.minLength(2)]],
+        supplier: [""],
         cepNumber: [""],
         notes: [""],
       },
       { validators: this.minMaxValidator },
     );
-  }
-
-  ngOnDestroy(): void {
-    // Clean up if needed
   }
 
   minMaxValidator(control: AbstractControl): ValidationErrors | null {
@@ -102,13 +100,14 @@ export class RawMaterialFormComponent implements OnDestroy {
   onSubmit(): void {
     this.submitted = true;
     this.serverError = null;
+    this.showSuccessAlert = false;
+    this.successMessage = null;
 
     if (this.form.invalid) {
       return;
     }
 
     this.isLoading = true;
-    this.emitFormStatus();
 
     const request: CreateRawMaterialRequest = {
       name: this.form.get("name")!.value,
@@ -121,45 +120,43 @@ export class RawMaterialFormComponent implements OnDestroy {
       maxSpecificationLimit: parseFloat(
         this.form.get("maxSpecificationLimit")!.value,
       ),
-      supplier: this.form.get("supplier")!.value,
+      supplier: this.form.get("supplier")!.value ?? "",
       cepNumber: this.form.get("cepNumber")!.value || undefined,
       notes: this.form.get("notes")!.value || undefined,
     };
 
-    this.formSubmit.emit(request);
-  }
-
-  onSubmitSuccess(response: RawMaterialResponse): void {
-    this.isLoading = false;
-    this.submitted = false;
-    this.form.reset();
-    this.emitFormStatus();
+    this.rawMaterialService.createRawMaterial(request).subscribe({
+      next: (response: RawMaterialResponse) => {
+        this.isLoading = false;
+        this.submitted = false;
+        this.form.reset();
+        this.showSuccessAlert = true;
+        this.successMessage = `Grondstof "${response.name}" succesvol geregistreerd.`;
+      },
+      error: (error) => {
+        this.onSubmitError(error);
+      },
+    });
   }
 
   onSubmitError(error: any): void {
     this.isLoading = false;
-    this.emitFormStatus();
+    this.showSuccessAlert = false;
+    this.successMessage = null;
 
     if (error.status === 409) {
       this.serverError =
-        "A raw material with this name and pharmaceutical API already exists.";
+        "Er bestaat al een grondstof met deze naam en farmaceutische API.";
     } else if (error.status === 400) {
       this.serverError =
-        error.error?.detail || "Invalid data. Please check your inputs.";
+        error.error?.detail || "Ongeldige invoer. Controleer de velden.";
     } else if (error.status === 403) {
       this.serverError =
-        "You do not have permission to register raw materials.";
+        "Je hebt geen rechten om grondstoffen te registreren.";
     } else {
       this.serverError =
-        "An error occurred while registering the raw material. Please try again.";
+        "Er ging iets mis bij het registreren. Probeer het opnieuw.";
     }
-  }
-
-  private emitFormStatus(): void {
-    this.formStatusChange.emit({
-      isValid: this.form.valid && !this.isLoading,
-      isLoading: this.isLoading,
-    });
   }
 
   getFieldError(fieldName: string): string | null {
@@ -169,32 +166,53 @@ export class RawMaterialFormComponent implements OnDestroy {
     }
 
     if (control.hasError("required")) {
-      return `${this.formatFieldName(fieldName)} is required.`;
+      return `${this.formatFieldName(fieldName)} is verplicht.`;
     }
-    if (control.hasError("minLength")) {
-      return `${this.formatFieldName(fieldName)} must be at least 2 characters.`;
+    if (control.hasError("minlength") || control.hasError("minLength")) {
+      return `${this.formatFieldName(fieldName)} moet minimaal 2 tekens zijn.`;
     }
     if (control.hasError("pattern")) {
-      return `${this.formatFieldName(fieldName)} must be a valid number.`;
+      return `${this.formatFieldName(fieldName)} moet een geldig getal zijn.`;
     }
     if (control.hasError("minMaxInvalid")) {
-      return "Minimum specification limit must be less than or equal to maximum.";
+      return "Minimum specificatiegrens moet kleiner of gelijk zijn aan maximum.";
     }
 
     return null;
   }
 
   private formatFieldName(field: string): string {
-    return field
-      .replace(/([A-Z])/g, " $1")
-      .toLowerCase()
-      .trim()
-      .split(" ")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
+    const labels: Record<string, string> = {
+      name: "Naam grondstof",
+      pharmaceuticalApi: "Farmaceutische API",
+      category: "Categorie",
+      unit: "Eenheid",
+      minSpecificationLimit: "Min. specificatiegrens",
+      maxSpecificationLimit: "Max. specificatiegrens",
+      notes: "Omschrijving",
+    };
+
+    return labels[field] ?? field;
   }
 
   get isFormValid(): boolean {
     return this.form.valid && !this.isLoading;
+  }
+
+  getCategoryLabel(category: string): string {
+    switch (category) {
+      case RawMaterialCategory.ActivePharmaceuticalIngredient:
+        return "Werkzame stof";
+      case RawMaterialCategory.Excipient:
+        return "Hulpstof";
+      case RawMaterialCategory.Packaging:
+        return "Verpakking";
+      case RawMaterialCategory.Solvent:
+        return "Oplosmiddel";
+      case RawMaterialCategory.Other:
+        return "Overig";
+      default:
+        return category;
+    }
   }
 }
