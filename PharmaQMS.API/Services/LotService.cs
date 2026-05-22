@@ -62,6 +62,7 @@ public sealed class LotService : ILotService
                 l.Quantity,
                 l.RawMaterial!.Unit,
                 l.ReceivedDateUtc,
+                l.ExpiryDateUtc,
                 l.Status.ToString()))
             .ToListAsync(ct);
     }

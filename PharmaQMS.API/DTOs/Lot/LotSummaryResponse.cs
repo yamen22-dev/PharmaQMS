@@ -9,5 +9,6 @@ public sealed record LotSummaryResponse(
     decimal Quantity,
     string Unit,
     DateTime ReceivedDateUtc,
+    DateTime ExpiryDateUtc,
     string Status
 );
