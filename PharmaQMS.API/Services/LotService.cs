@@ -189,6 +189,7 @@ public sealed class LotService : ILotService
 
         var oldStatus = lot.Status;
         lot.Status = newStatus;
+        _db.Lots.Update(lot);
         await _db.SaveChangesAsync(ct);
 
         // Audit Trail — oud en nieuw vastleggen (FR13, NF03)

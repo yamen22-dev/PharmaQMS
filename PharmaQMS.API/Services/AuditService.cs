@@ -25,9 +25,14 @@ public sealed class AuditService : IAuditService
     {
         var ip = _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString() ?? string.Empty;
 
+
+        var utcNow = DateTime.UtcNow;
+        var amsterdamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("W. Europe Standard Time");
+        var localTime = TimeZoneInfo.ConvertTimeFromUtc(utcNow, amsterdamTimeZone);
+        
         var entry = new AuditLog
         {
-            Tijdstip = DateTime.UtcNow,
+            Tijdstip = localTime,
             GebruikerId = performedByUserId.ToString(),
             Actie = action ?? string.Empty,
             EntiteitType = entityName ?? string.Empty,

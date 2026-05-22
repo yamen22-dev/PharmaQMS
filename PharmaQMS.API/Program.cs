@@ -12,8 +12,13 @@ using PharmaQMS.API.Data;
 using PharmaQMS.API.Models.Entities;
 using PharmaQMS.API.Services;
 using PharmaQMS.API.Infrastructure;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// set the default culture to Dutch (Netherlands) for consistent date/number formatting and localization
+CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("nl-NL");
+CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("nl-NL");
 
 builder.WebHost.ConfigureKestrel(options =>
 {

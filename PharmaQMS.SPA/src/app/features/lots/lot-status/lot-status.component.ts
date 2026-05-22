@@ -11,107 +11,8 @@ import { LotDetail, LotStatus } from "../../../core/models/lot.model";
   selector: "app-lot-status",
   standalone: true,
   imports: [CommonModule, RouterModule, ReactiveFormsModule],
-  template: `
-    <div class="breadcrumb" *ngIf="lot">
-      <a routerLink="/lots">Lots</a>
-      <span> › </span>
-      <a [routerLink]="['/lots', lot.id]">{{ lot.lotNumber }}</a>
-      <span> › </span>
-      <span>Status wijzigen</span>
-    </div>
-    <h1>Kwaliteitsstatus wijzigen</h1>
-
-    <div class="card form-card" *ngIf="lot; else loadingTpl">
-      <!-- Audit Trail banner -->
-      <div class="warning-banner">
-        Statuswijzigingen worden vastgelegd in de Audit Trail en zijn niet
-        omkeerbaar zonder nieuwe wijziging.
-      </div>
-
-      <form [formGroup]="form" (ngSubmit)="onSubmit()">
-        <!-- Huidige toestand (readonly) -->
-        <div class="field-row">
-          <span class="field-label">Lot</span>
-          <span class="field-value">{{ lot.lotNumber }}</span>
-        </div>
-        <div class="field-row">
-          <span class="field-label">Huidige status</span>
-          <span class="badge" [ngClass]="badgeClass(lot.status)">
-            {{ statusLabel(lot.status) }}
-          </span>
-        </div>
-
-        <!-- Nieuwe status -->
-        <div class="form-group mt">
-          <label for="newStatus">NIEUWE STATUS</label>
-          <select
-            id="newStatus"
-            formControlName="newStatus"
-            [class.input-error]="isInvalid('newStatus')"
-          >
-            <option value="">Selecteer nieuwe status...</option>
-            <option *ngFor="let opt of allowedTransitions" [value]="opt.value">
-              {{ opt.label }}
-            </option>
-          </select>
-          <span class="error-msg" *ngIf="isInvalid('newStatus')">
-            Selecteer een nieuwe status.
-          </span>
-        </div>
-
-        <!-- Reden -->
-        <div class="form-group">
-          <label for="reason">REDEN VOOR STATUSWIJZIGING</label>
-          <textarea
-            id="reason"
-            formControlName="reason"
-            rows="4"
-            placeholder="Beschrijf de reden voor deze wijziging (verplicht)..."
-            [class.input-error]="isInvalid('reason')"
-          ></textarea>
-          <span class="error-msg" *ngIf="isInvalid('reason')">
-            Reden is verplicht.
-          </span>
-        </div>
-
-        <!-- Elektronische handtekening -->
-        <div class="form-group">
-          <label for="password">ELEKTRONISCHE HANDTEKENING (WACHTWOORD)</label>
-          <input
-            id="password"
-            type="password"
-            formControlName="password"
-            placeholder="Bevestig met uw wachtwoord"
-            [class.input-error]="isInvalid('password')"
-          />
-          <span class="error-msg" *ngIf="isInvalid('password')">
-            Wachtwoord is verplicht.
-          </span>
-        </div>
-
-        <!-- Serverfout -->
-        <div class="error-banner" *ngIf="serverError">{{ serverError }}</div>
-
-        <div class="form-actions">
-          <button
-            type="button"
-            class="btn btn-secondary"
-            (click)="onCancel()"
-            [disabled]="submitting"
-          >
-            Annuleren
-          </button>
-          <button type="submit" class="btn btn-primary" [disabled]="submitting">
-            {{ submitting ? "Bezig..." : "Statuswijziging bevestigen" }}
-          </button>
-        </div>
-      </form>
-    </div>
-
-    <ng-template #loadingTpl>
-      <p class="loading-text" *ngIf="loading">Laden...</p>
-    </ng-template>
-  `,
+  templateUrl: "./lot-status.component.html",
+  styleUrl: "./lot-status.component.css",
 })
 export class LotStatusComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
@@ -124,71 +25,121 @@ export class LotStatusComponent implements OnInit {
   submitting = false;
   serverError: string | null = null;
 
+  lotNumber = "";
+  allowedTransitions: { value: LotStatus; label: string }[] = [];
+
   form = this.fb.group({
-    newStatus: ["", Validators.required],
-    reason: ["", [Validators.required, Validators.minLength(10)]],
-    password: ["", Validators.required],
+    newStatus: this.fb.control<LotStatus | "">("", {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
+    reason: this.fb.control("", {
+      nonNullable: true,
+      validators: [Validators.required, Validators.minLength(10)],
+    }),
+    password: this.fb.control("", {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
   });
 
-  // Toegestane overgangen vanuit Quarantine (Alt-C)
-  get allowedTransitions(): { value: LotStatus; label: string }[] {
-    if (this.lot?.status !== "Quarantine") return [];
+  ngOnInit(): void {
+    const idParam = this.route.snapshot.paramMap.get("id");
+    const id = Number(idParam);
+
+    if (!idParam || Number.isNaN(id)) {
+      this.loading = false;
+      this.serverError = "Ongeldige lot-id.";
+      return;
+    }
+
+    this.lotService.getLotById(id).subscribe({
+      next: (data) => {
+        this.lot = data;
+        this.allowedTransitions = this.getAllowedTransitions(data.status);
+        this.lotNumber = data.lotNumber;
+        const firstTransition = this.allowedTransitions[0]?.value ?? "";
+        this.form.patchValue({
+          newStatus: firstTransition,
+        });
+
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+        this.serverError = "Lot niet gevonden.";
+      },
+    });
+  }
+
+  private getAllowedTransitions(
+    status: LotStatus,
+  ): { value: LotStatus; label: string }[] {
+    if (status !== "Quarantine") return [];
     return [
       { value: "Released", label: "Goedgekeurd" },
       { value: "Rejected", label: "Afgekeurd" },
     ];
   }
 
-  ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get("id"));
-    this.lotService.getLotById(id).subscribe({
-      next: (data) => {
-        this.lot = data;
-        this.loading = false;
-      },
-      error: () => {
-        this.loading = false;
-      },
-    });
-  }
-
   onSubmit(): void {
+    if (!this.lot) {
+      this.serverError = "Lot niet geladen.";
+      return;
+    }
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      return;
+    }
+
+    const raw = this.form.getRawValue();
+    if (!raw.newStatus) {
+      this.form.get("newStatus")?.markAsTouched();
       return;
     }
 
     this.submitting = true;
     this.serverError = null;
 
-    const { newStatus, reason, password } = this.form.getRawValue();
-
     this.lotService
-      .changeLotStatus(this.lot!.id, {
-        newStatus: newStatus as LotStatus,
-        reason: reason!,
-        password: password!,
+      .changeLotStatus(this.lot.id, {
+        newStatus: raw.newStatus,
+        reason: raw.reason,
+        password: raw.password,
       })
       .subscribe({
-        next: () => this.router.navigate(["/lots", this.lot!.id]),
+        next: () => {
+          alert("Status succesvol gewijzigd. U wordt teruggestuurd naar de lotdetails.");
+          this.router.navigate(["/lots", this.lot!.id]);
+        },
         error: (err) => {
           this.submitting = false;
+
           if (err.status === 401) {
-            // Alt-B: onjuiste elektronische handtekening
             this.serverError = "Elektronische handtekening incorrect.";
+            alert("Elektronische handtekening incorrect. U wordt teruggestuurd naar de lotdetails.");
+            this.router.navigate(["/lots", this.lot!.id]);
           } else if (err.status === 422) {
-            // Alt-C: niet-toegestane overgang
             this.serverError =
               err.error?.message ?? "Deze statusovergang is niet toegestaan.";
+              alert(this.serverError + " U wordt teruggestuurd naar de lotdetails.");
+              this.router.navigate(["/lots", this.lot!.id]);
           } else {
             this.serverError = "Er is een fout opgetreden. Probeer opnieuw.";
+            alert(this.serverError + " U wordt teruggestuurd naar de lotdetails.");
+            this.router.navigate(["/lots", this.lot!.id]);
           }
         },
       });
   }
 
   onCancel(): void {
-    this.router.navigate(["/lots", this.lot?.id]);
+    if (this.lot) {
+      this.router.navigate(["/lots", this.lot.id]);
+    } else {
+      this.router.navigate(["/lots"]);
+    }
   }
 
   isInvalid(field: string): boolean {
