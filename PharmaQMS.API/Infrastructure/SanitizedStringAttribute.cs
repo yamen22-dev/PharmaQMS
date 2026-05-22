@@ -5,7 +5,7 @@ namespace PharmaQMS.API.Infrastructure;
 /// <summary>
 /// Custom validation attribute that sanitizes string input and validates it is safe.
 /// </summary>
-[AttributeUsage(AttributeTargets.Property)]
+[AttributeUsage(AttributeTargets.Property | AttributeTargets.Parameter)]
 public class SanitizedStringAttribute : ValidationAttribute
 {
     private readonly int _maxLength;

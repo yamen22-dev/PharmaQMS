@@ -44,10 +44,15 @@ public class DomainDbContext : DbContext
             entity.Property(x => x.LotNumber).HasMaxLength(100).IsRequired();
             entity.Property(x => x.Quantity).HasPrecision(18, 4);
             entity.Property(x => x.Status).HasConversion<byte>();
+            entity.Property(x => x.ExpiryDateUtc).IsRequired();
+            entity.Property(x => x.PurchaseOrderNumber).HasMaxLength(100);
+            entity.Property(x => x.AnalysisCertificate).HasMaxLength(100);
 
             entity.HasIndex(x => x.RawMaterialId);
-            entity.HasIndex(x => x.LotNumber).IsUnique();
-
+            entity.HasIndex(x => new { x.RawMaterialId, x.LotNumber }).IsUnique();
+            entity.HasIndex(x => x.ReceivedDateUtc);
+            entity.HasIndex(x => x.Status);
+            
             entity.HasOne(x => x.RawMaterial)
                 .WithMany(x => x.Lots)
                 .HasForeignKey(x => x.RawMaterialId)

@@ -231,6 +231,8 @@ try
     // Add Services
     builder.Services.AddScoped<IAuthService, AuthService>();
     builder.Services.AddScoped<IRawMaterialService, RawMaterialService>();
+    builder.Services.AddScoped<ILotService, LotService>();
+    builder.Services.AddScoped<IAuditService, AuditService>();
 
     // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
     builder.Services.AddOpenApi();

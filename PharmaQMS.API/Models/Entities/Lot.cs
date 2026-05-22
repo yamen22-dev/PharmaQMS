@@ -19,4 +19,9 @@ public class Lot
     public LotStatus Status { get; set; } = LotStatus.Quarantine;
 
     public RawMaterial? RawMaterial { get; set; }
+
+    public DateTime ExpiryDateUtc { get; set; }
+
+    public string PurchaseOrderNumber { get; set; } = string.Empty;
+    public string AnalysisCertificate { get; set; } = string.Empty;
 }
