@@ -272,7 +272,7 @@ public class AuthService : IAuthService
         {
             new(JwtRegisteredClaimNames.Sub, user.Id),
             new(JwtRegisteredClaimNames.Jti, jwtId),
-            new(ClaimTypes.NameIdentifier, user.Id),
+            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new(ClaimTypes.Email, user.Email ?? string.Empty),
             new(ClaimTypes.Name, user.UserName ?? user.Email ?? string.Empty)
         };
@@ -320,4 +320,18 @@ public class AuthService : IAuthService
 
     private static string HashToken(string token)
         => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
+
+    public async Task<bool> VerifyPasswordAsync(int userId, string password, CancellationToken cancellationToken = default)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user is null) return false;
+        return await _userManager.CheckPasswordAsync(user, password);
+    }
+
+    public async Task<bool> VerifyPasswordAsync(string userId, string password, CancellationToken cancellationToken = default)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user is null) return false;
+        return await _userManager.CheckPasswordAsync(user, password);
+    }
 }

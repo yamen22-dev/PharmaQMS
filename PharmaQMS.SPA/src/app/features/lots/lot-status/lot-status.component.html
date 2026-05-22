@@ -1,0 +1,119 @@
+<!-- Status change panel -->
+<div class="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-md">
+  <!-- Info alert -->
+  <div
+    class="mb-5 rounded border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-900"
+  >
+    Statuswijzigingen worden vastgelegd in de Audit Trail en zijn niet
+    omkeerbaar zonder nieuwe wijziging.
+  </div>
+
+  <!-- Lot header (label + value on same row) -->
+  <div class="mb-4">
+    <div class="flex items-center justify-between text-sm text-gray-500">
+      <div>Lot</div>
+      <div class="font-medium text-gray-800">
+        <div *ngIf="lot">
+          {{ lotNumber }}
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-3 border-t border-gray-100 pt-3">
+      <div class="flex items-center justify-between">
+        <div class="text-sm text-gray-500">Huidige status</div>
+        <div *ngIf="lot">
+          <span
+            [ngClass]="badgeClass(lot.status)"
+            class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-sm font-medium"
+          >
+            <!-- small dot -->
+            <span class="h-2 w-2 rounded-full bg-amber-700 inline-block"></span>
+              {{ lot.status }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <form [formGroup]="form" class="space-y-4" (ngSubmit)="onSubmit()">
+    <!-- NEW STATUS -->
+    <div>
+      <label
+        for="newStatus"
+        class="block text-xs font-semibold text-gray-600 uppercase mb-2"
+      >
+        Nieuwe status
+      </label>
+      <select
+        id="newStatus"
+        formControlName="newStatus"
+        class="block w-full h-12 rounded-md border border-gray-200 bg-white px-4 text-base text-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
+        aria-label="Selecteer nieuwe status"
+      >
+        <option value="">Selecteer nieuwe status...</option>
+        <option value="Released">Vrijgegeven</option>
+        <option value="Quarantine">Quarantaine</option>
+        <option value="Rejected">Afgekeurd</option>
+      </select>
+    </div>
+
+    <!-- REASON -->
+    <div>
+      <label
+        for="reason"
+        class="block text-xs font-semibold text-gray-600 uppercase mb-2"
+      >
+        Reden voor statuswijziging
+      </label>
+      <textarea
+        id="reason"
+        formControlName="reason"
+        rows="4"
+        class="block w-full rounded-md border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
+        placeholder="Beschrijf de reden voor deze wijziging (verplicht)..."
+      ></textarea>
+    </div>
+
+    <!-- ELECTRONIC SIGNATURE -->
+    <div>
+      <label
+        for="password"
+        class="block text-xs font-semibold text-gray-600 uppercase mb-2"
+      >
+        Elektronische handtekening (wachtwoord)
+      </label>
+      <input
+        id="password"
+        type="password"
+        formControlName="password"
+        class="block w-full h-12 rounded-md border border-gray-200 bg-white px-4 text-base text-gray-700 placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
+        placeholder="Bevestig met uw wachtwoord"
+        autocomplete="current-password"
+      />
+    </div>
+
+    <!-- thin divider -->
+    <div class="border-t border-gray-100 pt-3"></div>
+
+    <!-- Buttons -->
+    <div class="flex items-center justify-end gap-3">
+      <button
+        type="button"
+        (click)="onCancel()"
+        class="px-4 py-2 h-10 rounded-md border border-gray-200 bg-white text-sm text-gray-700 hover:bg-gray-50"
+      >
+        Annuleren
+      </button>
+
+      <button
+        type="submit"
+        [disabled]="submitting || !form.valid"
+        class="px-4 py-2 h-10 rounded-md bg-blue-600 text-white text-sm hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
+      >
+        Statuswijziging bevestigen
+      </button>
+    </div>
+  </form>
+</div>

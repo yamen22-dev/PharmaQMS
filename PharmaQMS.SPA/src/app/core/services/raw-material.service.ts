@@ -68,6 +68,7 @@ export class RawMaterialService {
               item?.pharmaceuticalApi ?? item?.PharmaceuticalApi ?? "",
             category: item?.category ?? item?.Category ?? "",
             unit: item?.unit ?? item?.Unit ?? "",
+            supplier: item?.supplier ?? item?.Supplier ?? "",
             minSpecificationLimit:
               item?.minSpecificationLimit ?? item?.MinSpecificationLimit ?? 0,
             maxSpecificationLimit:

@@ -31,14 +31,23 @@ public class RawMaterialsController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<RawMaterialDetailResponse>> GetById(int id, CancellationToken cancellationToken)
     {
-        var response = await _rawMaterialService.GetByIdAsync(id, cancellationToken);
-
-        if (response is null)
+        
+        try
         {
-            return Problem(title: "Raw material not found.", statusCode: StatusCodes.Status404NotFound);
+            var response = await _rawMaterialService.GetByIdAsync(id, cancellationToken);
+
+            if (response is null)
+            {
+                return Problem(title: "Raw material not found.", statusCode: StatusCodes.Status404NotFound);
+            }
+
+            return Ok(response);
+        }
+        catch (ArgumentException ex)
+        {
+            return Problem(title: ex.Message, statusCode: StatusCodes.Status400BadRequest);
         }
 
-        return Ok(response);
     }
     [HttpGet("status")]
     public IActionResult Status()

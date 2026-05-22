@@ -1,0 +1,215 @@
+<div class="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
+  <h2 class="text-2xl font-bold mb-4">Nieuwe lot aanmaken</h2>
+
+  <!-- ==== SUCCESS / ERROR ALERTS ==== -->
+  <div
+    *ngIf="submitSuccess"
+    class="mb-4 p-3 bg-green-100 text-green-800 rounded"
+  >
+    {{ submitSuccess }}
+  </div>
+  <div *ngIf="submitError" class="mb-4 p-3 bg-red-100 text-red-800 rounded">
+    {{ submitError }}
+  </div>
+
+  <form [formGroup]="lotForm" (ngSubmit)="onSubmit()" class="space-y-6">
+    <!-- ==== ROW 1: Lotnummer + Hoeveelheid ==== -->
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <!-- Lotnummer -->
+      <div>
+        <label for="lotNumber" class="block text-sm font-medium mb-1">
+          Lotnummer <span class="text-red-500">*</span>
+        </label>
+        <input
+          id="lotNumber"
+          type="text"
+          formControlName="lotNumber"
+          class="mt-1 block w-full h-12 rounded-md border border-gray-300 px-4 py-3 text-base shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          placeholder="bijv. LOT-2024-001"
+        />
+        <div
+          *ngIf="f['lotNumber'].touched && f['lotNumber'].invalid"
+          class="mt-1 text-sm text-red-600"
+        >
+          <div *ngIf="f['lotNumber'].errors?.['required']">
+            Lotnummer is verplicht.
+          </div>
+          <div *ngIf="f['lotNumber'].errors?.['pattern']">
+            Alleen hoofdletters, cijfers en streepjes zijn toegestaan.
+          </div>
+        </div>
+      </div>
+
+      <!-- Hoeveelheid -->
+      <div>
+        <label for="quantity" class="block text-sm font-medium mb-1">
+          Hoeveelheid <span class="text-red-500">*</span>
+        </label>
+        <input
+          id="quantity"
+          type="number"
+          formControlName="quantity"
+          class="mt-1 block w-full h-12 rounded-md border border-gray-300 px-4 py-3 text-base shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          placeholder="bijv. 50.0"
+          step="0.01"
+          min="0.01"
+        />
+        <div
+          *ngIf="f['quantity'].touched && f['quantity'].invalid"
+          class="mt-1 text-sm text-red-600"
+        >
+          <div *ngIf="f['quantity'].errors?.['required']">
+            Hoeveelheid is verplicht.
+          </div>
+          <div *ngIf="f['quantity'].errors?.['min']">
+            Hoeveelheid moet groter zijn dan 0.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==== ROW 2: Leverancier + Vervaldatum ==== -->
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <!-- Leverancier -->
+      <div>
+        <label for="supplier" class="block text-sm font-medium mb-1">
+          Leverancier
+        </label>
+        <input
+          id="supplier"
+          type="text"
+          formControlName="supplier"
+          class="mt-1 block w-full h-12 rounded-md border border-gray-300 px-4 py-3 text-base shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          placeholder="bijv. ChemCo BV"
+        />
+      </div>
+
+      <!-- Vervaldatum -->
+      <div>
+        <label for="expiryDate" class="block text-sm font-medium mb-1">
+          Vervaldatum <span class="text-red-500">*</span>
+        </label>
+        <input
+          id="expiryDate"
+          type="date"
+          formControlName="expiryDate"
+          class="mt-1 block w-full h-12 rounded-md border border-gray-300 px-4 py-3 text-base shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+        />
+        <div
+          *ngIf="f['expiryDate'].touched && f['expiryDate'].invalid"
+          class="mt-1 text-sm text-red-600"
+        >
+          Vervaldatum is verplicht.
+        </div>
+      </div>
+    </div>
+
+    <!-- ==== ROW 3: Ontvangstdatum + Inkoopordernummer ==== -->
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <!-- Ontvangstdatum -->
+      <div>
+        <label for="receivedDate" class="block text-sm font-medium mb-1">
+          Ontvangstdatum <span class="text-red-500">*</span>
+        </label>
+        <input
+          id="receivedDate"
+          type="date"
+          formControlName="receivedDate"
+          class="mt-1 block w-full h-12 rounded-md border border-gray-300 px-4 py-3 text-base shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+        />
+        <div
+          *ngIf="f['receivedDate'].touched && f['receivedDate'].invalid"
+          class="mt-1 text-sm text-red-600"
+        >
+          Ontvangstdatum is verplicht.
+        </div>
+      </div>
+
+      <!-- Inkoopordernummer -->
+      <div>
+        <label for="purchaseOrderNumber" class="block text-sm font-medium mb-1">
+          Inkoopordernummer <span class="text-red-500">*</span>
+        </label>
+        <input
+          id="purchaseOrderNumber"
+          type="text"
+          formControlName="purchaseOrderNumber"
+          class="mt-1 block w-full h-12 rounded-md border border-gray-300 px-4 py-3 text-base shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          placeholder="bijv. PO-2024-0567"
+        />
+        <div
+          *ngIf="
+            f['purchaseOrderNumber'].touched && f['purchaseOrderNumber'].invalid
+          "
+          class="mt-1 text-sm text-red-600"
+        >
+          Inkoopordernummer is verplicht.
+        </div>
+      </div>
+    </div>
+
+    <!-- ==== ROW 4: Analyse certificaat + Initiële status ==== -->
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <!-- Analyse certificaat -->
+      <div>
+        <label for="analysisCertificate" class="block text-sm font-medium mb-1">
+          Analyse certificaat (bestand of referentie)
+        </label>
+        <input
+          id="analysisCertificate"
+          type="text"
+          formControlName="analysisCertificate"
+          class="mt-1 block w-full h-12 rounded-md border border-gray-300 px-4 py-3 text-base shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          placeholder="bijv. certificaat.pdf of URL"
+        />
+      </div>
+
+      <!-- Initiële status -->
+      <div>
+        <label for="initialStatus" class="block text-sm font-medium mb-1">
+          Initiële status
+        </label>
+        <input
+          id="initialStatus"
+          type="text"
+          value="• QUARANTINE(Automatisch)"
+          readonly
+          class="mt-1 block w-full h-12 rounded-md border border-gray-300 px-4 py-3 text-base shadow-sm "
+        />
+      </div>
+    </div>
+
+    <!-- ==== Submit button ==== -->
+    <div class="flex justify-end">
+      <button
+        type="submit"
+        [disabled]="isLoading"
+        class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white font-medium rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+      >
+        <span *ngIf="isLoading" class="mr-2">
+          <svg
+            class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v8z"
+            ></path>
+          </svg>
+        </span>
+        Opslaan
+      </button>
+    </div>
+  </form>
+</div>

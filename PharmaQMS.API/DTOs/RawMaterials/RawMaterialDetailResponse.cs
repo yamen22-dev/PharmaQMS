@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace PharmaQMS.API.DTOs.RawMaterials;
 
 public sealed record RawMaterialDetailResponse(
@@ -8,7 +6,9 @@ public sealed record RawMaterialDetailResponse(
     string PharmaceuticalApi,
     string Category,
     string Unit,
+    string Supplier,
     decimal MinSpecificationLimit,
     decimal MaxSpecificationLimit,
     string Notes,
-    IReadOnlyList<RawMaterialLotResponse> Lots);
+    IReadOnlyList<RawMaterialLotResponse> Lots
+);

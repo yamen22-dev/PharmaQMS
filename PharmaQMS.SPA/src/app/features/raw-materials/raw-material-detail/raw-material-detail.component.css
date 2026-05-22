@@ -1,3 +1,4 @@
+@import "tailwindcss";
 .raw-material-detail-page {
     display: flex;
     flex-direction: column;
@@ -34,9 +35,8 @@
 
 
 .page-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
+    display: block;
+        width: 100%;
 }
 
 .content-card {
@@ -108,7 +108,7 @@
 
 .lot-number {
     font-weight: 600;
-    color: #1f2937;
+    color: #6b7280;
 }
 
 .status-pill {

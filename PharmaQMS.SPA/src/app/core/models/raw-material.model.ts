@@ -30,6 +30,7 @@ export interface RawMaterialDetail {
   pharmaceuticalApi: string;
   category: string;
   unit: string;
+  supplier: string;
   minSpecificationLimit: number;
   maxSpecificationLimit: number;
   notes: string;
