@@ -4,12 +4,15 @@ import { RouterLink } from "@angular/router";
 import { finalize } from "rxjs";
 import { RawMaterialService } from "../../core/services/raw-material.service";
 import {
+  LotStatus,
   RawMaterialCategory,
   RawMaterialOverview,
 } from "../../core/models/raw-material.model";
 import { AuthService } from "../../core/services/auth.service";
 import { AuthResponse } from "../../core/models/auth-response.model";
 import { FormsModule } from "@angular/forms";
+import { LotService } from "../../core/services/lot.service";
+import { LotSummary } from "../../core/models/lot.model";
 @Component({
   selector: "app-raw-materials",
   standalone: true,
@@ -27,6 +30,7 @@ export class RawMaterialsComponent implements OnInit {
   rawMaterials: RawMaterialOverview[] = [];
   filteredMaterials: RawMaterialOverview[] = [];
   isLoading = false;
+  isLoadingLots = false;
   errorMessage: string | null = null;
   searchTerm = "";
   selectedCategory = "all";
@@ -55,6 +59,20 @@ export class RawMaterialsComponent implements OnInit {
       this.canCreate = this.canCreateRawMaterial(session);
     });
     this.loadRawMaterials();
+    this.lotService.getLots().subscribe({
+      next: (data) => {
+        this.lots = data;
+        this.rawMaterialNames = [
+          ...new Set(data.map((l) => l.rawMaterialName)),
+        ];
+        this.applyFilters_lot();
+        this.isLoadingLots = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.isLoadingLots = false;
+      },
+    });
   }
 
   canCreateRawMaterial(session: AuthResponse | null): boolean {
@@ -120,8 +138,8 @@ export class RawMaterialsComponent implements OnInit {
       .getRawMaterials()
       .pipe(
         finalize(() => {
-            this.isLoading = false;
-            this.cdr.detectChanges();
+          this.isLoading = false;
+          this.cdr.detectChanges();
         }),
       )
       .subscribe({
@@ -156,36 +174,94 @@ export class RawMaterialsComponent implements OnInit {
     };
   }
 
-    public applyFilters(): void {
-        // Normalise the search term once
-        const term = this.searchTerm.trim().toLowerCase();
+  public applyFilters(): void {
+    // Normalise the search term once
+    const term = this.searchTerm.trim().toLowerCase();
 
-        // The value coming from the <select> (e.g. "all", "ActivePharmaceuticalIngredient", …)
-        const categoryFilter = this.selectedCategory;
+    // The value coming from the <select> (e.g. "all", "ActivePharmaceuticalIngredient", …)
+    const categoryFilter = this.selectedCategory;
 
-        // Build the filtered array
-        this.filteredMaterials = this.rawMaterials.filter((material) => {
-            // ---------- Category check ----------
-            // If the user chose "all" we accept every category,
-            // otherwise we compare the stored category with the selected one.
-            const matchesCategory =
-                categoryFilter === 'all' ||
-                material.category === categoryFilter;   // <-- make sure both sides are the same type
+    // Build the filtered array
+    this.filteredMaterials = this.rawMaterials.filter((material) => {
+      // ---------- Category check ----------
+      // If the user chose "all" we accept every category,
+      // otherwise we compare the stored category with the selected one.
+      const matchesCategory =
+        categoryFilter === "all" || material.category === categoryFilter; // <-- make sure both sides are the same type
 
-            // ---------- Text search ----------
-            const name = (material.name ?? '').toLowerCase();
-            const api = (material.pharmaceuticalApi ?? '').toLowerCase();
+      // ---------- Text search ----------
+      const name = (material.name ?? "").toLowerCase();
+      const api = (material.pharmaceuticalApi ?? "").toLowerCase();
 
-            const matchesTerm =
-                !term ||                                   // empty search → everything matches
-                name.includes(term) ||                     // name contains the term
-                api.includes(term);                        // pharmaceutical API contains the term
+      const matchesTerm =
+        !term || // empty search → everything matches
+        name.includes(term) || // name contains the term
+        api.includes(term); // pharmaceutical API contains the term
 
-            // Keep the item only when **both** conditions are true
-            return matchesCategory && matchesTerm;
-        });
+      // Keep the item only when **both** conditions are true
+      return matchesCategory && matchesTerm;
+    });
 
-        // Re‑calculate any statistics that depend on the filtered view
-        this.computeStats();
-    }
+    // Re‑calculate any statistics that depend on the filtered view
+    this.computeStats();
+  }
+  private readonly lotService = inject(LotService);
+
+  lots: LotSummary[] = [];
+  filtered: LotSummary[] = [];
+  rawMaterialNames: string[] = [];
+
+  searchQuery = "";
+  selectedStatus = "";
+  selectedRawMaterial = "";
+  selectedRawMaterialId: number | null = null;
+
+  applyFilters_lot(): void {
+    this.filtered = this.lots.filter((l) => {
+      const matchSearch = this.searchQuery
+        ? l.lotNumber.toLowerCase().includes(this.searchQuery.toLowerCase())
+        : true;
+      const matchStatus = this.selectedStatus
+        ? l.status === this.selectedStatus
+        : true;
+      const matchRm = this.selectedRawMaterial
+        ? l.rawMaterialName === this.selectedRawMaterial
+        : true;
+      return matchSearch && matchStatus && matchRm;
+    });
+
+    // Zoek het id op basis van de geselecteerde grondstof naam
+    this.selectedRawMaterialId = this.selectedRawMaterial
+      ? (this.lots.find((l) => l.rawMaterialName === this.selectedRawMaterial)
+          ?.rawMaterialId ?? null)
+      : null;
+  }
+
+  countByStatus(status: LotStatus): number {
+    return this.lots.filter((l) => l.status === status).length;
+  }
+
+  onsearchInput_lot(event: Event): void {
+    this.searchQuery = (event.target as HTMLInputElement).value;
+    this.applyFilters_lot();
+  }
+
+  statusLabel(status: LotStatus): string {
+    const map: Record<LotStatus, string> = {
+      Quarantine: "Quarantaine",
+      Released: "Goedgekeurd",
+      Rejected: "Afgekeurd",
+    };
+    return map[status];
+  }
+
+  badgeClass(status: LotStatus): string {
+    const map: Record<LotStatus, string> = {
+      Quarantine: "badge-orange",
+      Released: "badge-green",
+      Rejected: "badge-red",
+    };
+    return map[status];
+  }
 }
+

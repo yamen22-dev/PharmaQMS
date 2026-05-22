@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+#initialStatus {
+    background-color: #faeeda;
+    color: #633806;
+    font-weight: 700;
+}

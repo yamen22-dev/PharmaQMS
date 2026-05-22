@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { guestGuard } from "./core/guards/guest.guard";
+import { roleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
   {
@@ -47,6 +48,43 @@ export const routes: Routes = [
     path: "",
     pathMatch: "full",
     redirectTo: "dashboard",
+  },
+  {
+    path: "lots",
+    canActivate: [authGuard],
+    children: [
+      {
+        path: "",
+        loadComponent: () =>
+          import("./features/lots/lots-overview/lots-overview.component").then(
+            (m) => m.LotsOverviewComponent,
+          ),
+      },
+      {
+        path: ":id",
+        loadComponent: () =>
+          import("./features/lots/lot-detail/lot-detail.component").then(
+            (m) => m.LotDetailComponent,
+          ),
+      },
+      {
+        path: ":id/status",
+        canActivate: [roleGuard(["QAManager"])],
+        loadComponent: () =>
+          import("./features/lots/lot-status/lot-status.component").then(
+            (m) => m.LotStatusComponent,
+          ),
+      },
+    ],
+  },
+  {
+    // Lot aanmaken vanuit grondstof-context
+    path: "raw-materials/:rawMaterialId/lots/new",
+    canActivate: [authGuard, roleGuard(["QAManager", "WarehouseOperator"], "/raw-materials")],
+    loadComponent: () =>
+      import("./features/lots/lot-form/lot-form.component").then(
+        (m) => m.LotFormComponent,
+      ),
   },
   {
     path: "**",

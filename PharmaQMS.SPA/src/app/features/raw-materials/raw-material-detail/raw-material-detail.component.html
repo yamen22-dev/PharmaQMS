@@ -1,20 +1,32 @@
 <section class="raw-material-detail-page">
-  <header class="page-header">
-      <div>
-          <p class="eyebrow">
-              Grondstoffen & Lots
-              <span *ngIf="detail"> / {{ detail.name }}</span>
-          </p>
-          <nav class="breadcrumb" aria-label="Breadcrumb">
-              <a routerLink="/dashboard" class="breadcrumb-item">Dashboard</a>
-              <span class="breadcrumb-separator">/</span>
-              <a routerLink="/raw-materials" class="breadcrumb-item">Raw Materials</a>
-              <span class="breadcrumb-separator">/</span>
-              <span class="breadcrumb-current">Register</span>
-          </nav>
-          <h1>Grondstof detail</h1>
-      </div>
-  </header>
+<header class="page-header">
+  <div class="w-full">
+    <p class="eyebrow">
+      Grondstoffen & Lots
+      <span *ngIf="detail"> / {{ detail.name }}</span>
+    </p>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a routerLink="/dashboard" class="breadcrumb-item">Dashboard</a>
+      <span class="breadcrumb-separator">/</span>
+      <a routerLink="/raw-materials" class="breadcrumb-item">Raw Materials</a>
+      <span class="breadcrumb-separator">/</span>
+      <span class="breadcrumb-current">Register</span>
+    </nav>
+
+    <div class="flex flex-row justify-between items-center w-full">
+      <h1 class="text-xl font-semibold">Grondstof detail</h1>
+      <button
+        routerLink="/raw-materials/{{detail?.id}}/lots/new"
+        class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors flex items-center gap-2"
+        aria-label="Nieuw lot aanmaken"
+      >
+        + Nieuw Lot
+      </button>
+    </div>
+
+  </div>
+</header>
+
 
   <div *ngIf="isLoading" class="state-card">Laden...</div>
   <div *ngIf="errorMessage" class="state-card state-card--error">

@@ -1,3 +1,4 @@
+@import "tailwindcss";
 .raw-materials-page {
   display: flex;
   flex-direction: column;
@@ -267,4 +268,19 @@
     .search-field {
       width: 100%;
   }
+}
+.badge-orange {
+  background-color: #faeeda;
+  color: #633806;
+  font-weight: 700;
+}
+.badge-red {
+  background-color: #fcdcdc;
+  color: #b91c1c;
+  font-weight: 700;
+}
+badge-green {
+  background-color: #dcfce7;
+  color: #166534;
+  font-weight: 700;
 }
