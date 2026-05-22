@@ -31,7 +31,7 @@ export class LotService {
 
   // UC-02f
   getLotById(id: number): Observable<LotDetail> {
-    return this.http.get<LotDetail>(`${this.base}/api/v1/lots/${id}`);
+    return this.http.get<LotDetail>(`${this.base}/lots/${id}`);
   }
 
   // UC-02d
@@ -51,7 +51,7 @@ export class LotService {
     request: ChangeLotStatusRequest,
   ): Observable<LotStatusChangedResponse> {
     return this.http.post<LotStatusChangedResponse>(
-      `${this.base}/api/v1/lots/${id}/status`,
+      `${this.base}/lots/${id}/status`,
       request,
     );
   }
