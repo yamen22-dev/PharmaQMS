@@ -196,6 +196,8 @@ public sealed class BmrService(
         if (step.Status == BmrStepStatus.Verified && bmr.Steps.All(s => s.Status == BmrStepStatus.Verified))
             bmr.Status = BmrStatus.Completed;
 
+        db.Bmrs.Update(bmr);
+
         await db.SaveChangesAsync(ct);
     }
 
@@ -250,6 +252,8 @@ public sealed class BmrService(
 
         if (bmr.Steps.All(s => s.Status == BmrStepStatus.Verified))
             bmr.Status = BmrStatus.Completed;
+
+        db.Bmrs.Update(bmr);
 
         await db.SaveChangesAsync(ct);
     }

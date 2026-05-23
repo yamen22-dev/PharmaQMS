@@ -20,7 +20,6 @@ public sealed class BmrController(IBmrService bmrService, IMasterRecipeService _
         ?? throw new UnauthorizedAccessException("User identity not found.");
 
     [HttpPost("new")]
-    // [Authorize(Policy = "ProductionAnalystOrQAManager")]
     [Authorize(Roles = "QAManager,ProductionAnalyst")]
     [ProducesResponseType(typeof(BmrDetailResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -57,7 +56,7 @@ public sealed class BmrController(IBmrService bmrService, IMasterRecipeService _
     }
 
     [HttpPost("{bmrId:guid}/steps/{stepId:guid}/confirm")]
-    [Authorize(Policy = "ProductionAnalystOrQAManager")]
+    [Authorize(Roles = "QAManager,ProductionOperator")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
@@ -69,10 +68,11 @@ public sealed class BmrController(IBmrService bmrService, IMasterRecipeService _
     {
         await bmrService.ConfirmStepAsync(bmrId, stepId, request, UserId, ct);
         return NoContent();
+  
     }
 
     [HttpPost("{bmrId:guid}/steps/{stepId:guid}/verify")]
-    [Authorize(Policy = "QAManager")]
+    [Authorize(Roles = "QAManager")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]

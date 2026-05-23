@@ -92,6 +92,16 @@ export class BmrDetailComponent implements OnInit {
     this.router.navigate(["/bmr"]);
   }
 
+  viewSteps(path: string): void {
+    alert(`Navigating to: ${path}`);
+    this.router.navigate([path], {
+      state: {
+        bmrId: this.detail?.id,
+        batchNumber: this.detail?.batchNumber,
+      },
+    });
+  }
+
   private loadDetail(id: string): void {
     this.isLoading = true;
     this.errorMessage = null;

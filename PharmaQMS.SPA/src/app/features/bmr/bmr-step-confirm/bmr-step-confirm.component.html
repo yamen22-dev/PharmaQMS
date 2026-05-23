@@ -1,0 +1,124 @@
+<div class="min-h-screen bg-slate-50 px-4 py-6 text-slate-800">
+  <div class="mx-auto max-w-4xl">
+    <!-- Header -->
+    <div class="mb-6">
+      <h1 class="text-2xl font-semibold text-slate-900">Productiestap uitvoeren</h1>
+      <p class="mt-1 text-sm text-slate-500">Stappenplan — BATCH-2026-012</p>
+    </div>
+
+    <!-- Loading & error -->
+    <div *ngIf="isLoading" class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">Laden...</div>
+    <div *ngIf="errorMessage" class="rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">
+      {{ errorMessage }}
+    </div>
+
+    <div *ngIf="!isLoading && steps.length">
+      <!-- Steps list -->
+      <div class="space-y-4">
+        <div *ngFor="let step of steps" class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div class="flex-1">
+              <div class="flex items-center gap-2">
+                <span class="text-lg font-semibold text-slate-900">{{ step.number }}.</span>
+                <h3 class="text-lg font-semibold text-slate-900">{{ step.name }}</h3>
+                <!-- Status badge -->
+                <span
+                  class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium"
+                  [ngClass]="getStatusBadgeClass(step.status)"
+                >
+                  <span class="h-1.5 w-1.5 rounded-full bg-current"></span>
+                  {{ getStatusLabel(step.status) }}
+                </span>
+              </div>
+
+              <!-- Subinfo for verified steps -->
+              <div *ngIf="step.status === BmrStepStatus.Verified" class="mt-1 text-sm text-slate-500">
+                {{ step.completedBy }} · {{ step.completedAt }}
+              </div>
+
+              <!-- Subinfo for awaiting verification -->
+              <div *ngIf="step.status === BmrStepStatus.AwaitingVerification" class="mt-1 text-sm text-amber-600">
+                Wacht op verificatie
+              </div>
+            </div>
+
+            <!-- Action button (only for open step) -->
+            <button
+              *ngIf="step.status === BmrStepStatus.Open"
+              type="button"
+              (click)="openStepForm(step)"
+              class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
+            >
+              Uitvoeren
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal / Form for open step -->
+    <div
+      *ngIf="selectedStep"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+      (click)="closeForm()"
+    >
+      <div class="w-full max-w-lg rounded-xl bg-white shadow-xl" (click)="$event.stopPropagation()">
+        <div class="border-b border-slate-200 px-6 py-4">
+          <h2 class="text-xl font-semibold text-slate-900">Stap: {{ selectedStep.name }}</h2>
+          <p class="text-sm text-slate-500">Voer de stap uit en sla de gegevens op.</p>
+        </div>
+
+        <div class="p-6 space-y-5">
+          <!-- Temperature -->
+          <div>
+            <label class="block text-sm font-medium text-slate-700">TEMPERATUUR (°C)</label>
+            <input
+              type="number"
+              [(ngModel)]="stepForm.temperature"
+              class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+
+          <!-- Duration -->
+          <div>
+            <label class="block text-sm font-medium text-slate-700">DUUR (MIN)</label>
+            <input
+              type="number"
+              [(ngModel)]="stepForm.duration"
+              class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+
+          <!-- Remark -->
+          <div>
+            <label class="block text-sm font-medium text-slate-700">OPMERKING</label>
+            <textarea
+              rows="3"
+              [(ngModel)]="stepForm.remark"
+              placeholder="Eventuele afwijkingen..."
+              class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            ></textarea>
+          </div>
+
+        </div>
+
+        <div class="flex justify-end gap-3 border-t border-slate-200 px-6 py-4">
+          <button
+            type="button"
+            (click)="closeForm()"
+            class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Annuleren
+          </button>
+          <button
+            type="button"
+            (click)="submitStep()"
+            class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
+          >
+            Uitvoeren
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

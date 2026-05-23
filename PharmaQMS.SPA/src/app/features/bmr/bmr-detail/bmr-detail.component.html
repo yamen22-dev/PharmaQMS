@@ -35,7 +35,7 @@
         (click)="back()"
         class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-100"
       >
-        Terug naar overzicht
+        Back to overview
       </button>
     </div>
 
@@ -100,6 +100,11 @@
               <dd class="font-medium text-slate-900">
                 {{ completedSteps }} / {{ totalSteps }}
               </dd>
+            </div>
+            <div class="flex justify-between gap-4">
+              <dt class="text-slate-500">
+                <button (click)="viewSteps(`/bmr/${detail.id}/steps`)" class="text-blue-500 hover:text-blue-700">Stappenplan</button>
+              </dt>
             </div>
           </dl>
         </div>
