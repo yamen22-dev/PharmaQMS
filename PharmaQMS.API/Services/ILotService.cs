@@ -26,4 +26,7 @@ public interface ILotService
         ChangeLotStatusRequest request,
         string changedByUserId,
         CancellationToken ct = default);
+
+    /// <summary>UC-02h – Gepubliceerde lots ophalen.</summary>
+    Task<IReadOnlyList<LotSummaryResponse>> GetReleasedLotsAsync(CancellationToken ct = default);
 }

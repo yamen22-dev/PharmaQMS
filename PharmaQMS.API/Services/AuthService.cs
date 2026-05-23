@@ -334,4 +334,11 @@ public class AuthService : IAuthService
         if (user is null) return false;
         return await _userManager.CheckPasswordAsync(user, password);
     }
+
+    public async Task<string> GetUserByIdAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user is null) throw new KeyNotFoundException("User not found.");
+        return user.Id;
+    }
 }

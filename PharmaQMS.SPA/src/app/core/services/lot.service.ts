@@ -10,6 +10,7 @@ import {
   CreateLotRequest,
   ChangeLotStatusRequest,
   LotStatusChangedResponse,
+  LotResponse,
 } from "../models/lot.model";
 
 @Injectable({ providedIn: "root" })
@@ -54,5 +55,10 @@ export class LotService {
       `${this.base}/lots/${id}/status`,
       request,
     );
+  }
+
+  // Additional helper for BMR creation (get only approved lots)
+  getReleasedLots(): Observable<LotResponse[]> {
+    return this.http.get<LotResponse[]>(`${this.base}/lots/released`);
   }
 }

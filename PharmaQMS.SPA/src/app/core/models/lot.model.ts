@@ -52,3 +52,10 @@ export interface LotStatusChangedResponse {
   oldStatus: LotStatus;
   newStatus: LotStatus;
 }
+
+export interface LotResponse {
+  id: number;
+  lotNumber: string;
+  rawMaterialName: string;
+  status: string;
+}

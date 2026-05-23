@@ -13,6 +13,9 @@ using PharmaQMS.API.Models.Entities;
 using PharmaQMS.API.Services;
 using PharmaQMS.API.Infrastructure;
 using System.Globalization;
+using PharmaQMS.API.Services.Interfaces;
+using PharmaQMS.API.Services.Interfaces.MasterRecipe;
+using PharmaQMS.API.Services.MasterRecipe;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -238,6 +241,9 @@ try
     builder.Services.AddScoped<IRawMaterialService, RawMaterialService>();
     builder.Services.AddScoped<ILotService, LotService>();
     builder.Services.AddScoped<IAuditService, AuditService>();
+    builder.Services.AddScoped<IBmrService, BmrService>();
+    builder.Services.AddScoped<IMasterRecipeService, MasterRecipeService>();
+
 
     // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
     builder.Services.AddOpenApi();

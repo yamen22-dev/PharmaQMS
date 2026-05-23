@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PharmaQMS.API.Data;
 
@@ -11,9 +12,11 @@ using PharmaQMS.API.Data;
 namespace PharmaQMS.API.Migrations.Domain
 {
     [DbContext(typeof(DomainDbContext))]
-    partial class DomainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260522204711_BmrStepLotLinkAndMasterRecipeStepProductionLine")]
+    partial class BmrStepLotLinkAndMasterRecipeStepProductionLine
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -294,22 +297,6 @@ namespace PharmaQMS.API.Migrations.Domain
                     b.HasIndex("RecipeName");
 
                     b.ToTable("MasterRecipes", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("22222222-0000-0000-0000-000000000001"),
-                            IsApproved = true,
-                            RecipeName = "AMOX-500MG-CAP",
-                            Version = "3.1"
-                        },
-                        new
-                        {
-                            Id = new Guid("22222222-0000-0000-0000-000000000002"),
-                            IsApproved = true,
-                            RecipeName = "AMOX-250MG-CAP",
-                            Version = "2.0"
-                        });
                 });
 
             modelBuilder.Entity("PharmaQMS.API.Models.Entities.MasterRecipeStep", b =>
@@ -344,98 +331,6 @@ namespace PharmaQMS.API.Migrations.Domain
                         .IsUnique();
 
                     b.ToTable("MasterRecipeSteps", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("33333333-0000-0000-0000-000000000001"),
-                            ExpectedFields = "Gewicht (kg)",
-                            IsCritical = true,
-                            MasterRecipeId = new Guid("22222222-0000-0000-0000-000000000001"),
-                            StepName = "Grondstoffen wegen",
-                            StepNumber = 1
-                        },
-                        new
-                        {
-                            Id = new Guid("33333333-0000-0000-0000-000000000002"),
-                            ExpectedFields = "Mengtijd (min)",
-                            IsCritical = false,
-                            MasterRecipeId = new Guid("22222222-0000-0000-0000-000000000001"),
-                            StepName = "Mengen",
-                            StepNumber = 2
-                        },
-                        new
-                        {
-                            Id = new Guid("33333333-0000-0000-0000-000000000003"),
-                            ExpectedFields = "Temperatuur (°C); Tijd (min)",
-                            IsCritical = true,
-                            MasterRecipeId = new Guid("22222222-0000-0000-0000-000000000001"),
-                            StepName = "Granuleren",
-                            StepNumber = 3
-                        },
-                        new
-                        {
-                            Id = new Guid("33333333-0000-0000-0000-000000000004"),
-                            ExpectedFields = "Vochtigheid (%)",
-                            IsCritical = false,
-                            MasterRecipeId = new Guid("22222222-0000-0000-0000-000000000001"),
-                            StepName = "Drogen",
-                            StepNumber = 4
-                        },
-                        new
-                        {
-                            Id = new Guid("33333333-0000-0000-0000-000000000005"),
-                            ExpectedFields = "Vulgewicht (mg)",
-                            IsCritical = true,
-                            MasterRecipeId = new Guid("22222222-0000-0000-0000-000000000001"),
-                            StepName = "Capsules vullen",
-                            StepNumber = 5
-                        },
-                        new
-                        {
-                            Id = new Guid("33333333-0000-0000-0000-000000000006"),
-                            ExpectedFields = "Resultaat",
-                            IsCritical = true,
-                            MasterRecipeId = new Guid("22222222-0000-0000-0000-000000000001"),
-                            StepName = "In-process kwaliteitscheck",
-                            StepNumber = 6
-                        },
-                        new
-                        {
-                            Id = new Guid("33333333-0000-0000-0000-000000000007"),
-                            ExpectedFields = "Gewicht (kg)",
-                            IsCritical = true,
-                            MasterRecipeId = new Guid("22222222-0000-0000-0000-000000000002"),
-                            StepName = "Grondstoffen wegen",
-                            StepNumber = 1
-                        },
-                        new
-                        {
-                            Id = new Guid("33333333-0000-0000-0000-000000000008"),
-                            ExpectedFields = "Mengtijd (min)",
-                            IsCritical = false,
-                            MasterRecipeId = new Guid("22222222-0000-0000-0000-000000000002"),
-                            StepName = "Mengen",
-                            StepNumber = 2
-                        },
-                        new
-                        {
-                            Id = new Guid("33333333-0000-0000-0000-000000000009"),
-                            ExpectedFields = "Vulgewicht (mg)",
-                            IsCritical = true,
-                            MasterRecipeId = new Guid("22222222-0000-0000-0000-000000000002"),
-                            StepName = "Capsules vullen",
-                            StepNumber = 3
-                        },
-                        new
-                        {
-                            Id = new Guid("33333333-0000-0000-0000-000000000010"),
-                            ExpectedFields = "Resultaat",
-                            IsCritical = true,
-                            MasterRecipeId = new Guid("22222222-0000-0000-0000-000000000002"),
-                            StepName = "In-process kwaliteitscheck",
-                            StepNumber = 4
-                        });
                 });
 
             modelBuilder.Entity("PharmaQMS.API.Models.Entities.ProductionLine", b =>
@@ -462,29 +357,6 @@ namespace PharmaQMS.API.Migrations.Domain
                     b.HasIndex("LineName");
 
                     b.ToTable("ProductionLines", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("11111111-0000-0000-0000-000000000001"),
-                            IsActive = true,
-                            LineName = "Lijn A",
-                            Location = "Hal 1"
-                        },
-                        new
-                        {
-                            Id = new Guid("11111111-0000-0000-0000-000000000002"),
-                            IsActive = true,
-                            LineName = "Lijn B",
-                            Location = "Hal 1"
-                        },
-                        new
-                        {
-                            Id = new Guid("11111111-0000-0000-0000-000000000003"),
-                            IsActive = true,
-                            LineName = "Lijn C",
-                            Location = "Hal 2"
-                        });
                 });
 
             modelBuilder.Entity("PharmaQMS.API.Models.Entities.RawMaterial", b =>

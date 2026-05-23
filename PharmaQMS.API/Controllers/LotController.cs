@@ -30,6 +30,14 @@ public sealed class LotsController : ControllerBase
         return Ok(lots);
     }
 
+    [HttpGet("/api/v1/lots/released")]
+    public async Task<ActionResult<IReadOnlyList<LotSummaryResponse>>> GetReleasedLots(
+        CancellationToken ct)
+    {
+        var lots = await _lotService.GetReleasedLotsAsync(ct);
+        return Ok(lots);
+    }
+
     // GET /api/v1/raw-materials/{rawMaterialId}/lots  (SPA-compatibel overzicht)
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<LotSummaryResponse>>> GetLotsForRawMaterial(
