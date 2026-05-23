@@ -1,0 +1,124 @@
+<div class="min-h-screen bg-slate-50 px-4 py-6 text-slate-800">
+  <div class="mx-auto max-w-2xl">
+    <!-- Header -->
+    <div class="mb-6">
+      <h1 class="text-2xl font-semibold text-slate-900">Four‑eyes verification — {{ stepTitle || 'laden...' }}</h1>
+      <p class="mt-1 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3">
+        ⚠️ Critical step — verification required by a user other than the executor.
+      </p>
+      <div class="mt-2 flex flex-wrap items-center gap-2 text-sm text-slate-500">
+        <span>BMR — {{ batchNumber || 'laden...' }}</span>
+        <a
+          *ngIf="detailLink"
+          [routerLink]="detailLink"
+          class="rounded-full border border-slate-200 bg-white px-3 py-1 text-slate-700 hover:bg-slate-100"
+        >
+          Naar BMR-detail
+        </a>
+        <a
+          *ngIf="stepsLink"
+          [routerLink]="stepsLink"
+          class="rounded-full border border-slate-200 bg-white px-3 py-1 text-slate-700 hover:bg-slate-100"
+        >
+          Naar stappenplan
+        </a>
+      </div>
+    </div>
+
+    <!-- Loading / error -->
+    <div *ngIf="isLoading" class="rounded-xl border border-slate-200 bg-white p-6">Loading...</div>
+    <div *ngIf="errorMessage" class="rounded-xl border border-red-200 bg-red-50 p-6 text-red-700">{{ errorMessage }}</div>
+
+    <div *ngIf="!isLoading && stepData">
+      <!-- Card with entered step data -->
+      <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div class="border-b border-slate-200 bg-slate-50 px-6 py-4">
+          <h2 class="text-base font-semibold text-slate-900">Entered step data</h2>
+        </div>
+        <div class="p-6">
+          <dl class="space-y-4 text-sm">
+            <div class="flex flex-wrap justify-between gap-2 border-b border-slate-100 pb-2">
+              <dt class="font-medium text-slate-500">Performed by</dt>
+              <dd class="text-slate-900">{{ stepData.performedBy }}</dd>
+            </div>
+            <div class="flex flex-wrap justify-between gap-2 border-b border-slate-100 pb-2">
+              <dt class="font-medium text-slate-500">Timestamp</dt>
+              <dd class="text-slate-900">{{ stepData.timestamp }}</dd>
+            </div>
+            <div class="flex flex-wrap justify-between gap-2 border-b border-slate-100 pb-2">
+              <dt class="font-medium text-slate-500">Temperature</dt>
+              <dd class="text-slate-900">{{ stepData.temperature }} °C</dd>
+            </div>
+            <div class="flex flex-wrap justify-between gap-2 border-b border-slate-100 pb-2">
+              <dt class="font-medium text-slate-500">Duration</dt>
+              <dd class="text-slate-900">{{ stepData.duration }} minutes</dd>
+            </div>
+            <div class="flex flex-wrap justify-between gap-2">
+              <dt class="font-medium text-slate-500">Remark</dt>
+              <dd class="text-slate-900 italic">{{ stepData.remark || 'None' }}</dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+
+      <!-- Verifier section -->
+      <div class="mt-6 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div class="border-b border-slate-200 bg-slate-50 px-6 py-4">
+          <h2 class="text-base font-semibold text-slate-900">VERIFIER (YOU ARE LOGGED IN AS)</h2>
+        </div>
+        <div class="p-6">
+          <div class="mb-6 rounded-lg bg-blue-50 p-4 text-center text-blue-800">
+            {{ verifier.name || 'Onbekende gebruiker' }} — {{ verifier.role }}
+          </div>
+
+          <!-- Electronic signature (password) -->
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-700">ELECTRONIC SIGNATURE (PASSWORD)</label>
+              <p class="text-xs text-slate-500 mt-0.5 mb-2">Confirm verification with your password</p>
+              <input
+                type="password"
+                [(ngModel)]="verificationPassword"
+                class="block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                placeholder="Your password"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="flex justify-end gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4">
+          <a
+            *ngIf="detailLink"
+            [routerLink]="detailLink"
+            class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+          >
+            Back to BMR detail
+          </a>
+          <a
+            *ngIf="stepsLink"
+            [routerLink]="stepsLink"
+            class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+          >
+            Back to steps
+          </a>
+          <button
+            type="button"
+            (click)="cancel()"
+            class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            (click)="confirmVerification()"
+            [disabled]="!verificationPassword"
+            class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Confirm verification
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

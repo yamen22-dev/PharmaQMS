@@ -204,4 +204,25 @@ public sealed class LotService : ILotService
 
         return new LotStatusChangedResponse(lot.Id, lot.LotNumber, oldStatus.ToString(), newStatus.ToString());
     }
+
+    public async Task<IReadOnlyList<LotSummaryResponse>> GetReleasedLotsAsync(CancellationToken ct = default)
+    {
+        return await _db.Lots
+            .AsNoTracking()
+            .Include(l => l.RawMaterial)
+            .Where(l => l.Status == LotStatus.Released)
+            .OrderByDescending(l => l.ReceivedDateUtc)
+            .Select(l => new LotSummaryResponse(
+                l.Id,
+                l.LotNumber,
+                l.RawMaterialId,
+                l.RawMaterial!.Name,
+                l.RawMaterial!.Supplier,
+                l.Quantity,
+                l.RawMaterial!.Unit,
+                l.ReceivedDateUtc,
+                l.ExpiryDateUtc,
+                l.Status.ToString()))
+            .ToListAsync(ct);
+    }
 }

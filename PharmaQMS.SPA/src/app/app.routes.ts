@@ -80,11 +80,59 @@ export const routes: Routes = [
   {
     // Lot aanmaken vanuit grondstof-context
     path: "raw-materials/:rawMaterialId/lots/new",
-    canActivate: [authGuard, roleGuard(["QAManager", "WarehouseOperator"], "/raw-materials")],
+    canActivate: [
+      authGuard,
+      roleGuard(["QAManager", "WarehouseOperator"], "/raw-materials"),
+    ],
     loadComponent: () =>
       import("./features/lots/lot-form/lot-form.component").then(
         (m) => m.LotFormComponent,
       ),
+  },
+  // BMR routes
+  {
+    path: "bmr",
+    canActivate: [authGuard],
+    children: [
+      {
+        path: "",
+        loadComponent: () =>
+          import("./features/bmr/bmr-overview/bmr-overview.component").then(
+            (m) => m.BmrOverviewComponent,
+          ),
+      },
+      {
+        path: "new",
+        canActivate: [roleGuard(["QAManager", "ProductionOperator"], "/bmr")],
+        loadComponent: () =>
+          import("./features/bmr/bmr-create/bmr-create.component").then(
+            (m) => m.BmrCreateComponent,
+          ),
+      },
+      {
+        path: ":id",
+        loadComponent: () =>
+          import("./features/bmr/bmr-detail/bmr-detail.component").then(
+            (m) => m.BmrDetailComponent,
+          ),
+      },
+      {
+        path: ":id/steps",
+        canActivate: [roleGuard(["QAManager", "ProductionOperator"], "/bmr")],
+        loadComponent: () =>
+          import("./features/bmr/bmr-step-confirm/bmr-step-confirm.component").then(
+            (m) => m.BmrStepConfirmationComponent,
+          ),
+      },
+      {
+        path: ":bmrId/steps/:stepId/verify",
+        canActivate: [roleGuard(["QAManager"], "/bmr")],
+        loadComponent: () =>
+          import("./features/bmr/bmr-step-verification/bmr-step-verification.component").then(
+            (m) => m.BmrStepVerificationComponent,
+          ),
+      },
+    ],
   },
   {
     path: "**",
