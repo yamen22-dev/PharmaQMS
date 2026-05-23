@@ -11,8 +11,7 @@ using PharmaQMS.API.Services.Interfaces.MasterRecipe;
 
 [ApiController]
 [Route("api/v1/bmr")]
-// [Authorize]
-[AllowAnonymous] // Temporary for development, should be removed in production
+[Authorize]
 public sealed class BmrController(IBmrService bmrService, IMasterRecipeService _masterRecipeService) : ControllerBase
 {
     private string UserId =>

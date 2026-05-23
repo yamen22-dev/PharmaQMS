@@ -1,0 +1,77 @@
+<section class="bg-gray-50 p-6">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-2xl font-semibold">Quality Control overview</h2>
+    <a style="color: white;" routerLink="/qc/new" class="bg-blue-600 text-white px-3 py-2 rounded"
+      >+ New QC test</a
+    >
+  </div>
+
+  <div class="grid grid-cols-4 gap-4 mb-4">
+    <div class="bg-white p-4 rounded-md shadow">
+      <p class="text-sm text-gray-500">Total tests</p>
+      <h3 class="text-xl font-bold">{{ tests.length }}</h3>
+    </div>
+    <div class="bg-white p-4 rounded-md shadow">
+      <p class="text-sm text-gray-500">In progress</p>
+      <h3 class="text-xl font-bold">{{ countByResult("In progress") }}</h3>
+    </div>
+    <div class="bg-white p-4 rounded-md shadow">
+      <p class="text-sm text-gray-500">Passed</p>
+      <h3 class="text-xl font-bold">{{ countByResult("Passed") }}</h3>
+    </div>
+    <div class="bg-white p-4 rounded-md shadow">
+      <p class="text-sm text-gray-500">OOS</p>
+      <h3 class="text-xl font-bold">{{ countByResult("OOS") }}</h3>
+    </div>
+  </div>
+
+  <div class="flex gap-2 mb-4">
+    <input
+      type="text"
+      placeholder="Search by batch or lot..."
+      [(ngModel)]="searchQuery"
+      (input)="applyFilters()"
+      class="border rounded px-3 py-2 flex-1"
+    />
+
+    <select
+      [(ngModel)]="selectedResult"
+      (change)="applyFilters()"
+      class="border rounded px-3 py-2"
+    >
+      <option value="">All results</option>
+      <option value="Passed">Passed</option>
+      <option value="In progress">In progress</option>
+      <option value="OOS">OOS</option>
+    </select>
+  </div>
+
+  <div class="bg-white rounded-md shadow overflow-hidden">
+    <table class="min-w-full">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="text-left text-sm text-gray-600 uppercase p-3">
+            Test object
+          </th>
+          <th class="text-left text-sm text-gray-600 uppercase p-3">Type</th>
+          <th class="text-left text-sm text-gray-600 uppercase p-3">Date</th>
+          <th class="text-left text-sm text-gray-600 uppercase p-3">Analyst</th>
+          <th class="text-left text-sm text-gray-600 uppercase p-3">Result</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let t of filtered" class="border-t">
+          <td class="p-3">{{ testObjectLabel(t) }}</td>
+          <td class="p-3">{{ t.testObjectType }}</td>
+          <td class="p-3">{{ t.createdAt | date: "dd-MM-yyyy" }}</td>
+          <td class="p-3">{{ t.createdBy }}</td>
+          <td class="p-3">
+            <span [class]="badgeClass(statusLabel(t.status))">{{
+              statusLabel(t.status)
+            }}</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

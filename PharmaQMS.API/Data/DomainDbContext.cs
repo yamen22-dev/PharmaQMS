@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using PharmaQMS.API.Data.Configurations;
 using PharmaQMS.API.Models.Entities;
 
 namespace PharmaQMS.API.Data;
@@ -19,6 +20,10 @@ public class DomainDbContext : DbContext
     public DbSet<BmrStep> BmrSteps => Set<BmrStep>();
 
     public DbSet<BmrLotLink> BmrLotLinks => Set<BmrLotLink>();
+
+    public DbSet<QcTest> QcTests => Set<QcTest>();
+
+    public DbSet<QcTestParameter> QcTestParameters => Set<QcTestParameter>();
 
     public DbSet<MasterRecipe> MasterRecipes => Set<MasterRecipe>();
 
@@ -227,7 +232,8 @@ public class DomainDbContext : DbContext
             );
         });
 
-
+        modelBuilder.ApplyConfiguration(new QcTestConfiguration());
+        modelBuilder.ApplyConfiguration(new QcTestParameterConfiguration());
     }
 
 }

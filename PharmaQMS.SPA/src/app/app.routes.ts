@@ -135,6 +135,14 @@ export const routes: Routes = [
     ],
   },
   {
+    path: "qc",
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import("./features/qc/qc-overview/qc-overview.component").then(
+        (m) => m.QcOverviewComponent,
+      ),
+  },
+  {
     path: "**",
     redirectTo: "dashboard",
   },
