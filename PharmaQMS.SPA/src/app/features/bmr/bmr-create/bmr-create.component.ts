@@ -128,4 +128,7 @@ export class BmrCreateComponent implements OnInit {
         },
       });
   }
+  back(): void {
+    this.router.navigate(["/bmr"]);
+  }
 }

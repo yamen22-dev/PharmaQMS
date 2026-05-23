@@ -35,14 +35,15 @@ export interface BmrStepResponse {
 }
 
 export interface BmrSummaryResponse {
+  productName: any;
   Id: string;
-  BatchNumber: string;
-  RecipeName: string;
-  ProductionLineName: string;
-  CreatedAt: Date;
-  Status: BmrStatus;
-  TotalSteps: number;
-  CompletedSteps: number;
+  batchNumber: string;
+  recipeName: string;
+  productionLineName: string;
+  createdAt: Date;
+  status: BmrStatus;
+  totalSteps: number;
+  completedSteps: number;
 }
 
 export interface ConfirmStepRequest {
@@ -58,10 +59,10 @@ export interface CreateBmrRequest {
 }
 
 export interface PageResponse<T> {
-  Items: T[];
-  TotalCount: number;
-  Page: number;
-  PageSize: number;
+  items: T[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
 }
 export interface VerifyStepRequest {
     Password: string;
@@ -71,6 +72,7 @@ export enum BmrStatus {
   InProgress = 0,
   Completed = 1,
   Rejected = 2,
+  InQc = 3,
 }
 
 export enum BmrStepStatus {
