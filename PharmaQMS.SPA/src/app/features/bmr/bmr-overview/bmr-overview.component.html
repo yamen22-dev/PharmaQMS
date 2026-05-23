@@ -121,7 +121,7 @@
               class="text-sm text-slate-700"
             >
               <td class="px-4 py-4 font-medium text-slate-700">
-                {{ item.batchNumber }}
+                <a [routerLink]="['/bmr', item.id]">{{ item.batchNumber }}</a>
               </td>
               <td class="px-4 py-4">
                 {{ item.recipeName }}

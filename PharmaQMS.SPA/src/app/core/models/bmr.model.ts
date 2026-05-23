@@ -1,14 +1,14 @@
 export interface BmrDetailResponse {
-  Id: string;
-  BatchNumber: string;
-  RecipeName: string;
-  RecipeVersion: string;
-  ProductionLineName: string;
-  BatchSize: number;
-  Status: BmrStatus;
-  CreatedAt: Date;
-  Lots: ReadonlySet<BmrLotLinkResponse>;
-  Steps: ReadonlySet<BmrStepResponse>;
+  id: string;
+  batchNumber: string;
+  recipeName: string;
+  recipeVersion: string;
+  productionLineName: string;
+  batchSize: number;
+  status: BmrStatus;
+  createdAt: string;
+  lots: BmrLotLinkResponse[];
+  steps: BmrStepResponse[];
 }
 export interface BmrListQuery {
   Status?: BmrStatus;
@@ -16,27 +16,27 @@ export interface BmrListQuery {
   PageSize: number;
 }
 export interface BmrLotLinkResponse {
-  LotId: number;
-  LotNumber: string;
-  RawMaterialName: string;
+  lotId: number;
+  lotNumber: string;
+  rawMaterialName: string;
 }
 export interface BmrStepResponse {
-  Id: string;
-  StepNumber: number;
-  StepName: string;
-  IsCritical: boolean;
-  Status: BmrStepStatus;
-  EnteredData?: string;
-  EnteredById?: string;
-  EnteredAt?: Date;
-  VerifiedById?: string;
-  VerifiedAt?: Date;
-  DeviationNote?: string;
+  id: string;
+  stepNumber: number;
+  stepName: string;
+  isCritical: boolean;
+  status: BmrStepStatus;
+  enteredData?: string | null;
+  enteredById?: string | null;
+  enteredAt?: string | null;
+  verifiedById?: string | null;
+  verifiedAt?: string | null;
+  deviationNote?: string | null;
 }
 
 export interface BmrSummaryResponse {
   productName: any;
-  Id: string;
+  id: string;
   batchNumber: string;
   recipeName: string;
   productionLineName: string;

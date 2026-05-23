@@ -119,7 +119,7 @@ export class BmrCreateComponent implements OnInit {
       .subscribe({
         next: (bmr) => {
           alert("BMR created successfully!");
-          this.router.navigate(["/bmr", bmr.Id]);
+          this.router.navigate(["/bmr", bmr.id]);
         },
         error: () => {
           this.isSubmitting = false;
