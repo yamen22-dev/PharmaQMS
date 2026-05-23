@@ -135,6 +135,35 @@ export const routes: Routes = [
     ],
   },
   {
+    path: "qc",
+    canActivate: [authGuard],
+    children: [
+      {
+        path: "",
+        loadComponent: () =>
+          import("./features/qc/qc-overview/qc-overview.component").then(
+            (m) => m.QcOverviewComponent,
+          ),
+      },
+      {
+        path: "new",
+        canActivate: [roleGuard(["QCAnalyst", "QAManager"], "/qc")],
+        loadComponent: () =>
+          import("./features/qc/qc-create/qc-create.component").then(
+            (m) => m.QcCreateComponent,
+          ),
+      },
+      {
+        path: ":id",
+        canActivate: [roleGuard(["QCAnalyst", "QAManager"], "/qc")],
+        loadComponent: () =>
+          import("./features/qc/qc-detail/qc-detail.component").then(
+            (m) => m.QcDetailComponent,
+          ),
+      },
+    ],
+  },
+  {
     path: "**",
     redirectTo: "dashboard",
   },

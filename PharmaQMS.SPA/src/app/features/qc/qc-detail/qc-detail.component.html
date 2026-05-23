@@ -1,0 +1,153 @@
+<section class="min-h-screen bg-slate-100 px-4 py-6 text-slate-800">
+  <div class="mx-auto max-w-6xl">
+    <button
+      type="button"
+      (click)="cancel()"
+      class="mb-3 text-sm font-medium text-slate-500 hover:text-slate-700"
+    >
+      QC > Resultaten invoeren
+    </button>
+
+    <div class="mb-4 flex items-start justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-semibold text-slate-900">
+          Testresultaten invoeren
+        </h1>
+        <p class="mt-1 text-sm text-slate-500">
+          Voer per parameter de gemeten waarde in. De status wordt direct
+          vergeleken met de specificatiegrenzen.
+        </p>
+      </div>
+
+      <span
+        class="rounded-full px-3 py-1 text-sm font-semibold"
+        [class]="overallStatusClass"
+      >
+        {{ overallStatusLabel }}
+      </span>
+    </div>
+
+    <div
+      *ngIf="loading"
+      class="rounded-2xl border border-slate-200 bg-white p-10 text-center text-slate-500 shadow-sm"
+    >
+      Testdetails worden geladen...
+    </div>
+
+    <ng-container *ngIf="!loading && test">
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div
+          class="mb-4 flex flex-col gap-3 border-b border-slate-200 pb-4 md:flex-row md:items-center md:justify-between"
+        >
+          <div>
+            <p class="text-sm uppercase tracking-wider text-slate-500">Batch</p>
+            <h2 class="text-xl font-semibold text-slate-900">
+              {{ test.testObjectLabel }}
+            </h2>
+          </div>
+          <div class="text-sm text-slate-500">
+            <div>
+              <span class="font-semibold text-slate-700">Type:</span>
+              {{ test.testObjectType }}
+            </div>
+            <div>
+              <span class="font-semibold text-slate-700">Aangemaakt door:</span>
+              {{ test.createdBy }}
+            </div>
+          </div>
+        </div>
+
+        <div class="overflow-hidden rounded-xl border border-slate-200">
+          <table class="min-w-full divide-y divide-slate-200">
+            <thead
+              class="bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-500"
+            >
+              <tr>
+                <th class="px-4 py-3 text-left">Parameter</th>
+                <th class="px-4 py-3 text-left">Specificatie</th>
+                <th class="px-4 py-3 text-left">Gemeten waarde</th>
+                <th class="px-4 py-3 text-left">Uitslag</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 bg-white">
+              <tr *ngFor="let parameter of test.parameters">
+                <td class="px-4 py-4 font-medium text-slate-900">
+                  {{ parameter.name }}
+                </td>
+                <td class="px-4 py-4 text-slate-600">
+                  {{ parameter.min | number: "1.0-4" }} -
+                  {{ parameter.max | number: "1.0-4" }} {{ parameter.unit }}
+                </td>
+                <td class="px-4 py-4">
+                  <input
+                    type="number"
+                    [ngModel]="measuredValues[parameter.id]"
+                    (ngModelChange)="updateMeasuredValue(parameter.id, $event)"
+                    [disabled]="test.status !== 'In progress'"
+                    class="w-32 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:bg-slate-100"
+                  />
+                </td>
+                <td class="px-4 py-4">
+                  <span
+                    class="rounded-full px-3 py-1 text-sm font-semibold"
+                    [class]="resultClass(parameter)"
+                  >
+                    {{ resultLabel(parameter) }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mt-5 max-w-md">
+          <label
+            class="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500"
+          >
+            Elektronische handtekening (wachtwoord)
+          </label>
+          <input
+            type="password"
+            [(ngModel)]="password"
+            autocomplete="current-password"
+            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+          />
+        </div>
+
+        <p
+          *ngIf="statusMessage"
+          [class]="
+            statusMessageClass + ' mt-4 rounded-xl border px-4 py-3 text-sm'
+          "
+        >
+          {{ statusMessage }}
+        </p>
+
+        <p
+          *ngIf="errorMessage"
+          class="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
+        >
+          {{ errorMessage }}
+        </p>
+
+        <div class="mt-6 flex justify-end gap-3 border-t border-slate-200 pt-4">
+          <button
+            type="button"
+            (click)="cancel()"
+            class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+          >
+            Annuleren
+          </button>
+          <button
+            type="button"
+            (click)="saveResults()"
+            [disabled]="!canSubmit"
+            class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {{ submitting ? "Bezig..." : "Resultaten opslaan" }}
+          </button>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</section>

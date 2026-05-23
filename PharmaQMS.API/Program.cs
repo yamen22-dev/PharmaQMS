@@ -16,6 +16,8 @@ using System.Globalization;
 using PharmaQMS.API.Services.Interfaces;
 using PharmaQMS.API.Services.Interfaces.MasterRecipe;
 using PharmaQMS.API.Services.MasterRecipe;
+using PharmaQMS.Application.QualityControl;
+using PharmaQMS.Infrastructure.QualityControl;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -243,7 +245,7 @@ try
     builder.Services.AddScoped<IAuditService, AuditService>();
     builder.Services.AddScoped<IBmrService, BmrService>();
     builder.Services.AddScoped<IMasterRecipeService, MasterRecipeService>();
-
+    builder.Services.AddScoped<IQcTestService, QcTestService>();
 
     // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
     builder.Services.AddOpenApi();
@@ -305,6 +307,9 @@ try
         {
             Log.Information("Skipping default user seeding outside development.");
         }
+
+        Log.Information("Seeding QC sample data...");
+        await QcSeeder.SeedSampleDataAsync(domainDbContext);
 
         Log.Information("Database seeded successfully");
     }
