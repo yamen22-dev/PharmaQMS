@@ -103,7 +103,12 @@
             </div>
             <div class="flex justify-between gap-4">
               <dt class="text-slate-500">
-                <button (click)="viewSteps(`/bmr/${detail.id}/steps`)" class="text-blue-500 hover:text-blue-700">Stappenplan</button>
+                <a
+                  [routerLink]="['/bmr', detail.id, 'steps']"
+                  class="text-blue-500 hover:text-blue-700"
+                >
+                  Stappenplan
+                </a>
               </dt>
             </div>
           </dl>

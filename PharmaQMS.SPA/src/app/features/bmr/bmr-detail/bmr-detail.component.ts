@@ -1,6 +1,6 @@
 import { CommonModule } from "@angular/common";
 import { ChangeDetectorRef, Component, inject, OnInit } from "@angular/core";
-import { ActivatedRoute, Router } from "@angular/router";
+import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 import {
   BmrDetailResponse,
   BmrStatus,
@@ -10,7 +10,7 @@ import { BmrService } from "../../../core/services/bmr.service";
 @Component({
   selector: "app-bmr-detail",
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: "./bmr-detail.component.html",
   styleUrl: "./bmr-detail.component.css",
 })
@@ -90,16 +90,6 @@ export class BmrDetailComponent implements OnInit {
 
   back(): void {
     this.router.navigate(["/bmr"]);
-  }
-
-  viewSteps(path: string): void {
-    alert(`Navigating to: ${path}`);
-    this.router.navigate([path], {
-      state: {
-        bmrId: this.detail?.id,
-        batchNumber: this.detail?.batchNumber,
-      },
-    });
   }
 
   private loadDetail(id: string): void {

@@ -1,13 +1,15 @@
 import { CommonModule } from "@angular/common";
 import { ChangeDetectorRef, Component, inject, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, RouterLink } from "@angular/router";
 import {
+  BmrDetailResponse,
   BmrStepResponse,
   BmrStepStatus,
   ConfirmStepRequest,
 } from "../../../core/models/bmr.model";
 import { BmrService } from "../../../core/services/bmr.service";
+import { AuthService } from "../../../core/services/auth.service";
 
 type UiStep = {
   id: string;
@@ -23,7 +25,7 @@ type UiStep = {
 @Component({
   selector: "app-bmr-step-confirm",
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: "./bmr-step-confirm.component.html",
   styleUrls: ["./bmr-step-confirm.component.css"],
 })
@@ -32,7 +34,11 @@ export class BmrStepConfirmationComponent implements OnInit {
 
   private readonly route = inject(ActivatedRoute);
   private readonly bmrService = inject(BmrService);
+  private readonly authService = inject(AuthService);
 
+  protected bmrId: string | null = null;
+
+  batchNumber = "";
   steps: UiStep[] = [];
   isLoading = true;
   errorMessage = "";
@@ -44,12 +50,10 @@ export class BmrStepConfirmationComponent implements OnInit {
     remark: "",
   };
 
-  private bmrId: string | null = null;
-
   constructor(private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
-    this.bmrId = this.route.snapshot.paramMap.get("id") || "BATCH-2026-012";
+    this.bmrId = this.route.snapshot.paramMap.get("id") ?? "";
     this.loadSteps();
   }
 
@@ -77,11 +81,22 @@ export class BmrStepConfirmationComponent implements OnInit {
     this.errorMessage = "";
 
     this.bmrService.getBmrById(this.bmrId).subscribe({
-      next: (data: any) => {
+      next: (data: BmrDetailResponse) => {
+        this.batchNumber = data.batchNumber;
         // map backend step shape to UI-friendly shape
         this.steps = (data.steps || []).map((s: BmrStepResponse) =>
           this.mapStep(s),
         );
+        // resolve display names for entered/verified users
+        this.steps.forEach((st) => {
+          const userId = st.completedBy;
+          if (userId) {
+            this.authService.getUserNameById(userId).subscribe((name) => {
+              st.completedBy = name;
+              this.cdr.detectChanges();
+            });
+          }
+        });
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -165,16 +180,18 @@ export class BmrStepConfirmationComponent implements OnInit {
       DeviationNote: this.stepForm.remark || undefined,
     };
 
-    this.bmrService.confirmStep(this.bmrId, this.selectedStep.id, confirmReq).subscribe({
-      next: () => {
-        alert("Stap succesvol uitgevoerd!");
-        this.closeForm();
-        this.loadSteps();
-      },
-      error: (err) => {
-        console.error(err);
-        alert("Fout bij uitvoeren van stap.");
-      },
-    });
+    this.bmrService
+      .confirmStep(this.bmrId, this.selectedStep.id, confirmReq)
+      .subscribe({
+        next: () => {
+          alert("Stap succesvol uitgevoerd!");
+          this.closeForm();
+          this.loadSteps();
+        },
+        error: (err) => {
+          console.error(err);
+          alert("Fout bij uitvoeren van stap.");
+        },
+      });
   }
 }

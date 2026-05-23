@@ -11,6 +11,7 @@ public static class IdentitySeeder
     private static readonly SeedUserDefinition[] DefaultUsers =
     [
         new(RoleNames.QAManager, "QA", "Manager", "qa.manager@pharmaqms.local"),
+        new(RoleNames.QAManager, "Secondary", "Manager", "qa2.manager@pharmaqms.local"),
         new(RoleNames.QCAnalyst, "QC", "Analyst", "qc.analyst@pharmaqms.local"),
         new(RoleNames.ProductionAnalyst, "Production", "Analyst", "production.analyst@pharmaqms.local"),
         new(RoleNames.WarehouseOperator, "Warehouse", "Operator", "warehouse.operator@pharmaqms.local"),

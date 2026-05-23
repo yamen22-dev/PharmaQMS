@@ -1,12 +1,22 @@
-import { HttpClient, HttpContext } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, catchError, map, Observable, of, tap, throwError } from 'rxjs';
-import { environment } from '../../../environments/environment';
-import { AuthResponse } from '../models/auth-response.model';
-import { LoginRequest } from '../models/login-request.model';
-import { RefreshTokenRequest } from '../models/refresh-token-request.model';
-import { AuthStorageService } from './auth-storage.service';
-import { SKIP_AUTH } from '../interceptors/auth.tokens';
+import { HttpClient, HttpContext } from "@angular/common/http";
+import { inject, Injectable } from "@angular/core";
+import {
+  BehaviorSubject,
+  catchError,
+  finalize,
+  map,
+  Observable,
+  of,
+  shareReplay,
+  tap,
+  throwError,
+} from "rxjs";
+import { environment } from "../../../environments/environment";
+import { AuthResponse } from "../models/auth-response.model";
+import { LoginRequest } from "../models/login-request.model";
+import { RefreshTokenRequest } from "../models/refresh-token-request.model";
+import { AuthStorageService } from "./auth-storage.service";
+import { SKIP_AUTH } from "../interceptors/auth.tokens";
 
 @Injectable({ providedIn: "root" })
 export class AuthService {
@@ -15,6 +25,8 @@ export class AuthService {
   private readonly sessionSubject = new BehaviorSubject<AuthResponse | null>(
     this.storage.readSession(),
   );
+  private readonly displayNameCache = new Map<string, string>();
+  private readonly displayNameRequests = new Map<string, Observable<string>>();
 
   readonly session$ = this.sessionSubject.asObservable();
 
@@ -96,5 +108,52 @@ export class AuthService {
   private setSession(session: AuthResponse): void {
     this.storage.saveSession(session);
     this.sessionSubject.next(session);
+  }
+
+  getUserNameById(userId: string): Observable<string> {
+    const normalizedUserId = userId.trim();
+    if (!normalizedUserId) {
+      return of("Onbekende gebruiker");
+    }
+
+    const cachedName = this.displayNameCache.get(normalizedUserId);
+    if (cachedName) {
+      return of(cachedName);
+    }
+
+    const inFlightRequest = this.displayNameRequests.get(normalizedUserId);
+    if (inFlightRequest) {
+      return inFlightRequest;
+    }
+
+    const request$ = this.http
+      .post<any>(
+        `${environment.apiBaseUrl}/auth/display-name`,
+        { userId: normalizedUserId },
+        { context: new HttpContext().set(SKIP_AUTH, true) },
+      )
+      .pipe(
+        map((response) => {
+          // backend might return DisplayName or displayName depending on serializer
+          return (
+            response?.displayName ??
+            response?.DisplayName ??
+            "Onbekende gebruiker"
+          );
+        }),
+        tap((displayName) => {
+          if (displayName !== "Onbekende gebruiker") {
+            this.displayNameCache.set(normalizedUserId, displayName);
+          }
+        }),
+        catchError(() => of("Onbekende gebruiker")),
+        finalize(() => {
+          this.displayNameRequests.delete(normalizedUserId);
+        }),
+        shareReplay({ bufferSize: 1, refCount: false }),
+      );
+
+    this.displayNameRequests.set(normalizedUserId, request$);
+    return request$;
   }
 }

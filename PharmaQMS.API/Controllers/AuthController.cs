@@ -70,4 +70,20 @@ public class AuthController : ControllerBase
 
         return Problem(title: result.Error, statusCode: result.StatusCode);
     }
+
+    [HttpPost("display-name")]
+    public async Task<ActionResult<AuthResponse>> GetUserFullNameById([FromBody] GetUserNameRequest request)
+    {
+        var userFullName = await _authService.GetUserFullNameAsync(request.UserId);
+        if (userFullName is null)
+        {
+            return NotFound(new ProblemDetails
+            {
+                Title = "User not found",
+                Status = StatusCodes.Status404NotFound,
+                Detail = $"No user found with ID '{request.UserId}'."
+            });
+        }
+        return Ok(new { DisplayName = userFullName });
+    }
 }
