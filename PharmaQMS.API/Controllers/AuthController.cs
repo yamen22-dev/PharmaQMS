@@ -74,8 +74,12 @@ public class AuthController : ControllerBase
     [HttpPost("display-name")]
     public async Task<ActionResult<AuthResponse>> GetUserFullNameById([FromBody] GetUserNameRequest request)
     {
-        var userFullName = await _authService.GetUserFullNameAsync(request.UserId);
-        if (userFullName is null)
+        try
+        {
+            var userFullName = await _authService.GetUserFullNameAsync(request.UserId);
+            return Ok(new { DisplayName = userFullName });
+        }
+        catch (KeyNotFoundException)
         {
             return NotFound(new ProblemDetails
             {
@@ -84,6 +88,5 @@ public class AuthController : ControllerBase
                 Detail = $"No user found with ID '{request.UserId}'."
             });
         }
-        return Ok(new { DisplayName = userFullName });
     }
 }

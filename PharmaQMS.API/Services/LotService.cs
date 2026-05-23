@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using PharmaQMS.API.Data;
 using PharmaQMS.API.DTOs.Lot;
 using PharmaQMS.API.Models.Entities;
+using PharmaQMS.API.Services.Interfaces;
 
 namespace PharmaQMS.API.Services;
 
