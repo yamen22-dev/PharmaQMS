@@ -28,9 +28,11 @@ export class BmrOverviewComponent implements OnInit {
   statusLabels: Record<number, string> = {
     0: "In Progress",
     1: "Completed",
-    2: "Closed",
+    2: "Rejected",
     3: "In QC",
   };
+
+  protected readonly BmrStatus = BmrStatus;
 
   ngOnInit(): void {
     this.bmrService.getBmrs({ Page: 1, PageSize: 10 }).subscribe({
@@ -68,7 +70,7 @@ export class BmrOverviewComponent implements OnInit {
       const matchesSearch =
         !search ||
         item.batchNumber.toLowerCase().includes(search) ||
-        item.recipeName.toLowerCase().includes(search); // ← RecipeName not productName
+        item.recipeName.toLowerCase().includes(search);
 
       const matchesStatus =
         this.selectedStatus === "all" || item.status === this.selectedStatus;

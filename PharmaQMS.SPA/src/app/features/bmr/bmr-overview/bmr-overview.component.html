@@ -90,10 +90,11 @@
             [(ngModel)]="selectedStatus"
             class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 md:w-48"
           >
-            <option value="all">All statuses</option>
-            <option value="In Progress">In Progress</option>
-            <option value="In QC">In QC</option>
-            <option value="Closed">Closed</option>
+              <option [ngValue]="'all'">Alle statussen</option>
+              <option [ngValue]="BmrStatus.InProgress">In progress</option>
+              <option [ngValue]="BmrStatus.InQc">In QC</option>
+              <option [ngValue]="BmrStatus.Completed">Completed</option>
+              <option [ngValue]="BmrStatus.Rejected">Rejected</option>
           </select>
         </div>
       </div>
