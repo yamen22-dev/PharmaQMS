@@ -5,36 +5,73 @@ using PharmaQMS.API.DTOs.QualityControl;
 using PharmaQMS.API.Models.DTOs.Common;
 using PharmaQMS.API.Models.Entities;
 using PharmaQMS.API.Models.Enums;
+using PharmaQMS.API.Services;
 using PharmaQMS.API.Services.Interfaces;
+using System.Globalization;
 
 namespace PharmaQMS.Infrastructure.QualityControl;
 
-public sealed class QcTestService(DomainDbContext db) : IQcTestService
+public sealed class QcTestService(DomainDbContext db, IAuthService authService) : IQcTestService
 {
     public async Task<Result<QcTestSummaryResponse>> CreateAsync(
         CreateQcTestRequest request,
         string userId,
         CancellationToken ct = default)
     {
+        if (string.IsNullOrWhiteSpace(request.Password))
+        {
+            return Result<QcTestSummaryResponse>.Failure(
+                "Electronic signature rejected: password is required.");
+        }
+
+        var signatureValid = await authService.VerifyPasswordAsync(userId, request.Password, ct);
+        if (!signatureValid)
+        {
+            return Result<QcTestSummaryResponse>.Failure(
+                "Electronic signature rejected: incorrect password.");
+        }
+
+        var normalizedType = request.TestObjectType.Trim().ToLowerInvariant() switch
+        {
+            "lot" => "Lot",
+            "batch" => "Batch",
+            _ => string.Empty,
+        };
+
+        if (string.IsNullOrWhiteSpace(normalizedType))
+        {
+            return Result<QcTestSummaryResponse>.Failure(
+                "Test object type must be either 'Lot' or 'Batch'.");
+        }
+
+        if (request.Parameters.Count == 0)
+        {
+            return Result<QcTestSummaryResponse>.Failure(
+                "At least one test parameter is required.");
+        }
+
         // Validate parameters: min must be < max
         foreach (var p in request.Parameters)
         {
+            if (string.IsNullOrWhiteSpace(p.Name) || string.IsNullOrWhiteSpace(p.Unit))
+            {
+                return Result<QcTestSummaryResponse>.Failure(
+                    "Each parameter must contain a name and a unit.");
+            }
+
             if (p.Min >= p.Max)
                 return Result<QcTestSummaryResponse>.Failure(
                     $"Parameter '{p.Name}': min must be less than max.");
         }
 
         // Guard: verify test object exists and has correct status
-        var objectExists = request.TestObjectType switch
+        var objectExists = normalizedType switch
         {
             "Lot" => await db.Lots
                             .AsNoTracking()
                             .AnyAsync(l => l.Id == request.TestObjectId
                                          && l.Status == LotStatus.Quarantine, ct),
-            "Batch" => await db.Bmrs
-                            .AsNoTracking()
-                            .AnyAsync(b => b.BatchNumber == request.TestObjectId.ToString()
-                                         && b.Status == BmrStatus.InQc, ct),
+            "Batch" => await IsEligibleBatchAsync(request.TestObjectId, ct),
             _ => false
         };
 
@@ -46,7 +83,7 @@ public sealed class QcTestService(DomainDbContext db) : IQcTestService
 
         var test = new QcTest
         {
-            TestObjectType = request.TestObjectType,
+            TestObjectType = normalizedType,
             TestObjectId = request.TestObjectId,
             Status = QcTestStatus.InBehandeling,
             CreatedAt = now,
@@ -75,7 +112,7 @@ public sealed class QcTestService(DomainDbContext db) : IQcTestService
             EntiteitType = nameof(QcTest),
             EntiteitId = test.Id.ToString(),
             OudWaarde = null,
-            NieuweWaarde = $"TestObjectType={request.TestObjectType}, "
+            NieuweWaarde = $"TestObjectType={normalizedType}, "
                            + $"TestObjectId={request.TestObjectId}, "
                            + $"ParameterCount={request.Parameters.Count}",
             IPAdres = string.Empty,
@@ -84,14 +121,129 @@ public sealed class QcTestService(DomainDbContext db) : IQcTestService
 
         await db.SaveChangesAsync(ct);
 
+        var createdByUsername = await ResolveCreatedByUsernameAsync(test.CreatedBy, ct);
+
         return Result<QcTestSummaryResponse>.Success(new(
             test.Id,
             test.TestObjectType,
             test.TestObjectId,
             test.Status,
             test.CreatedAt,
-            test.CreatedBy
+            createdByUsername
         ));
+    }
+
+    private async Task<bool> IsEligibleBatchAsync(int testObjectId, CancellationToken ct)
+    {
+        var idText = testObjectId.ToString(CultureInfo.InvariantCulture);
+        var paddedIdText = testObjectId.ToString("D3", CultureInfo.InvariantCulture);
+
+        var batchNumbers = await db.Bmrs
+            .AsNoTracking()
+            .Where(b => b.Status == BmrStatus.InQc)
+            .Select(b => b.BatchNumber)
+            .ToListAsync(ct);
+
+        return batchNumbers.Any(batchNumber => MatchesBatchId(batchNumber, idText, paddedIdText));
+    }
+
+    private static bool MatchesBatchId(string batchNumber, string idText, string paddedIdText)
+    {
+        if (string.IsNullOrWhiteSpace(batchNumber))
+        {
+            return false;
+        }
+
+        if (batchNumber.Equals(idText, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        if (batchNumber.EndsWith($"-{idText}", StringComparison.OrdinalIgnoreCase)
+            || batchNumber.EndsWith($"-{paddedIdText}", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        var segments = batchNumber.Split('-', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (segments.Length == 0)
+        {
+            return false;
+        }
+
+        var lastSegment = segments[^1];
+        if (!int.TryParse(lastSegment, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedSegment))
+        {
+            return false;
+        }
+
+        if (!int.TryParse(idText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedId))
+        {
+            return false;
+        }
+
+        return parsedSegment == parsedId;
+    }
+
+    public async Task<Result<QcEligibleObjectsResponse>> GetEligibleObjectsAsync(
+        CancellationToken ct = default)
+    {
+        var lots = await db.Lots
+            .AsNoTracking()
+            .Where(l => l.Status == LotStatus.Quarantine)
+            .OrderByDescending(l => l.Id)
+            .Select(l => new QcEligibleObjectResponse(
+                "Lot",
+                l.Id,
+                $"Lot #{l.Id} - {l.LotNumber}"))
+            .ToListAsync(ct);
+
+        var inQcBatchNumbers = await db.Bmrs
+            .AsNoTracking()
+            .Where(b => b.Status == BmrStatus.InQc)
+            .OrderByDescending(b => b.CreatedAt)
+            .Select(b => b.BatchNumber)
+            .ToListAsync(ct);
+
+        var batches = inQcBatchNumbers
+            .Select(batchNumber => new
+            {
+                BatchNumber = batchNumber,
+                ParsedId = ExtractBatchObjectId(batchNumber)
+            })
+            .Where(x => x.ParsedId is not null)
+            .GroupBy(x => x.ParsedId!.Value)
+            .Select(g => g.First())
+            .Select(x => new QcEligibleObjectResponse(
+                "Batch",
+                x.ParsedId!.Value,
+                x.BatchNumber))
+            .ToList();
+
+        return Result<QcEligibleObjectsResponse>.Success(
+            new QcEligibleObjectsResponse(lots, batches));
+    }
+
+    private static int? ExtractBatchObjectId(string batchNumber)
+    {
+        if (string.IsNullOrWhiteSpace(batchNumber))
+        {
+            return null;
+        }
+
+        var segments = batchNumber.Split('-', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (segments.Length == 0)
+        {
+            return null;
+        }
+
+        var lastSegment = segments[^1];
+        if (!int.TryParse(lastSegment, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedId))
+        {
+            return null;
+        }
+
+        return parsedId > 0 ? parsedId : null;
     }
 
     public async Task<Result<PagedResponse<QcTestSummaryResponse>>> GetAllAsync(
@@ -114,8 +266,25 @@ public sealed class QcTestService(DomainDbContext db) : IQcTestService
                 t.Status, t.CreatedAt, t.CreatedBy))
             .ToListAsync(ct);
 
+        var createdByUserIds = items
+            .Select(x => x.CreatedBy)
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        var usernamesById = await ResolveCreatedByUsernamesAsync(createdByUserIds, ct);
+
+        var mappedItems = items
+            .Select(item => item with
+            {
+                CreatedBy = usernamesById.TryGetValue(item.CreatedBy, out var username)
+                    ? username
+                    : item.CreatedBy
+            })
+            .ToList();
+
         return Result<PagedResponse<QcTestSummaryResponse>>.Success(
-            new(items, query.Page, query.PageSize, total));
+            new(mappedItems, query.Page, query.PageSize, total));
     }
 
     public async Task<Result<QcTestSummaryResponse>> GetByIdAsync(
@@ -130,8 +299,42 @@ public sealed class QcTestService(DomainDbContext db) : IQcTestService
                 t.Status, t.CreatedAt, t.CreatedBy))
             .FirstOrDefaultAsync(ct);
 
-        return test is null
-            ? Result<QcTestSummaryResponse>.Failure("QC test not found.")
-            : Result<QcTestSummaryResponse>.Success(test);
+        if (test is null)
+        {
+            return Result<QcTestSummaryResponse>.Failure("QC test not found.");
+        }
+
+        var createdByUsername = await ResolveCreatedByUsernameAsync(test.CreatedBy, ct);
+
+        return Result<QcTestSummaryResponse>.Success(test with
+        {
+            CreatedBy = createdByUsername
+        });
+    }
+
+    private async Task<Dictionary<string, string>> ResolveCreatedByUsernamesAsync(
+        IReadOnlyCollection<string> userIds,
+        CancellationToken ct)
+    {
+        var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var userId in userIds)
+        {
+            map[userId] = await ResolveCreatedByUsernameAsync(userId, ct);
+        }
+
+        return map;
+    }
+
+    private async Task<string> ResolveCreatedByUsernameAsync(string userId, CancellationToken ct)
+    {
+        try
+        {
+            return await authService.GetUsernameByIdAsync(userId, ct);
+        }
+        catch (KeyNotFoundException)
+        {
+            return userId;
+        }
     }
 }

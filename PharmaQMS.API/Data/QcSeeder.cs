@@ -6,6 +6,9 @@ namespace PharmaQMS.API.Data;
 
 public static class QcSeeder
 {
+    private const string SeedLotNumber = "LOT-QC-SEED-2026-001";
+    private const string SeedBatchNumber = "BATCH-QC-SEED-777";
+
     private sealed record SeedQcTestParameter(int Id, string Name, string Unit, decimal Min, decimal Max);
 
     private sealed record SeedQcTest(
@@ -58,6 +61,9 @@ public static class QcSeeder
         DomainDbContext db,
         CancellationToken cancellationToken = default)
     {
+        await EnsureSeedLotForQcCreateAsync(db, cancellationToken);
+        await EnsureSeedBatchForQcCreateAsync(db, cancellationToken);
+
         foreach (var seedTest in SeedTests)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -112,5 +118,107 @@ public static class QcSeeder
         {
             await db.SaveChangesAsync(cancellationToken);
         }
+    }
+
+    private static async Task EnsureSeedLotForQcCreateAsync(
+        DomainDbContext db,
+        CancellationToken cancellationToken)
+    {
+        var existingSeedLot = await db.Lots
+            .FirstOrDefaultAsync(l => l.LotNumber == SeedLotNumber, cancellationToken);
+
+        if (existingSeedLot is not null)
+        {
+            if (existingSeedLot.Status != LotStatus.Quarantine)
+            {
+                existingSeedLot.Status = LotStatus.Quarantine;
+            }
+
+            return;
+        }
+
+        var rawMaterial = await db.RawMaterials
+            .OrderBy(r => r.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (rawMaterial is null)
+        {
+            rawMaterial = new RawMaterial
+            {
+                Name = "QC Seed API",
+                PharmaceuticalApi = "AMOXICILLIN",
+                Category = RawMaterialCategory.ActivePharmaceuticalIngredient,
+                Unit = "kg",
+                MinSpecificationLimit = 98.0m,
+                MaxSpecificationLimit = 102.0m,
+                Supplier = "Seed Supplier",
+                CepNumber = "CEP-QC-SEED",
+                Notes = "Automatisch seed record voor QC-test aanmaak.",
+                CreatedUtc = DateTime.UtcNow
+            };
+
+            db.RawMaterials.Add(rawMaterial);
+            await db.SaveChangesAsync(cancellationToken);
+        }
+
+        db.Lots.Add(new Lot
+        {
+            RawMaterialId = rawMaterial.Id,
+            LotNumber = SeedLotNumber,
+            ReceivedDateUtc = DateTime.UtcNow.Date.AddDays(-2),
+            Quantity = 150.0m,
+            Status = LotStatus.Quarantine,
+            ExpiryDateUtc = DateTime.UtcNow.Date.AddYears(1),
+            PurchaseOrderNumber = "PO-QC-SEED-001",
+            AnalysisCertificate = "COA-QC-SEED-001"
+        });
+    }
+
+    private static async Task EnsureSeedBatchForQcCreateAsync(
+        DomainDbContext db,
+        CancellationToken cancellationToken)
+    {
+        var existingSeedBatch = await db.Bmrs
+            .FirstOrDefaultAsync(b => b.BatchNumber == SeedBatchNumber, cancellationToken);
+
+        if (existingSeedBatch is not null)
+        {
+            if (existingSeedBatch.Status != BmrStatus.InQc)
+            {
+                existingSeedBatch.Status = BmrStatus.InQc;
+            }
+
+            return;
+        }
+
+        var masterRecipeId = await db.MasterRecipes
+            .AsNoTracking()
+            .OrderBy(r => r.Id)
+            .Select(r => r.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        var productionLineId = await db.ProductionLines
+            .AsNoTracking()
+            .Where(p => p.IsActive)
+            .OrderBy(p => p.Id)
+            .Select(p => p.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (masterRecipeId == Guid.Empty || productionLineId == Guid.Empty)
+        {
+            return;
+        }
+
+        db.Bmrs.Add(new Bmr
+        {
+            Id = Guid.NewGuid(),
+            BatchNumber = SeedBatchNumber,
+            MasterRecipeId = masterRecipeId,
+            BatchSize = 500.0m,
+            ProductionLineId = productionLineId,
+            Status = BmrStatus.InQc,
+            CreatedById = "seed-system",
+            CreatedAt = DateTime.UtcNow
+        });
     }
 }

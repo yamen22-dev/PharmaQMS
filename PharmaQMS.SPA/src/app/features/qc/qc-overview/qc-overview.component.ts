@@ -129,6 +129,6 @@ export class QcOverviewComponent implements OnInit {
   }
 
   testObjectLabel(test: QcTestSummary): string {
-    return test.testObject?.trim() || `${test.testObjectType}`;
+    return test.testObject?.trim() || `${test.testObjectType} #${test.id}`;
   }
 }

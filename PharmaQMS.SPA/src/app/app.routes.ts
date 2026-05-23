@@ -137,10 +137,23 @@ export const routes: Routes = [
   {
     path: "qc",
     canActivate: [authGuard],
-    loadComponent: () =>
-      import("./features/qc/qc-overview/qc-overview.component").then(
-        (m) => m.QcOverviewComponent,
-      ),
+    children: [
+      {
+        path: "",
+        loadComponent: () =>
+          import("./features/qc/qc-overview/qc-overview.component").then(
+            (m) => m.QcOverviewComponent,
+          ),
+      },
+      {
+        path: "new",
+        canActivate: [roleGuard(["QCAnalyst", "QAManager"], "/qc")],
+        loadComponent: () =>
+          import("./features/qc/qc-create/qc-create.component").then(
+            (m) => m.QcCreateComponent,
+          ),
+      },
+    ],
   },
   {
     path: "**",

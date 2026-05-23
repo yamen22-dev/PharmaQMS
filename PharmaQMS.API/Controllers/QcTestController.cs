@@ -11,7 +11,6 @@ namespace PharmaQMS.API.Controllers;
 [ApiController]
 [Route("api/v1/qc-tests")]
 [Authorize]
-[AllowAnonymous]
 public sealed class QcTestController(IQcTestService service) : ControllerBase
 {
     [Authorize(Roles = "QCAnalyst, QAManager")]
@@ -24,7 +23,12 @@ public sealed class QcTestController(IQcTestService service) : ControllerBase
         [FromBody] CreateQcTestRequest request,
         CancellationToken ct)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return Unauthorized();
+        }
+
         var result = await service.CreateAsync(request, userId, ct);
 
         return result.IsSuccess
@@ -50,5 +54,14 @@ public sealed class QcTestController(IQcTestService service) : ControllerBase
     {
         var result = await service.GetAllAsync(query, ct);
         return result.IsSuccess ? Ok(result.Value) : BadRequest();
+    }
+
+    [Authorize(Roles = "QCAnalyst, QAManager")]
+    [HttpGet("eligible-objects")]
+    [ProducesResponseType(typeof(QcEligibleObjectsResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetEligibleObjects(CancellationToken ct)
+    {
+        var result = await service.GetEligibleObjectsAsync(ct);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(new { error = result.Error });
     }
 }

@@ -9,3 +9,14 @@ public sealed record QcTestSummaryResponse(
     DateTimeOffset CreatedAt,
     string CreatedBy
 );
+
+public sealed record QcEligibleObjectResponse(
+    string TestObjectType,
+    int TestObjectId,
+    string Label
+);
+
+public sealed record QcEligibleObjectsResponse(
+    IReadOnlyList<QcEligibleObjectResponse> Lots,
+    IReadOnlyList<QcEligibleObjectResponse> Batches
+);
