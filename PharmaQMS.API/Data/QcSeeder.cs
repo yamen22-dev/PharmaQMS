@@ -9,7 +9,13 @@ public static class QcSeeder
     private const string SeedLotNumber = "LOT-QC-SEED-2026-001";
     private const string SeedBatchNumber = "BATCH-QC-SEED-777";
 
-    private sealed record SeedQcTestParameter(int Id, string Name, string Unit, decimal Min, decimal Max);
+    private sealed record SeedQcTestParameter(
+        int Id,
+        string Name,
+        string Unit,
+        decimal Min,
+        decimal Max,
+        decimal? MeasuredValue = null);
 
     private sealed record SeedQcTest(
         int Id,
@@ -30,8 +36,8 @@ public static class QcSeeder
             new DateTimeOffset(2026, 5, 19, 8, 15, 0, TimeSpan.Zero),
             "qc.analyst@pharmaqms.local",
             [
-                new(910001, "Appearance", "score", 0m, 5m),
-                new(910002, "Moisture", "%", 0.0m, 2.0m)
+                new(910001, "Appearance", "score", 0m, 5m, 4.0m),
+                new(910002, "Moisture", "%", 0.0m, 2.0m, 1.6m)
             ]),
         new(
             900002,
@@ -41,8 +47,8 @@ public static class QcSeeder
             new DateTimeOffset(2026, 5, 20, 14, 40, 0, TimeSpan.Zero),
             "qa.manager@pharmaqms.local",
             [
-                new(910003, "Assay", "%", 98.0m, 102.0m),
-                new(910004, "Dissolution", "%", 80.0m, 100.0m)
+                new(910003, "Assay", "%", 98.0m, 102.0m, 100.1m),
+                new(910004, "Dissolution", "%", 80.0m, 100.0m, 92.0m)
             ]),
         new(
             900003,
@@ -52,8 +58,8 @@ public static class QcSeeder
             new DateTimeOffset(2026, 5, 21, 10, 5, 0, TimeSpan.Zero),
             "production.analyst@pharmaqms.local",
             [
-                new(910005, "Appearance", "score", 0m, 5m),
-                new(910006, "Impurities", "%", 0.0m, 1.0m)
+                new(910005, "Appearance", "score", 0m, 5m, 4.0m),
+                new(910006, "Impurities", "%", 0.0m, 1.0m, 1.4m)
             ])
     ];
 
@@ -87,6 +93,7 @@ public static class QcSeeder
                             Unit = parameter.Unit,
                             Min = parameter.Min,
                             Max = parameter.Max,
+                            MeasuredValue = parameter.MeasuredValue,
                         })
                         .ToList(),
                 });
@@ -109,6 +116,7 @@ public static class QcSeeder
                     Unit = parameter.Unit,
                     Min = parameter.Min,
                     Max = parameter.Max,
+                    MeasuredValue = parameter.MeasuredValue,
                 });
 
             db.QcTestParameters.AddRange(missingParameters);

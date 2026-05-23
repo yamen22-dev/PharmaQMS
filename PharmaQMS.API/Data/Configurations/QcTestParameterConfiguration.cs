@@ -15,5 +15,6 @@ internal sealed class QcTestParameterConfiguration : IEntityTypeConfiguration<Qc
         b.Property(p => p.Unit).HasMaxLength(20).IsRequired();
         b.Property(p => p.Min).HasColumnType("decimal(18,4)");
         b.Property(p => p.Max).HasColumnType("decimal(18,4)");
+        b.Property(p => p.MeasuredValue).HasColumnType("decimal(18,4)");
     }
 }

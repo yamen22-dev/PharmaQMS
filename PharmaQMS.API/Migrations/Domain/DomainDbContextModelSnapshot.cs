@@ -534,6 +534,9 @@ namespace PharmaQMS.API.Migrations.Domain
                     b.Property<decimal>("Max")
                         .HasColumnType("decimal(18,4)");
 
+                    b.Property<decimal?>("MeasuredValue")
+                        .HasColumnType("decimal(18,4)");
+
                     b.Property<decimal>("Min")
                         .HasColumnType("decimal(18,4)");
 

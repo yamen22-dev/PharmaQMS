@@ -24,4 +24,14 @@ public interface IQcTestService
 
     Task<Result<QcEligibleObjectsResponse>> GetEligibleObjectsAsync(
         CancellationToken ct = default);
+
+    Task<Result<QcTestDetailResponse>> GetDetailAsync(
+        int id,
+        CancellationToken ct = default);
+
+    Task<Result<SubmitQcTestResultsResponse>> SubmitResultsAsync(
+        int id,
+        SubmitQcTestResultsRequest request,
+        string userId,
+        CancellationToken ct = default);
 }

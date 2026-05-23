@@ -60,8 +60,12 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let t of filtered" class="border-t">
-          <td class="p-3">{{ testObjectLabel(t) }}</td>
+        <tr *ngFor="let t of filtered" class="border-t hover:bg-slate-50">
+          <td class="p-3">
+            <a [routerLink]="['/qc', t.id]" class="font-medium text-blue-700 hover:text-blue-900">
+              {{ testObjectLabel(t) }}
+            </a>
+          </td>
           <td class="p-3">{{ t.testObjectType }}</td>
           <td class="p-3">{{ t.createdAt | date: "dd-MM-yyyy" }}</td>
           <td class="p-3">{{ t.createdBy }}</td>

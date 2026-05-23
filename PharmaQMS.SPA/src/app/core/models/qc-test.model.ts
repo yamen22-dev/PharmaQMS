@@ -9,8 +9,41 @@ export interface QcTestSummary {
   status: QcResult;
 }
 
+export interface QcTestParameter {
+  id: number;
+  name: string;
+  unit: string;
+  min: number;
+  max: number;
+  measuredValue: number | null;
+  isWithinSpecification: boolean;
+}
+
 export interface QcTestDetail extends QcTestSummary {
-  notes?: string;
+  testObjectLabel: string;
+  parameters: QcTestParameter[];
+}
+
+export interface SubmitQcTestResultParameter {
+  parameterId: number;
+  measuredValue: number;
+}
+
+export interface SubmitQcTestResultsRequest {
+  password: string;
+  parameters: SubmitQcTestResultParameter[];
+}
+
+export interface SubmitQcTestResultsResponse {
+  id: number;
+  testObjectType: string;
+  testObjectId: number;
+  testObjectLabel: string;
+  status: QcResult;
+  message: string;
+  coaStarted: boolean;
+  notificationQueued: boolean;
+  parameters: QcTestParameter[];
 }
 
 export interface CreateQcTestParameter {

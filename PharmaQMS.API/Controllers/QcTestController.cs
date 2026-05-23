@@ -38,11 +38,11 @@ public sealed class QcTestController(IQcTestService service) : ControllerBase
     }
 
     [HttpGet("{id:int}")]
-    [ProducesResponseType(typeof(QcTestSummaryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(QcTestDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetById(int id, CancellationToken ct)
     {
-        var result = await service.GetByIdAsync(id, ct);
+        var result = await service.GetDetailAsync(id, ct);
         return result.IsSuccess ? Ok(result.Value) : NotFound();
     }
 
@@ -54,6 +54,27 @@ public sealed class QcTestController(IQcTestService service) : ControllerBase
     {
         var result = await service.GetAllAsync(query, ct);
         return result.IsSuccess ? Ok(result.Value) : BadRequest();
+    }
+
+    [Authorize(Roles = "QCAnalyst, QAManager")]
+    [HttpPost("{id:int}/results")]
+    [ProducesResponseType(typeof(SubmitQcTestResultsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> SubmitResults(
+        int id,
+        [FromBody] SubmitQcTestResultsRequest request,
+        CancellationToken ct)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return Unauthorized();
+        }
+
+        var result = await service.SubmitResultsAsync(id, request, userId, ct);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(new { error = result.Error });
     }
 
     [Authorize(Roles = "QCAnalyst, QAManager")]

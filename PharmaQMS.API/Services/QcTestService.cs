@@ -11,7 +11,10 @@ using System.Globalization;
 
 namespace PharmaQMS.Infrastructure.QualityControl;
 
-public sealed class QcTestService(DomainDbContext db, IAuthService authService) : IQcTestService
+public sealed class QcTestService(
+    DomainDbContext db,
+    IAuthService authService,
+    IAuditService auditService) : IQcTestService
 {
     public async Task<Result<QcTestSummaryResponse>> CreateAsync(
         CreateQcTestRequest request,
@@ -312,6 +315,157 @@ public sealed class QcTestService(DomainDbContext db, IAuthService authService) 
         });
     }
 
+    public async Task<Result<QcTestDetailResponse>> GetDetailAsync(
+        int id,
+        CancellationToken ct = default)
+    {
+        var test = await db.QcTests
+            .AsNoTracking()
+            .Include(t => t.Parameters)
+            .FirstOrDefaultAsync(t => t.Id == id, ct);
+
+        if (test is null)
+        {
+            return Result<QcTestDetailResponse>.Failure("QC test not found.");
+        }
+
+        var createdByUsername = await ResolveCreatedByUsernameAsync(test.CreatedBy, ct);
+
+        return Result<QcTestDetailResponse>.Success(new QcTestDetailResponse(
+            test.Id,
+            test.TestObjectType,
+            test.TestObjectId,
+            await ResolveTestObjectLabelAsync(test.TestObjectType, test.TestObjectId, ct),
+            test.Status,
+            test.CreatedAt,
+            createdByUsername,
+            test.Parameters
+                .OrderBy(parameter => parameter.Id)
+                .Select(ToParameterResponse)
+                .ToList()));
+    }
+
+    public async Task<Result<SubmitQcTestResultsResponse>> SubmitResultsAsync(
+        int id,
+        SubmitQcTestResultsRequest request,
+        string userId,
+        CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(request.Password))
+        {
+            return Result<SubmitQcTestResultsResponse>.Failure(
+                "Electronic signature rejected: password is required.");
+        }
+
+        var signatureValid = await authService.VerifyPasswordAsync(userId, request.Password, ct);
+        if (!signatureValid)
+        {
+            return Result<SubmitQcTestResultsResponse>.Failure(
+                "Electronic signature rejected: incorrect password.");
+        }
+
+        var test = await db.QcTests
+            .Include(t => t.Parameters)
+            .FirstOrDefaultAsync(t => t.Id == id, ct);
+
+        if (test is null)
+        {
+            return Result<SubmitQcTestResultsResponse>.Failure("QC test not found.");
+        }
+
+        if (test.Status is not QcTestStatus.InBehandeling and not QcTestStatus.InProgress)
+        {
+            return Result<SubmitQcTestResultsResponse>.Failure("QC test is already finalized.");
+        }
+
+        if (request.Parameters.Count != test.Parameters.Count)
+        {
+            return Result<SubmitQcTestResultsResponse>.Failure(
+                "All parameter results must be entered before saving.");
+        }
+
+        var parametersById = test.Parameters.ToDictionary(parameter => parameter.Id);
+
+        foreach (var submittedParameter in request.Parameters)
+        {
+            if (!parametersById.TryGetValue(submittedParameter.ParameterId, out var parameter))
+            {
+                return Result<SubmitQcTestResultsResponse>.Failure(
+                    $"Parameter {submittedParameter.ParameterId} not found in this test.");
+            }
+
+            parameter.MeasuredValue = submittedParameter.MeasuredValue;
+        }
+
+        if (test.Parameters.Any(parameter => !parameter.MeasuredValue.HasValue))
+        {
+            return Result<SubmitQcTestResultsResponse>.Failure(
+                "All parameter results must be entered before saving.");
+        }
+
+        var allWithinSpecification = test.Parameters.All(parameter =>
+            parameter.MeasuredValue.HasValue
+            && parameter.MeasuredValue.Value >= parameter.Min
+            && parameter.MeasuredValue.Value <= parameter.Max);
+
+        test.Status = allWithinSpecification
+            ? QcTestStatus.Approved
+            : QcTestStatus.Rejected;
+
+        var testObjectUpdated = await ApplyTestObjectStatusAsync(
+            test.TestObjectType,
+            test.TestObjectId,
+            allWithinSpecification,
+            ct);
+
+        if (!testObjectUpdated)
+        {
+            return Result<SubmitQcTestResultsResponse>.Failure(
+                "Test object could not be updated for this QC result.");
+        }
+
+        await db.SaveChangesAsync(ct);
+
+        await auditService.LogAsync(
+            entityName: nameof(QcTest),
+            entityId: test.Id.ToString(CultureInfo.InvariantCulture),
+            action: "QC_RESULTS_SUBMITTED",
+            oldValue: null,
+            newValue: $"TestObjectType={test.TestObjectType};TestObjectId={test.TestObjectId};Status={test.Status};WithinSpec={allWithinSpecification}",
+            performedByUserId: userId,
+            ct: ct);
+
+        if (!allWithinSpecification)
+        {
+            await auditService.LogAsync(
+                entityName: "Notification",
+                entityId: test.Id.ToString(CultureInfo.InvariantCulture),
+                action: "QA_MANAGER_ALERT",
+                oldValue: null,
+                newValue: "OOS detected. QA manager notification queued.",
+                performedByUserId: userId,
+                ct: ct);
+        }
+
+        var responseParameters = test.Parameters
+            .OrderBy(parameter => parameter.Id)
+            .Select(ToParameterResponse)
+            .ToList();
+
+        return Result<SubmitQcTestResultsResponse>.Success(new SubmitQcTestResultsResponse(
+            test.Id,
+            test.TestObjectType,
+            test.TestObjectId,
+            await ResolveTestObjectLabelAsync(test.TestObjectType, test.TestObjectId, ct),
+            test.Status,
+            allWithinSpecification
+                ? "Alle resultaten liggen binnen specificatie. CoA-generatie is gestart."
+                : "OOS gedetecteerd. Er dient een deviatierapport te worden aangemaakt (BR03).",
+            allWithinSpecification,
+            !allWithinSpecification,
+            responseParameters));
+    }
+
     private async Task<Dictionary<string, string>> ResolveCreatedByUsernamesAsync(
         IReadOnlyCollection<string> userIds,
         CancellationToken ct)
@@ -336,5 +490,97 @@ public sealed class QcTestService(DomainDbContext db, IAuthService authService) 
         {
             return userId;
         }
+    }
+
+    private async Task<string> ResolveTestObjectLabelAsync(
+        string testObjectType,
+        int testObjectId,
+        CancellationToken ct)
+    {
+        if (testObjectType.Equals("Lot", StringComparison.OrdinalIgnoreCase))
+        {
+            var lot = await db.Lots
+                .AsNoTracking()
+                .Where(lot => lot.Id == testObjectId)
+                .Select(lot => new { lot.Id, lot.LotNumber })
+                .FirstOrDefaultAsync(ct);
+
+            return lot is null
+                ? $"Lot #{testObjectId}"
+                : $"Lot #{lot.Id} - {lot.LotNumber}";
+        }
+
+        if (testObjectType.Equals("Batch", StringComparison.OrdinalIgnoreCase))
+        {
+            var batch = await db.Bmrs
+                .AsNoTracking()
+                .Select(bmr => new { bmr.BatchNumber })
+                .ToListAsync(ct);
+
+            var batchNumber = batch.FirstOrDefault(item => MatchesBatchId(item.BatchNumber, testObjectId))?.BatchNumber;
+            return string.IsNullOrWhiteSpace(batchNumber)
+                ? $"Batch #{testObjectId}"
+                : $"Batch #{testObjectId} - {batchNumber}";
+        }
+
+        return $"{testObjectType} #{testObjectId}";
+    }
+
+    private async Task<bool> ApplyTestObjectStatusAsync(
+        string testObjectType,
+        int testObjectId,
+        bool passed,
+        CancellationToken ct)
+    {
+        if (testObjectType.Equals("Lot", StringComparison.OrdinalIgnoreCase))
+        {
+            var lot = await db.Lots.FirstOrDefaultAsync(l => l.Id == testObjectId, ct);
+            if (lot is null)
+            {
+                return false;
+            }
+
+            lot.Status = passed ? LotStatus.Released : LotStatus.Rejected;
+            return true;
+        }
+
+        if (testObjectType.Equals("Batch", StringComparison.OrdinalIgnoreCase))
+        {
+            var bmrList = await db.Bmrs.ToListAsync(ct);
+            var matchingBmr = bmrList.FirstOrDefault(bmr => MatchesBatchId(bmr.BatchNumber, testObjectId));
+            if (matchingBmr is null)
+            {
+                return false;
+            }
+
+            matchingBmr.Status = passed ? BmrStatus.Completed : BmrStatus.Rejected;
+            return true;
+        }
+
+        return false;
+    }
+
+    private static QcTestParameterResponse ToParameterResponse(QcTestParameter parameter)
+    {
+        var measuredValue = parameter.MeasuredValue;
+        var withinSpecification = measuredValue.HasValue
+            && measuredValue.Value >= parameter.Min
+            && measuredValue.Value <= parameter.Max;
+
+        return new QcTestParameterResponse(
+            parameter.Id,
+            parameter.Name,
+            parameter.Unit,
+            parameter.Min,
+            parameter.Max,
+            parameter.MeasuredValue,
+            withinSpecification);
+    }
+
+    private static bool MatchesBatchId(string batchNumber, int testObjectId)
+    {
+        var idText = testObjectId.ToString(CultureInfo.InvariantCulture);
+        var paddedIdText = testObjectId.ToString("D3", CultureInfo.InvariantCulture);
+        return MatchesBatchId(batchNumber, idText, paddedIdText);
     }
 }

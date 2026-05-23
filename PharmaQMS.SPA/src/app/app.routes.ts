@@ -153,6 +153,14 @@ export const routes: Routes = [
             (m) => m.QcCreateComponent,
           ),
       },
+      {
+        path: ":id",
+        canActivate: [roleGuard(["QCAnalyst", "QAManager"], "/qc")],
+        loadComponent: () =>
+          import("./features/qc/qc-detail/qc-detail.component").then(
+            (m) => m.QcDetailComponent,
+          ),
+      },
     ],
   },
   {

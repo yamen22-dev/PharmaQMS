@@ -14,5 +14,7 @@ public class QcTestParameter
 
     public decimal Max { get; set; }
 
+    public decimal? MeasuredValue { get; set; }
+
     public QcTest? QcTest { get; set; }
 }
