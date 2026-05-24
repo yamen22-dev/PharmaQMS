@@ -15,6 +15,8 @@ namespace PlaywrightTests;
 public sealed class BmrServiceTests
 {
     [Fact]
+    [Trait("TestId", "UT-UC03-01")]
+    [Trait("TestId", "UT-UC03-02")]
     public async Task CreateAsync_WithApprovedMasterRecipeAndReleasedLot_CreatesBmrInProgressWithLinkedLotsAndAuditEntries()
     {
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -138,6 +140,7 @@ public sealed class BmrServiceTests
     }
 
     [Fact]
+    [Trait("TestId", "UT-UC03-01")]
     public async Task VerifyStepAsync_WithSelfVerificationRejectsAndWithQaManagerMarksStepVerifiedAndWritesAuditEntry()
     {
         var cancellationToken = TestContext.Current.CancellationToken;

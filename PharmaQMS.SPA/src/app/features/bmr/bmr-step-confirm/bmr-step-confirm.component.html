@@ -52,7 +52,7 @@
               Execution
             </button>
             <a
-              *ngIf="step.status === BmrStepStatus.AwaitingVerification"
+              *ngIf="step.status === BmrStepStatus.AwaitingVerification && canVerifySteps"
               [routerLink]="['/bmr', this.bmrId, 'steps', step.id, 'verify']"
               class="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-amber-700"
             style="color:white;">

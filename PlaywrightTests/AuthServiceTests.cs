@@ -1,5 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
@@ -27,6 +29,7 @@ public sealed class AuthServiceTests
     }
 
     [Fact]
+    [Trait("TestId", "UT-UC01-01")]
     public async Task LoginAsync_WithValidCredentials_ReturnsSuccessfulResultAndToken()
     {
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -107,6 +110,136 @@ public sealed class AuthServiceTests
         Assert.Equal(user.Id, jwt.Subject);
         Assert.Equal(TestEmail, jwt.Claims.First(claim => claim.Type == ClaimTypes.Email).Value);
         Assert.Equal(1, await dbContext.RefreshTokens.CountAsync(cancellationToken));
+    }
+
+    [Fact]
+    [Trait("TestId", "UT-UC01-02")]
+    public void ExpiredAccessToken_IsRejectedByValidation()
+    {
+        var config = CreateConfiguration();
+        var key = config["Jwt:Key"]!;
+        var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
+
+        var claims = new[]
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, "user-1"),
+            new Claim(ClaimTypes.Email, TestEmail)
+        };
+
+        var token = new JwtSecurityToken(
+            issuer: config["Jwt:Issuer"],
+            audience: config["Jwt:Audience"],
+            claims: claims,
+            notBefore: DateTime.UtcNow.AddMinutes(-10),
+            expires: DateTime.UtcNow.AddMinutes(-5),
+            signingCredentials: new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256));
+
+        var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+        var validationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidIssuer = config["Jwt:Issuer"],
+            ValidAudience = config["Jwt:Audience"],
+            IssuerSigningKey = signingKey,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        };
+
+        var handler = new JwtSecurityTokenHandler();
+
+        Assert.Throws<SecurityTokenExpiredException>(() => handler.ValidateToken(tokenString, validationParameters, out _));
+    }
+
+    [Fact]
+    [Trait("TestId", "UT-NFR02-01")]
+    public async Task RefreshTokenRotation_GeneratesNewTokenAndDeactivatesOld()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+
+        await using var connection = new SqliteConnection("Filename=:memory:");
+        await connection.OpenAsync(cancellationToken);
+
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddHttpContextAccessor();
+        services.AddSingleton<IConfiguration>(CreateConfiguration());
+        services.AddDbContext<AuthDbContext>(options => options.UseSqlite(connection));
+        services
+            .AddIdentity<AuthUser, IdentityRole>(options => { })
+            .AddEntityFrameworkStores<AuthDbContext>()
+            .AddDefaultTokenProviders();
+
+        using var provider = services.BuildServiceProvider();
+        using var scope = provider.CreateScope();
+
+        var dbContext = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
+        await dbContext.Database.EnsureCreatedAsync(cancellationToken);
+
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AuthUser>>();
+        var user = new AuthUser { UserName = TestEmail, Email = TestEmail };
+        var createResult = await userManager.CreateAsync(user, TestPassword);
+        Assert.True(createResult.Succeeded);
+
+        var authService = new AuthService(
+            userManager,
+            dbContext,
+            scope.ServiceProvider.GetRequiredService<ILogger<AuthService>>(),
+            scope.ServiceProvider.GetRequiredService<IConfiguration>(),
+            scope.ServiceProvider.GetRequiredService<IOptions<IdentityOptions>>());
+
+        var loginResult = await authService.LoginAsync(new LoginRequest { Email = TestEmail, Password = TestPassword }, cancellationToken);
+        Assert.True(loginResult.Succeeded);
+        var oldRefresh = loginResult.Response!.RefreshToken;
+
+        var tokenRecordBefore = await dbContext.RefreshTokens.SingleOrDefaultAsync(x => x.TokenHash == Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(oldRefresh))), cancellationToken);
+        Assert.NotNull(tokenRecordBefore);
+
+        var refreshResult = await authService.RefreshAsync(new RefreshTokenRequest { RefreshToken = oldRefresh }, cancellationToken);
+        Assert.True(refreshResult.Succeeded);
+        var newRefresh = refreshResult.Response!.RefreshToken;
+
+        var oldRecord = await dbContext.RefreshTokens.SingleAsync(x => x.TokenHash == tokenRecordBefore!.TokenHash, cancellationToken);
+        var newRecord = await dbContext.RefreshTokens.SingleAsync(x => x.TokenHash == Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(newRefresh))), cancellationToken);
+
+        Assert.NotNull(oldRecord.RevokedUtc);
+        Assert.Equal(newRecord.TokenHash, oldRecord.ReplacedByTokenHash);
+    }
+
+    [Fact]
+    [Trait("TestId", "UT-NFR04-01")]
+    public async Task StoredPassword_IsHashedNotPlaintext()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+
+        await using var connection = new SqliteConnection("Filename=:memory:");
+        await connection.OpenAsync(cancellationToken);
+
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddHttpContextAccessor();
+        services.AddSingleton<IConfiguration>(CreateConfiguration());
+        services.AddDbContext<AuthDbContext>(options => options.UseSqlite(connection));
+        services
+            .AddIdentity<AuthUser, IdentityRole>(options => { })
+            .AddEntityFrameworkStores<AuthDbContext>()
+            .AddDefaultTokenProviders();
+
+        using var provider = services.BuildServiceProvider();
+        using var scope = provider.CreateScope();
+
+        var dbContext = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
+        await dbContext.Database.EnsureCreatedAsync(cancellationToken);
+
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AuthUser>>();
+        var user = new AuthUser { UserName = TestEmail, Email = TestEmail };
+        var createResult = await userManager.CreateAsync(user, TestPassword);
+        Assert.True(createResult.Succeeded);
+
+        var stored = await dbContext.Users.SingleAsync(u => u.Email == TestEmail, cancellationToken);
+        Assert.False(string.Equals(stored.PasswordHash, TestPassword, StringComparison.Ordinal));
+        Assert.DoesNotContain(TestPassword, stored.PasswordHash, StringComparison.Ordinal);
     }
 
     [Fact]
