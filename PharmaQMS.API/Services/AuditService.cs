@@ -1,5 +1,9 @@
+using Microsoft.EntityFrameworkCore;
 using PharmaQMS.API.Data;
+using PharmaQMS.API.Models.DTOs.Audit;
+using PharmaQMS.API.Models.DTOs.Common;
 using PharmaQMS.API.Models.Entities;
+using PharmaQMS.API.Services.Interfaces;
 
 namespace PharmaQMS.API.Services;
 
@@ -44,5 +48,23 @@ public sealed class AuditService : IAuditService
 
         _db.AuditLogs.Add(entry);
         await _db.SaveChangesAsync(ct).ConfigureAwait(false);
+    }
+
+    public async Task<IReadOnlyList<AuditLogResponse>> GetAllAsync(CancellationToken ct = default)
+    {
+        return await _db.AuditLogs
+            .OrderByDescending(x => x.Tijdstip)
+            .Select(x => new AuditLogResponse(
+                x.Id,
+                x.Tijdstip,
+                x.GebruikerId,
+                x.Actie,
+                x.EntiteitType,
+                x.EntiteitId,
+                x.OudWaarde,
+                x.NieuweWaarde,
+                x.IPAdres))
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
     }
 }

@@ -1,4 +1,6 @@
-namespace PharmaQMS.API.Services;
+using PharmaQMS.API.Models.DTOs.Audit;
+
+namespace PharmaQMS.API.Services.Interfaces;
 
 public interface IAuditService
 {
@@ -10,4 +12,6 @@ public interface IAuditService
         string? newValue,
         string performedByUserId,
         CancellationToken ct = default);
+
+    Task<IReadOnlyList<AuditLogResponse>> GetAllAsync(CancellationToken ct = default);
 }

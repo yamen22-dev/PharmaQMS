@@ -21,6 +21,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: "audit-trail",
+    canActivate: [authGuard, roleGuard(["QAManager", "Viewer"], "/dashboard")],
+    loadComponent: () =>
+      import("./features/audit-trail/audit-trail.component").then(
+        (m) => m.AuditTrailComponent,
+      ),
+  },
+  {
     path: "raw-materials/new",
     canActivate: [authGuard],
     loadComponent: () =>
