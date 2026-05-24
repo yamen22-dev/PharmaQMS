@@ -39,6 +39,11 @@ public sealed class AuditTrailInterceptor : SaveChangesInterceptor
         {
             if (entry.Entity is AuditLog)
             {
+                if (entry.State is EntityState.Modified or EntityState.Deleted)
+                {
+                    throw new InvalidOperationException("AuditLog records zijn onwijzigbaar en kunnen niet worden aangepast of verwijderd.");
+                }
+
                 continue;
             }
 

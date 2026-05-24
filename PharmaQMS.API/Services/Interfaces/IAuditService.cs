@@ -13,5 +13,14 @@ public interface IAuditService
         string performedByUserId,
         CancellationToken ct = default);
 
+    Task UpdateAsync(
+        long auditId,
+        AuditLogUpdateRequest request,
+        CancellationToken ct = default);
+
+    Task DeleteAsync(
+        long auditId,
+        CancellationToken ct = default);
+
     Task<IReadOnlyList<AuditLogResponse>> GetAllAsync(CancellationToken ct = default);
 }

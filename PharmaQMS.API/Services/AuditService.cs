@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using PharmaQMS.API.Data;
 using PharmaQMS.API.Models.DTOs.Audit;
-using PharmaQMS.API.Models.DTOs.Common;
 using PharmaQMS.API.Models.Entities;
 using PharmaQMS.API.Services.Interfaces;
 
@@ -47,6 +46,37 @@ public sealed class AuditService : IAuditService
         };
 
         _db.AuditLogs.Add(entry);
+        await _db.SaveChangesAsync(ct).ConfigureAwait(false);
+    }
+
+    public async Task UpdateAsync(
+        long auditId,
+        AuditLogUpdateRequest request,
+        CancellationToken ct = default)
+    {
+        var auditLog = await _db.AuditLogs
+            .FirstOrDefaultAsync(x => x.Id == auditId, ct)
+            .ConfigureAwait(false)
+            ?? throw new KeyNotFoundException($"AuditLog met id {auditId} niet gevonden.");
+
+        auditLog.Tijdstip = request.Tijdstip;
+        auditLog.GebruikerId = request.GebruikerId;
+        auditLog.Actie = request.Actie;
+        auditLog.EntiteitType = request.EntiteitType;
+        auditLog.OudWaarde = request.OudWaarde;
+        auditLog.NieuweWaarde = request.NieuweWaarde;
+
+        await _db.SaveChangesAsync(ct).ConfigureAwait(false);
+    }
+
+    public async Task DeleteAsync(long auditId, CancellationToken ct = default)
+    {
+        var auditLog = await _db.AuditLogs
+            .FirstOrDefaultAsync(x => x.Id == auditId, ct)
+            .ConfigureAwait(false)
+            ?? throw new KeyNotFoundException($"AuditLog met id {auditId} niet gevonden.");
+
+        _db.AuditLogs.Remove(auditLog);
         await _db.SaveChangesAsync(ct).ConfigureAwait(false);
     }
 
