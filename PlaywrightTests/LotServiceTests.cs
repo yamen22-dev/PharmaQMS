@@ -123,7 +123,7 @@ public sealed class LotServiceTests
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
             () => lotService.CreateLotAsync(rawMaterial.Id, request, "user-123", cancellationToken));
 
-        Assert.Equal("Dit lotnummer bestaat al voor de geselecteerde grondstof.", exception.Message);
+        Assert.Equal("This lot number already exists for the selected raw material.", exception.Message);
         Assert.Equal(1, await dbContext.Lots.CountAsync(cancellationToken));
         Assert.Equal(1, await dbContext.AuditLogs.CountAsync(cancellationToken));
     }

@@ -43,9 +43,9 @@ export class LotDetailComponent implements OnInit {
 
   statusLabel(status: LotStatus): string {
     const map: Record<LotStatus, string> = {
-      Quarantine: "Quarantaine",
-      Released: "Goedgekeurd",
-      Rejected: "Afgekeurd",
+      Quarantine: "Quarantine",
+      Released: "Released",
+      Rejected: "Rejected",
     };
     return map[status];
   }

@@ -352,55 +352,55 @@ namespace PharmaQMS.API.Migrations.Domain
                         new
                         {
                             Id = new Guid("33333333-0000-0000-0000-000000000001"),
-                            ExpectedFields = "Gewicht (kg)",
+                            ExpectedFields = "Weight (kg)",
                             IsCritical = true,
                             MasterRecipeId = new Guid("22222222-0000-0000-0000-000000000001"),
-                            StepName = "Grondstoffen wegen",
+                            StepName = "Weigh raw materials",
                             StepNumber = 1
                         },
                         new
                         {
                             Id = new Guid("33333333-0000-0000-0000-000000000002"),
-                            ExpectedFields = "Mengtijd (min)",
+                            ExpectedFields = "Mix time (min)",
                             IsCritical = false,
                             MasterRecipeId = new Guid("22222222-0000-0000-0000-000000000001"),
-                            StepName = "Mengen",
+                            StepName = "Mixing",
                             StepNumber = 2
                         },
                         new
                         {
                             Id = new Guid("33333333-0000-0000-0000-000000000003"),
-                            ExpectedFields = "Temperatuur (°C); Tijd (min)",
+                            ExpectedFields = "Temperature (°C); Time (min)",
                             IsCritical = true,
                             MasterRecipeId = new Guid("22222222-0000-0000-0000-000000000001"),
-                            StepName = "Granuleren",
+                            StepName = "Granulation",
                             StepNumber = 3
                         },
                         new
                         {
                             Id = new Guid("33333333-0000-0000-0000-000000000004"),
-                            ExpectedFields = "Vochtigheid (%)",
+                            ExpectedFields = "Moisture (%)",
                             IsCritical = false,
                             MasterRecipeId = new Guid("22222222-0000-0000-0000-000000000001"),
-                            StepName = "Drogen",
+                            StepName = "Drying",
                             StepNumber = 4
                         },
                         new
                         {
                             Id = new Guid("33333333-0000-0000-0000-000000000005"),
-                            ExpectedFields = "Vulgewicht (mg)",
+                            ExpectedFields = "Fill weight (mg)",
                             IsCritical = true,
                             MasterRecipeId = new Guid("22222222-0000-0000-0000-000000000001"),
-                            StepName = "Capsules vullen",
+                            StepName = "Capsule filling",
                             StepNumber = 5
                         },
                         new
                         {
                             Id = new Guid("33333333-0000-0000-0000-000000000006"),
-                            ExpectedFields = "Resultaat",
+                            ExpectedFields = "Result",
                             IsCritical = true,
                             MasterRecipeId = new Guid("22222222-0000-0000-0000-000000000001"),
-                            StepName = "In-process kwaliteitscheck",
+                            StepName = "In-process quality check",
                             StepNumber = 6
                         },
                         new

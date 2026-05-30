@@ -35,7 +35,7 @@ export class QcDetailComponent implements OnInit {
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get("id"));
     if (!Number.isFinite(id)) {
-      this.errorMessage = "QC-test kon niet worden geladen.";
+      this.errorMessage = "QC test could not be loaded.";
       this.loading = false;
       return;
     }
@@ -82,7 +82,7 @@ export class QcDetailComponent implements OnInit {
         this.submitting = false;
         this.errorMessage =
           error?.error?.error ??
-          "Resultaten opslaan is mislukt. Controleer de invoer en probeer opnieuw.";
+          "Failed to save results. Check the input and try again.";
         this.cdr.detectChanges();
       },
     });
@@ -106,10 +106,10 @@ export class QcDetailComponent implements OnInit {
   resultLabel(parameter: QcTestParameter): string {
     const measuredValue = this.currentMeasuredValue(parameter);
     if (measuredValue == null) {
-      return "Nog niet ingevuld";
+      return "Not entered yet";
     }
 
-    return this.isWithinSpecification(parameter) ? "Geslaagd" : "OOS";
+    return this.isWithinSpecification(parameter) ? "Passed" : "OOS";
   }
 
   resultClass(parameter: QcTestParameter): string {
@@ -139,14 +139,14 @@ export class QcDetailComponent implements OnInit {
 
   get overallStatusLabel(): string {
     if (!this.test) {
-      return "In behandeling";
+      return "In progress";
     }
 
     if (!this.areAllValuesEntered()) {
-      return "In behandeling";
+      return "In progress";
     }
 
-    return this.allValuesWithinSpecification() ? "Goedgekeurd" : "OOS";
+    return this.allValuesWithinSpecification() ? "Approved" : "OOS";
   }
 
   get overallStatusClass(): string {
@@ -180,7 +180,7 @@ export class QcDetailComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: () => {
-        this.errorMessage = "QC-test kon niet worden geladen.";
+        this.errorMessage = "QC test could not be loaded.";
         this.loading = false;
         this.cdr.detectChanges();
       },

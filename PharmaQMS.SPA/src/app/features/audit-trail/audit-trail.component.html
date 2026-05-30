@@ -4,27 +4,26 @@
       <p class="eyebrow">Audit Trail</p>
       <h1 style="color: white">Audit Trail overview</h1>
       <p class="subtitle">
-        Raadpleeg chronologisch alle geregistreerde events en bekijk de oude en
-        nieuwe waarden per record.
+        Browse chronological recorded events and view old and new values per record.
       </p>
     </div>
   </header>
 
-  <section class="filter-panel">
+    <section class="filter-panel">
     <label>
-      <span>Zoeken</span>
+      <span>Search</span>
       <input
         type="text"
-        placeholder="Gebruiker, entiteit, record of waarde..."
+        placeholder="User, entity, record or value..."
         [(ngModel)]="searchQuery"
         (input)="applyFilters()"
       />
     </label>
 
     <label>
-      <span>Entiteitstype</span>
+      <span>Entity type</span>
       <select [(ngModel)]="selectedEntityType" (change)="applyFilters()">
-        <option value="">Alle types</option>
+        <option value="">All types</option>
         <option *ngFor="let entityType of entityTypes" [value]="entityType">
           {{ entityType }}
         </option>
@@ -32,9 +31,9 @@
     </label>
 
     <label>
-      <span>Actie</span>
+      <span>Action</span>
       <select [(ngModel)]="selectedAction" (change)="applyFilters()">
-        <option value="">Alle acties</option>
+        <option value="">All actions</option>
         <option *ngFor="let action of actions" [value]="action">
           {{ action }}
         </option>
@@ -42,17 +41,17 @@
     </label>
 
     <label>
-      <span>Van</span>
+      <span>From</span>
       <input type="date" [(ngModel)]="fromDate" (change)="applyFilters()" />
     </label>
 
     <label>
-      <span>Tot</span>
+      <span>To</span>
       <input type="date" [(ngModel)]="toDate" (change)="applyFilters()" />
     </label>
 
     <label>
-      <span>Per pagina</span>
+      <span>Per page</span>
       <select [(ngModel)]="pageSize" (change)="changePageSize(pageSize)">
         <option [ngValue]="5">5</option>
         <option [ngValue]="10">10</option>
@@ -65,24 +64,24 @@
   <section class="content-grid">
     <div class="table-card">
       <div class="table-header">
-        <h2>Resultaten</h2>
+        <h2>Results</h2>
         <p>{{ filteredEntries.length }} records</p>
       </div>
 
-      <div *ngIf="loading" class="state-box">Auditgegevens laden...</div>
+      <div *ngIf="loading" class="state-box">Loading audit data...</div>
 
       <div *ngIf="!loading && filteredEntries.length === 0" class="state-box">
-        Geen records gevonden voor de opgegeven filtercriteria.
+        No records found for the given filter criteria.
       </div>
 
       <div *ngIf="!loading && filteredEntries.length > 0" class="table-wrapper">
         <table>
           <thead>
             <tr>
-              <th>Tijdstip</th>
-              <th>Gebruiker</th>
-              <th>Actie</th>
-              <th>Entiteit</th>
+              <th>Timestamp</th>
+              <th>User</th>
+              <th>Action</th>
+              <th>Entity</th>
               <th>Record ID</th>
               <th>Details</th>
             </tr>
@@ -110,7 +109,7 @@
                   class="link-button"
                   (click)="selectEntry(entry)"
                 >
-                  Bekijken
+                  View
                 </button>
               </td>
             </tr>
@@ -122,7 +121,7 @@
         *ngIf="!loading && filteredEntries.length > 0"
         class="pagination-bar"
       >
-        <p>{{ pageStart }}-{{ pageEnd }} van {{ filteredEntries.length }}</p>
+        <p>{{ pageStart }}-{{ pageEnd }} of {{ filteredEntries.length }}</p>
 
         <div class="pagination-actions">
           <button
@@ -131,11 +130,11 @@
             (click)="changePage(currentPage - 1)"
             [disabled]="currentPage === 1"
           >
-            Vorige
+            Previous
           </button>
 
           <span class="pagination-page"
-            >Pagina {{ currentPage }} van {{ totalPages }}</span
+            >Page {{ currentPage }} of {{ totalPages }}</span
           >
 
           <button
@@ -144,7 +143,7 @@
             (click)="changePage(currentPage + 1)"
             [disabled]="currentPage === totalPages"
           >
-            Volgende
+            Next
           </button>
         </div>
       </div>
@@ -158,23 +157,23 @@
 
       <dl>
         <div>
-          <dt>Tijdstip</dt>
+          <dt>Timestamp</dt>
           <dd>{{ entry.tijdstip | date: "dd-MM-yyyy HH:mm" }}</dd>
         </div>
         <div>
-          <dt>Gebruiker</dt>
+          <dt>User</dt>
           <dd>
             {{ entry.gebruikerNaam }}<span>{{ entry.gebruikerId }}</span>
           </dd>
         </div>
         <div>
-          <dt>Actie</dt>
+          <dt>Action</dt>
           <dd>
             <span [class]="badgeClass(entry.actie)">{{ entry.actie }}</span>
           </dd>
         </div>
         <div>
-          <dt>Entiteit</dt>
+          <dt>Entity</dt>
           <dd>{{ entry.entiteitType }}</dd>
         </div>
         <div>
@@ -182,18 +181,18 @@
           <dd class="mono">{{ entry.entiteitId }}</dd>
         </div>
         <div>
-          <dt>IP-adres</dt>
-          <dd class="mono">{{ entry.ipAdres || "Onbekend" }}</dd>
+          <dt>IP address</dt>
+          <dd class="mono">{{ entry.ipAdres || "Unknown" }}</dd>
         </div>
       </dl>
 
       <div class="value-block">
-        <h3>Oude waarde</h3>
+        <h3>Old value</h3>
         <pre>{{ formatValue(entry.oudWaarde) }}</pre>
       </div>
 
       <div class="value-block">
-        <h3>Nieuwe waarde</h3>
+        <h3>New value</h3>
         <pre>{{ formatValue(entry.nieuweWaarde) }}</pre>
       </div>
     </aside>

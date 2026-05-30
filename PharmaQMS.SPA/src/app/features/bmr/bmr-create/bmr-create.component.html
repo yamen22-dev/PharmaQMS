@@ -1,9 +1,9 @@
 <div class="min-h-screen bg-slate-50 px-4 py-4 text-slate-800">
   <div class="mx-auto max-w-6xl">
-    <button (click)="back()" class="mb-4 text-sm text-indigo-500">BMR &rsaquo; Nieuw BMR</button>
+    <button (click)="back()" class="mb-4 text-sm text-indigo-500">BMR › New BMR</button>
 
     <h1 class="mb-4 text-2xl font-semibold text-slate-900">
-      Batch Manufacturing Record aanmaken
+      Create Batch Manufacturing Record
     </h1>
 
     <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
@@ -14,7 +14,7 @@
               for="masterRecipe"
               class="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500"
             >
-              Masterrecept
+              Master recipe
             </label>
             <select
               id="masterRecipe"
@@ -32,7 +32,7 @@
               for="batchSize"
               class="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500"
             >
-              Batchgrootte (kg)
+              Batch size (kg)
             </label>
             <input
               id="batchSize"
@@ -47,7 +47,7 @@
               for="plannedBmrDate"
               class="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500"
             >
-              Geplande startdatum
+              Planned start date
             </label>
             <input
               id="plannedBmrDate"
@@ -63,7 +63,7 @@
               for="productionLine"
               class="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500"
             >
-              Productielijn
+              Production line
             </label>
             <select
               id="productionLine"
@@ -79,14 +79,14 @@
 
         <div class="mt-4">
           <h2 class="mb-3 text-base font-semibold text-slate-900">
-            Gekoppelde grondstoflots
+            Linked raw material lots
           </h2>
 
           <fieldset style="border: none; padding: 0; margin: 0">
             <legend class="mb-3 text-sm font-medium text-slate-900">
-              Gekoppelde grondstoflots
+              Linked raw material lots
               <span class="text-xs font-normal text-slate-500"
-                >(minstens één vereist)</span
+                >(at least one required)</span
               >
             </legend>
 
@@ -126,8 +126,8 @@
               [class.text-slate-500]="selectedLotIds.size > 0"
               [class.text-red-500]="selectedLotIds.size === 0"
             >
-              {{ selectedLotIds.size }} van {{ availableLots.length }} lots
-              geselecteerd
+              {{ selectedLotIds.size }} of {{ availableLots.length }} lots
+              selected
             </p>
           </fieldset>
 
@@ -138,7 +138,7 @@
                 (click)="cancel()"
                 class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
               >
-                Annuleren
+                Cancel
               </button>
 
               <button
@@ -147,7 +147,7 @@
                 [disabled]="!isFormValid || isSubmitting"
                 class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                BMR aanmaken &amp; starten
+                Create &amp; start BMR
               </button>
             </div>
           </div>

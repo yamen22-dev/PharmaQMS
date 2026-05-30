@@ -28,7 +28,7 @@ export class BmrDetailComponent implements OnInit {
     const id = this.route.snapshot.paramMap.get("id");
 
     if (!id) {
-      this.errorMessage = "Ongeldige BMR-id.";
+      this.errorMessage = "Invalid BMR id.";
       this.isLoading = false;
       return;
     }
@@ -42,13 +42,13 @@ export class BmrDetailComponent implements OnInit {
     }
     switch (status) {
       case BmrStatus.InProgress:
-        return "In uitvoering";
+        return "In progress";
       case BmrStatus.InQc:
         return "In QC";
       case BmrStatus.Completed:
-        return "Voltooid";
+        return "Completed";
       case BmrStatus.Rejected:
-        return "Afgekeurd";
+        return "Rejected";
       default:
         return status;
     }
@@ -74,7 +74,7 @@ export class BmrDetailComponent implements OnInit {
       return "-";
     }
 
-    return new Date(value).toLocaleString("nl-NL");
+    return new Date(value).toLocaleString("en-GB");
   }
 
   get totalSteps(): number {
@@ -104,10 +104,10 @@ export class BmrDetailComponent implements OnInit {
       },
       error: (error) => {
         if (error?.status === 404) {
-          this.errorMessage = "BMR niet gevonden.";
+          this.errorMessage = "BMR not found.";
         } else {
           this.errorMessage =
-            "Het BMR-detail kon niet worden geladen. Probeer het later opnieuw.";
+            "Could not load BMR details. Please try again later.";
         }
 
         this.isLoading = false;

@@ -55,7 +55,7 @@ export class QcCreateComponent implements OnInit {
       error: () => {
         this.loading = false;
         this.errorMessage =
-          "Testobjecten konden niet worden geladen. Probeer het later opnieuw.";
+          "Test objects could not be loaded. Please try again later.";
         this.cdr.detectChanges();
       },
     });
@@ -139,7 +139,7 @@ export class QcCreateComponent implements OnInit {
         this.submitting = false;
         this.errorMessage =
           error?.error?.error ??
-          "QC-test aanmaken is mislukt. Controleer de invoer.";
+          "Failed to create QC test. Check the input.";
         this.cdr.detectChanges();
       },
     });

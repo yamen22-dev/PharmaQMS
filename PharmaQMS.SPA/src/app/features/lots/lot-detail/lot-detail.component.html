@@ -15,25 +15,25 @@
         [routerLink]="['/lots', lot.id, 'status']"
         class="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors bg-white"
       style="color:black;">
-        Status wijzigen
+        Change status
       </a>
     </div>
   </div>
 </div>
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6" *ngIf="lot; else loadingTpl">
   <div class="bg-white border border-gray-200 rounded-lg p-6">
-    <h2 class="text-base font-semibold text-gray-900 mb-4">Lotgegevens</h2>
+    <h2 class="text-base font-semibold text-gray-900 mb-4">Lot details</h2>
     <dl class="space-y-3">
       <div class="flex justify-between text-sm">
-        <dt class="text-gray-500">Lotnummer</dt>
+        <dt class="text-gray-500">Lot number</dt>
         <dd class="font-medium text-gray-900">{{ lot.lotNumber }}</dd>
       </div>
       <div class="flex justify-between text-sm border-t border-gray-100 pt-3">
-        <dt class="text-gray-500">Grondstof</dt>
+        <dt class="text-gray-500">Raw material</dt>
         <dd class="font-medium text-gray-900">{{ lot.rawMaterialName }}</dd>
       </div>
       <div class="flex justify-between text-sm border-t border-gray-100 pt-3">
-        <dt class="text-gray-500">Leverancier</dt>
+        <dt class="text-gray-500">Supplier</dt>
         <dd class="font-medium text-gray-900">{{ lot.supplier }}</dd>
       </div>
       <div class="flex justify-between text-sm border-t border-gray-100 pt-3">
@@ -41,11 +41,11 @@
         <dd class="font-medium text-gray-900">{{ lot.pharmaceuticalApi }}</dd>
       </div>
       <div class="flex justify-between text-sm border-t border-gray-100 pt-3">
-        <dt class="text-gray-500">Hoeveelheid</dt>
+        <dt class="text-gray-500">Quantity</dt>
         <dd class="font-medium text-gray-900">{{ lot.quantity }} {{ lot.unit }}</dd>
       </div>
       <div class="flex justify-between text-sm border-t border-gray-100 pt-3">
-        <dt class="text-gray-500">Ontvangstdatum</dt>
+        <dt class="text-gray-500">Received date</dt>
         <dd class="font-medium text-gray-900">
           {{ lot.receivedDateUtc | date:'dd-MM-yyyy' }}
         </dd>
@@ -80,6 +80,6 @@
 </div>
 
 <ng-template #loadingTpl>
-  <p *ngIf="loading" class="text-sm text-gray-500 mt-4">Laden...</p>
-  <p *ngIf="!loading" class="text-sm text-red-500 mt-4">Lot niet gevonden.</p>
+  <p *ngIf="loading" class="text-sm text-gray-500 mt-4">Loading...</p>
+  <p *ngIf="!loading" class="text-sm text-red-500 mt-4">Lot not found.</p>
 </ng-template>

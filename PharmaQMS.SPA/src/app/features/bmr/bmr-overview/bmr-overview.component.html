@@ -29,7 +29,7 @@
 
       <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <div class="text-2xl font-semibold text-blue-600">{{ inProgress }}</div>
-          <div class="text-sm text-slate-500">In uitvoering</div>
+          <div class="text-sm text-slate-500">In progress</div>
         </div>
 
         <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -39,12 +39,12 @@
 
         <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <div class="text-2xl font-semibold text-lime-700">{{ completed }}</div>
-          <div class="text-sm text-slate-500">Voltooid</div>
+          <div class="text-sm text-slate-500">Completed</div>
         </div>
 
         <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <div class="text-2xl font-semibold text-red-600">{{ rejected }}</div>
-          <div class="text-sm text-slate-500">Afgekeurd</div>
+          <div class="text-sm text-slate-500">Rejected</div>
         </div>
     </div>
 
@@ -90,7 +90,7 @@
             [(ngModel)]="selectedStatus"
             class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 md:w-48"
           >
-              <option [ngValue]="'all'">Alle statussen</option>
+              <option [ngValue]="'all'">All statuses</option>
               <option [ngValue]="BmrStatus.InProgress">In progress</option>
               <option [ngValue]="BmrStatus.InQc">In QC</option>
               <option [ngValue]="BmrStatus.Completed">Completed</option>

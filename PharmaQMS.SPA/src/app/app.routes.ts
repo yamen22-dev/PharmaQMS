@@ -86,7 +86,7 @@ export const routes: Routes = [
     ],
   },
   {
-    // Lot aanmaken vanuit grondstof-context
+    // Create lot from raw-material context
     path: "raw-materials/:rawMaterialId/lots/new",
     canActivate: [
       authGuard,

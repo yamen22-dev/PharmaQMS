@@ -202,17 +202,17 @@ public class DomainDbContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasData(
-                new MasterRecipeStep { Id = Guid.Parse("33333333-0000-0000-0000-000000000001"), MasterRecipeId = Guid.Parse("22222222-0000-0000-0000-000000000001"), StepNumber = 1, StepName = "Grondstoffen wegen", IsCritical = true, ExpectedFields = "Gewicht (kg)" },
-                new MasterRecipeStep { Id = Guid.Parse("33333333-0000-0000-0000-000000000002"), MasterRecipeId = Guid.Parse("22222222-0000-0000-0000-000000000001"), StepNumber = 2, StepName = "Mengen", IsCritical = false, ExpectedFields = "Mengtijd (min)" },
-                new MasterRecipeStep { Id = Guid.Parse("33333333-0000-0000-0000-000000000003"), MasterRecipeId = Guid.Parse("22222222-0000-0000-0000-000000000001"), StepNumber = 3, StepName = "Granuleren", IsCritical = true, ExpectedFields = "Temperatuur (°C); Tijd (min)" },
-                new MasterRecipeStep { Id = Guid.Parse("33333333-0000-0000-0000-000000000004"), MasterRecipeId = Guid.Parse("22222222-0000-0000-0000-000000000001"), StepNumber = 4, StepName = "Drogen", IsCritical = false, ExpectedFields = "Vochtigheid (%)" },
-                new MasterRecipeStep { Id = Guid.Parse("33333333-0000-0000-0000-000000000005"), MasterRecipeId = Guid.Parse("22222222-0000-0000-0000-000000000001"), StepNumber = 5, StepName = "Capsules vullen", IsCritical = true, ExpectedFields = "Vulgewicht (mg)" },
-                new MasterRecipeStep { Id = Guid.Parse("33333333-0000-0000-0000-000000000006"), MasterRecipeId = Guid.Parse("22222222-0000-0000-0000-000000000001"), StepNumber = 6, StepName = "In-process kwaliteitscheck", IsCritical = true, ExpectedFields = "Resultaat" },
+                new MasterRecipeStep { Id = Guid.Parse("33333333-0000-0000-0000-000000000001"), MasterRecipeId = Guid.Parse("22222222-0000-0000-0000-000000000001"), StepNumber = 1, StepName = "Weigh raw materials", IsCritical = true, ExpectedFields = "Weight (kg)" },
+                new MasterRecipeStep { Id = Guid.Parse("33333333-0000-0000-0000-000000000002"), MasterRecipeId = Guid.Parse("22222222-0000-0000-0000-000000000001"), StepNumber = 2, StepName = "Mixing", IsCritical = false, ExpectedFields = "Mix time (min)" },
+                new MasterRecipeStep { Id = Guid.Parse("33333333-0000-0000-0000-000000000003"), MasterRecipeId = Guid.Parse("22222222-0000-0000-0000-000000000001"), StepNumber = 3, StepName = "Granulation", IsCritical = true, ExpectedFields = "Temperature (°C); Time (min)" },
+                new MasterRecipeStep { Id = Guid.Parse("33333333-0000-0000-0000-000000000004"), MasterRecipeId = Guid.Parse("22222222-0000-0000-0000-000000000001"), StepNumber = 4, StepName = "Drying", IsCritical = false, ExpectedFields = "Moisture (%)" },
+                new MasterRecipeStep { Id = Guid.Parse("33333333-0000-0000-0000-000000000005"), MasterRecipeId = Guid.Parse("22222222-0000-0000-0000-000000000001"), StepNumber = 5, StepName = "Capsule filling", IsCritical = true, ExpectedFields = "Fill weight (mg)" },
+                new MasterRecipeStep { Id = Guid.Parse("33333333-0000-0000-0000-000000000006"), MasterRecipeId = Guid.Parse("22222222-0000-0000-0000-000000000001"), StepNumber = 6, StepName = "In-process quality check", IsCritical = true, ExpectedFields = "Result" },
 
-                new MasterRecipeStep { Id = Guid.Parse("33333333-0000-0000-0000-000000000007"), MasterRecipeId = Guid.Parse("22222222-0000-0000-0000-000000000002"), StepNumber = 1, StepName = "Grondstoffen wegen", IsCritical = true, ExpectedFields = "Gewicht (kg)" },
-                new MasterRecipeStep { Id = Guid.Parse("33333333-0000-0000-0000-000000000008"), MasterRecipeId = Guid.Parse("22222222-0000-0000-0000-000000000002"), StepNumber = 2, StepName = "Mengen", IsCritical = false, ExpectedFields = "Mengtijd (min)" },
-                new MasterRecipeStep { Id = Guid.Parse("33333333-0000-0000-0000-000000000009"), MasterRecipeId = Guid.Parse("22222222-0000-0000-0000-000000000002"), StepNumber = 3, StepName = "Capsules vullen", IsCritical = true, ExpectedFields = "Vulgewicht (mg)" },
-                new MasterRecipeStep { Id = Guid.Parse("33333333-0000-0000-0000-000000000010"), MasterRecipeId = Guid.Parse("22222222-0000-0000-0000-000000000002"), StepNumber = 4, StepName = "In-process kwaliteitscheck", IsCritical = true, ExpectedFields = "Resultaat" }
+                new MasterRecipeStep { Id = Guid.Parse("33333333-0000-0000-0000-000000000007"), MasterRecipeId = Guid.Parse("22222222-0000-0000-0000-000000000002"), StepNumber = 1, StepName = "Weigh raw materials", IsCritical = true, ExpectedFields = "Weight (kg)" },
+                new MasterRecipeStep { Id = Guid.Parse("33333333-0000-0000-0000-000000000008"), MasterRecipeId = Guid.Parse("22222222-0000-0000-0000-000000000002"), StepNumber = 2, StepName = "Mixing", IsCritical = false, ExpectedFields = "Mix time (min)" },
+                new MasterRecipeStep { Id = Guid.Parse("33333333-0000-0000-0000-000000000009"), MasterRecipeId = Guid.Parse("22222222-0000-0000-0000-000000000002"), StepNumber = 3, StepName = "Capsule filling", IsCritical = true, ExpectedFields = "Fill weight (mg)" },
+                new MasterRecipeStep { Id = Guid.Parse("33333333-0000-0000-0000-000000000010"), MasterRecipeId = Guid.Parse("22222222-0000-0000-0000-000000000002"), StepNumber = 4, StepName = "In-process quality check", IsCritical = true, ExpectedFields = "Result" }
             );
         });
 
@@ -226,8 +226,8 @@ public class DomainDbContext : DbContext
 
             entity.HasIndex(x => x.LineName);
             entity.HasData(
-                new ProductionLine { Id = Guid.Parse("11111111-0000-0000-0000-000000000001"), LineName = "Lijn A", Location = "Hal 1", IsActive = true },
-                new ProductionLine { Id = Guid.Parse("11111111-0000-0000-0000-000000000002"), LineName = "Lijn B", Location = "Hal 1", IsActive = true },
+                new ProductionLine { Id = Guid.Parse("11111111-0000-0000-0000-000000000001"), LineName = "Line A", Location = "Hall 1", IsActive = true },
+                new ProductionLine { Id = Guid.Parse("11111111-0000-0000-0000-000000000002"), LineName = "Line B", Location = "Hall 1", IsActive = true },
                 new ProductionLine { Id = Guid.Parse("11111111-0000-0000-0000-000000000003"), LineName = "Lijn C", Location = "Hal 2", IsActive = true }
             );
         });

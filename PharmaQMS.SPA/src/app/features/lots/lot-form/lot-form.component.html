@@ -1,5 +1,5 @@
 <div class="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
-  <h2 class="text-2xl font-bold mb-4">Nieuwe lot aanmaken</h2>
+  <h2 class="text-2xl font-bold mb-4">Create new lot</h2>
 
   <!-- ==== SUCCESS / ERROR ALERTS ==== -->
   <div
@@ -13,44 +13,44 @@
   </div>
 
   <form [formGroup]="lotForm" (ngSubmit)="onSubmit()" class="space-y-6">
-    <!-- ==== ROW 1: Lotnummer + Hoeveelheid ==== -->
+    <!-- ==== ROW 1: Lot number + Quantity ==== -->
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-      <!-- Lotnummer -->
+      <!-- Lot number -->
       <div>
         <label for="lotNumber" class="block text-sm font-medium mb-1">
-          Lotnummer <span class="text-red-500">*</span>
+          Lot number <span class="text-red-500">*</span>
         </label>
         <input
           id="lotNumber"
           type="text"
           formControlName="lotNumber"
           class="mt-1 block w-full h-12 rounded-md border border-gray-300 px-4 py-3 text-base shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-          placeholder="bijv. LOT-2024-001"
+          placeholder="e.g. LOT-2024-001"
         />
         <div
           *ngIf="f['lotNumber'].touched && f['lotNumber'].invalid"
           class="mt-1 text-sm text-red-600"
         >
           <div *ngIf="f['lotNumber'].errors?.['required']">
-            Lotnummer is verplicht.
+            Lot number is required.
           </div>
           <div *ngIf="f['lotNumber'].errors?.['pattern']">
-            Alleen hoofdletters, cijfers en streepjes zijn toegestaan.
+            Only uppercase letters, numbers, and hyphens are allowed.
           </div>
         </div>
       </div>
 
-      <!-- Hoeveelheid -->
+      <!-- Quantity -->
       <div>
         <label for="quantity" class="block text-sm font-medium mb-1">
-          Hoeveelheid <span class="text-red-500">*</span>
+          Quantity <span class="text-red-500">*</span>
         </label>
         <input
           id="quantity"
           type="number"
           formControlName="quantity"
           class="mt-1 block w-full h-12 rounded-md border border-gray-300 px-4 py-3 text-base shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-          placeholder="bijv. 50.0"
+          placeholder="e.g. 50.0"
           step="0.01"
           min="0.01"
         />
@@ -59,35 +59,35 @@
           class="mt-1 text-sm text-red-600"
         >
           <div *ngIf="f['quantity'].errors?.['required']">
-            Hoeveelheid is verplicht.
+            Quantity is required.
           </div>
           <div *ngIf="f['quantity'].errors?.['min']">
-            Hoeveelheid moet groter zijn dan 0.
+            Quantity must be greater than 0.
           </div>
         </div>
       </div>
     </div>
 
-    <!-- ==== ROW 2: Leverancier + Vervaldatum ==== -->
+    <!-- ==== ROW 2: Supplier + Expiry date ==== -->
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-      <!-- Leverancier -->
+      <!-- Supplier -->
       <div>
         <label for="supplier" class="block text-sm font-medium mb-1">
-          Leverancier
+          Supplier
         </label>
         <input
           id="supplier"
           type="text"
           formControlName="supplier"
           class="mt-1 block w-full h-12 rounded-md border border-gray-300 px-4 py-3 text-base shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-          placeholder="bijv. ChemCo BV"
+          placeholder="e.g. ChemCo BV"
         />
       </div>
 
-      <!-- Vervaldatum -->
+      <!-- Expiry date -->
       <div>
         <label for="expiryDate" class="block text-sm font-medium mb-1">
-          Vervaldatum <span class="text-red-500">*</span>
+          Expiry date <span class="text-red-500">*</span>
         </label>
         <input
           id="expiryDate"
@@ -99,17 +99,17 @@
           *ngIf="f['expiryDate'].touched && f['expiryDate'].invalid"
           class="mt-1 text-sm text-red-600"
         >
-          Vervaldatum is verplicht.
+          Expiry date is required.
         </div>
       </div>
     </div>
 
-    <!-- ==== ROW 3: Ontvangstdatum + Inkoopordernummer ==== -->
+    <!-- ==== ROW 3: Received date + Purchase order number ==== -->
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-      <!-- Ontvangstdatum -->
+      <!-- Received date -->
       <div>
         <label for="receivedDate" class="block text-sm font-medium mb-1">
-          Ontvangstdatum <span class="text-red-500">*</span>
+          Received date <span class="text-red-500">*</span>
         </label>
         <input
           id="receivedDate"
@@ -121,21 +121,21 @@
           *ngIf="f['receivedDate'].touched && f['receivedDate'].invalid"
           class="mt-1 text-sm text-red-600"
         >
-          Ontvangstdatum is verplicht.
+          Received date is required.
         </div>
       </div>
 
-      <!-- Inkoopordernummer -->
+      <!-- Purchase order number -->
       <div>
         <label for="purchaseOrderNumber" class="block text-sm font-medium mb-1">
-          Inkoopordernummer <span class="text-red-500">*</span>
+          Purchase order number <span class="text-red-500">*</span>
         </label>
         <input
           id="purchaseOrderNumber"
           type="text"
           formControlName="purchaseOrderNumber"
           class="mt-1 block w-full h-12 rounded-md border border-gray-300 px-4 py-3 text-base shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-          placeholder="bijv. PO-2024-0567"
+          placeholder="e.g. PO-2024-0567"
         />
         <div
           *ngIf="
@@ -143,36 +143,36 @@
           "
           class="mt-1 text-sm text-red-600"
         >
-          Inkoopordernummer is verplicht.
+          Purchase order number is required.
         </div>
       </div>
     </div>
 
-    <!-- ==== ROW 4: Analyse certificaat + Initiële status ==== -->
+    <!-- ==== ROW 4: Analysis certificate + Initial status ==== -->
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-      <!-- Analyse certificaat -->
+      <!-- Analysis certificate -->
       <div>
         <label for="analysisCertificate" class="block text-sm font-medium mb-1">
-          Analyse certificaat (bestand of referentie)
+          Analysis certificate (file or reference)
         </label>
         <input
           id="analysisCertificate"
           type="text"
           formControlName="analysisCertificate"
           class="mt-1 block w-full h-12 rounded-md border border-gray-300 px-4 py-3 text-base shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-          placeholder="bijv. certificaat.pdf of URL"
+          placeholder="e.g. certificate.pdf or URL"
         />
       </div>
 
-      <!-- Initiële status -->
+      <!-- Initial status -->
       <div>
         <label for="initialStatus" class="block text-sm font-medium mb-1">
-          Initiële status
+          Initial status
         </label>
         <input
           id="initialStatus"
           type="text"
-          value="• QUARANTINE(Automatisch)"
+          value="QUARANTINE (Automatic)"
           readonly
           class="mt-1 block w-full h-12 rounded-md border border-gray-300 px-4 py-3 text-base shadow-sm "
         />
@@ -208,7 +208,7 @@
             ></path>
           </svg>
         </span>
-        Opslaan
+        Save
       </button>
     </div>
   </form>

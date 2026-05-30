@@ -5,12 +5,12 @@
     <p class="tagline">QUALITY MANAGEMENT SYSTEM</p>
   </div>
 
-  <h2>Aanmelden</h2>
-  <p>Log in met uw organisatieaccount.</p>
+  <h2>Sign in</h2>
+  <p>Log in with your organization account.</p>
 
   <form class="form-grid" [formGroup]="form" (ngSubmit)="submit()">
     <div class="form-row">
-      <label for="email">GEBRUIKERSNAAM</label>
+      <label for="email">USERNAME</label>
       <input
         id="email"
         type="email"
@@ -19,12 +19,12 @@
         placeholder="jan.devries"
       />
       <small *ngIf="submitted && form.controls.email.invalid"
-        >Een geldig e-mailadres is vereist.</small
+        >A valid email address is required.</small
       >
     </div>
 
     <div class="form-row">
-      <label for="password">WACHTWOORD</label>
+      <label for="password">PASSWORD</label>
       <input
         id="password"
         type="password"
@@ -33,14 +33,14 @@
         placeholder="••••••••"
       />
       <small *ngIf="submitted && form.controls.password.invalid"
-        >Wachtwoord is vereist.</small
+        >Password is required.</small
       >
     </div>
 
     <div *ngIf="errorMessage" class="error-box">{{ errorMessage }}</div>
 
     <button class="primary-button" type="submit" [disabled]="isSubmitting">
-      {{ isSubmitting ? "Bezig met aanmelden..." : "Aanmelden" }}
+      {{ isSubmitting ? "Signing in..." : "Sign in" }}
     </button>
   </form>
 </section>

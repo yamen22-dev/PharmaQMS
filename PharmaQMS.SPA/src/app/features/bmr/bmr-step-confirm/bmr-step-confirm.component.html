@@ -2,12 +2,12 @@
   <div class="mx-auto max-w-4xl">
     <!-- Header -->
     <div class="mb-6">
-      <h1 class="text-2xl font-semibold text-slate-900">Productiestap uitvoeren</h1>
-      <p class="mt-1 text-sm text-slate-500">Stappenplan — {{ batchNumber || 'laden...' }}</p>
+      <h1 class="text-2xl font-semibold text-slate-900">Execute production step</h1>
+      <p class="mt-1 text-sm text-slate-500">Steps — {{ batchNumber || 'Loading...' }}</p>
     </div>
 
     <!-- Loading & error -->
-    <div *ngIf="isLoading" class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">Laden...</div>
+    <div *ngIf="isLoading" class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">Loading...</div>
     <div *ngIf="errorMessage" class="rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">
       {{ errorMessage }}
     </div>
@@ -46,17 +46,18 @@
             <button
               *ngIf="step.status === BmrStepStatus.Open"
               type="button"
+              aria-label="Execute step {{step.number}} - {{step.name}}"
               (click)="openStepForm(step)"
               class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
             >
-              Execution
+              Execute
             </button>
             <a
               *ngIf="step.status === BmrStepStatus.AwaitingVerification && canVerifySteps"
               [routerLink]="['/bmr', this.bmrId, 'steps', step.id, 'verify']"
               class="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-amber-700"
             style="color:white;">
-              Verification
+              Verify
             </a>
           </div>
         </div>
@@ -71,14 +72,14 @@
     >
       <div class="w-full max-w-lg rounded-xl bg-white shadow-xl" (click)="$event.stopPropagation()">
         <div class="border-b border-slate-200 px-6 py-4">
-          <h2 class="text-xl font-semibold text-slate-900">Stap: {{ selectedStep.name }}</h2>
-          <p class="text-sm text-slate-500">Voer de stap uit en sla de gegevens op.</p>
+          <h2 class="text-xl font-semibold text-slate-900">Step: {{ selectedStep.name }}</h2>
+          <p class="text-sm text-slate-500">Execute the step and save the data.</p>
         </div>
 
         <div class="p-6 space-y-5">
           <!-- Temperature -->
           <div>
-            <label for="temperature" class="block text-sm font-medium text-slate-700">TEMPERATUUR (°C)</label>
+            <label for="temperature" class="block text-sm font-medium text-slate-700">TEMPERATURE (°C)</label>
             <input
               id="temperature"
               type="number"
@@ -89,7 +90,7 @@
 
           <!-- Duration -->
           <div>
-            <label for="duration" class="block text-sm font-medium text-slate-700">DUUR (MIN)</label>
+            <label for="duration" class="block text-sm font-medium text-slate-700">DURATION (MIN)</label>
             <input
               id="duration"
               type="number"
@@ -100,12 +101,12 @@
 
           <!-- Remark -->
           <div>
-            <label for="remark" class="block text-sm font-medium text-slate-700">OPMERKING</label>
+            <label for="remark" class="block text-sm font-medium text-slate-700">REMARK</label>
             <textarea
               id="remark"
               rows="3"
               [(ngModel)]="stepForm.remark"
-              placeholder="Eventuele afwijkingen..."
+              placeholder="Any deviations..."
               class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             ></textarea>
           </div>
@@ -118,14 +119,16 @@
             (click)="closeForm()"
             class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
           >
-            Annuleren
+            Cancel
           </button>
           <button
+            id="confirm-execute-button"
+            aria-label="Confirm execute"
             type="button"
             (click)="submitStep()"
             class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
           >
-            Uitvoeren
+            Execute
           </button>
         </div>
       </div>

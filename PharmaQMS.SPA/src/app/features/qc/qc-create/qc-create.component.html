@@ -5,14 +5,14 @@
       (click)="cancel()"
       class="mb-3 text-sm font-medium text-slate-500 hover:text-slate-700"
     >
-      QC > Test aanmaken
+      QC > Create test
     </button>
 
-    <h1 class="mb-4 text-3xl font-semibold text-slate-900">QC-test aanmaken</h1>
+    <h1 class="mb-4 text-3xl font-semibold text-slate-900">Create QC test</h1>
 
     <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <div *ngIf="loading" class="py-10 text-center text-slate-500">
-        Laden van loten en batches...
+        Loading lots and batches...
       </div>
 
       <ng-container *ngIf="!loading">
@@ -21,7 +21,7 @@
             <label
               class="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500"
             >
-              Testobject
+              Test object
             </label>
             <select
               [(ngModel)]="testObjectType"
@@ -30,7 +30,7 @@
             >
               <option *ngFor="let type of objectTypes" [value]="type">
                 {{
-                  type === "Batch" ? "Batch (eindproduct)" : "Lot (grondstof)"
+                  type === "Batch" ? "Batch (finished product)" : "Lot (raw material)"
                 }}
               </option>
             </select>
@@ -46,7 +46,7 @@
               [(ngModel)]="selectedTestObjectId"
               class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
             >
-              <option [ngValue]="null" disabled>Kies een object</option>
+              <option [ngValue]="null" disabled>Select an object</option>
               <option
                 *ngFor="let option of testObjectOptions"
                 [ngValue]="option.testObjectId"
@@ -58,13 +58,13 @@
               *ngIf="!testObjectOptions.length"
               class="mt-2 text-xs text-amber-700"
             >
-              Geen geschikte
+              No suitable
               {{
                 testObjectType === "Lot"
-                  ? "loten in Quarantaine"
-                  : "batches in In QC"
+                  ? "lots in Quarantine"
+                  : "batches in QC"
               }}
-              gevonden.
+              found.
             </p>
           </div>
         </div>
@@ -73,7 +73,7 @@
           <h2
             class="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-500"
           >
-            Testparameters toevoegen
+            Add test parameters
           </h2>
 
           <div
@@ -82,7 +82,7 @@
             <div class="col-span-12 md:col-span-6">Parameter</div>
             <div class="col-span-4 md:col-span-2">Min</div>
             <div class="col-span-4 md:col-span-2">Max</div>
-            <div class="col-span-3 md:col-span-1">Eenheid</div>
+            <div class="col-span-3 md:col-span-1">Unit</div>
             <div class="col-span-1"></div>
           </div>
 
@@ -109,7 +109,7 @@
             />
             <input
               [(ngModel)]="parameter.unit"
-              placeholder="Eenheid"
+              placeholder="Unit"
               class="col-span-3 rounded-md border border-slate-300 px-3 py-2 text-sm md:col-span-1"
             />
             <button
@@ -127,7 +127,7 @@
             (click)="addParameter()"
             class="mt-2 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-100"
           >
-            + Parameter toevoegen
+            + Add parameter
           </button>
         </div>
 
@@ -135,7 +135,7 @@
           <label
             class="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500"
           >
-            Elektronische handtekening (wachtwoord)
+            Electronic signature (password)
           </label>
           <input
             type="password"
@@ -158,7 +158,7 @@
             (click)="cancel()"
             class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
           >
-            Annuleren
+            Cancel
           </button>
           <button
             type="button"
@@ -166,7 +166,7 @@
             [disabled]="!canSubmit"
             class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {{ submitting ? "Bezig..." : "Test aanmaken" }}
+            {{ submitting ? "Submitting..." : "Create test" }}
           </button>
         </div>
       </ng-container>

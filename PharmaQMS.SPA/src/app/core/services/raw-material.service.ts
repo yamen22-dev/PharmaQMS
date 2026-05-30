@@ -28,7 +28,6 @@ export class RawMaterialService {
       .get<RawMaterialOverview[]>(`${environment.apiBaseUrl}/raw-materials`)
       .pipe(
         map((items: any) => {
-          console.log(items, "raw-materials service.");
           const list = this.normalizeCollection(items);
           return list.map((item: any) => ({
             id: item.id ?? item.Id ?? 0,

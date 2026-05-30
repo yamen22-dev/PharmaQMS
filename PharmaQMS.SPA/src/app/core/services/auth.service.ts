@@ -113,7 +113,7 @@ export class AuthService {
   getUserNameById(userId: string): Observable<string> {
     const normalizedUserId = userId.trim();
     if (!normalizedUserId) {
-      return of("Onbekende gebruiker");
+      return of("Unknown user");
     }
 
     const cachedName = this.displayNameCache.get(normalizedUserId);
@@ -136,17 +136,15 @@ export class AuthService {
         map((response) => {
           // backend might return DisplayName or displayName depending on serializer
           return (
-            response?.displayName ??
-            response?.DisplayName ??
-            "Onbekende gebruiker"
+            response?.displayName ?? response?.DisplayName ?? "Unknown user"
           );
         }),
         tap((displayName) => {
-          if (displayName !== "Onbekende gebruiker") {
+          if (displayName !== "Unknown user") {
             this.displayNameCache.set(normalizedUserId, displayName);
           }
         }),
-        catchError(() => of("Onbekende gebruiker")),
+        catchError(() => of("Unknown user")),
         finalize(() => {
           this.displayNameRequests.delete(normalizedUserId);
         }),

@@ -49,7 +49,7 @@ export class LotStatusComponent implements OnInit {
 
     if (!idParam || Number.isNaN(id)) {
       this.loading = false;
-      this.serverError = "Ongeldige lot-id.";
+      this.serverError = "Invalid lot id.";
       return;
     }
 
@@ -67,7 +67,7 @@ export class LotStatusComponent implements OnInit {
       },
       error: () => {
         this.loading = false;
-        this.serverError = "Lot niet gevonden.";
+        this.serverError = "Lot not found.";
       },
     });
   }
@@ -77,14 +77,14 @@ export class LotStatusComponent implements OnInit {
   ): { value: LotStatus; label: string }[] {
     if (status !== "Quarantine") return [];
     return [
-      { value: "Released", label: "Goedgekeurd" },
-      { value: "Rejected", label: "Afgekeurd" },
+      { value: "Released", label: "Released" },
+      { value: "Rejected", label: "Rejected" },
     ];
   }
 
   onSubmit(): void {
     if (!this.lot) {
-      this.serverError = "Lot niet geladen.";
+      this.serverError = "Lot not loaded.";
       return;
     }
 
@@ -110,24 +110,26 @@ export class LotStatusComponent implements OnInit {
       })
       .subscribe({
         next: () => {
-          alert("Status succesvol gewijzigd. U wordt teruggestuurd naar de lotdetails.");
+          alert("Status updated successfully. You will be returned to lot details.");
           this.router.navigate(["/lots", this.lot!.id]);
         },
         error: (err) => {
           this.submitting = false;
 
           if (err.status === 401) {
-            this.serverError = "Elektronische handtekening incorrect.";
-            alert("Elektronische handtekening incorrect. U wordt teruggestuurd naar de lotdetails.");
+            this.serverError = "Electronic signature incorrect.";
+            alert(
+              "Electronic signature incorrect. You will be returned to lot details.",
+            );
             this.router.navigate(["/lots", this.lot!.id]);
           } else if (err.status === 422) {
             this.serverError =
-              err.error?.message ?? "Deze statusovergang is niet toegestaan.";
-              alert(this.serverError + " U wordt teruggestuurd naar de lotdetails.");
-              this.router.navigate(["/lots", this.lot!.id]);
+              err.error?.message ?? "This status transition is not allowed.";
+            alert(this.serverError + " You will be returned to lot details.");
+            this.router.navigate(["/lots", this.lot!.id]);
           } else {
-            this.serverError = "Er is een fout opgetreden. Probeer opnieuw.";
-            alert(this.serverError + " U wordt teruggestuurd naar de lotdetails.");
+            this.serverError = "An error occurred. Please try again.";
+            alert(this.serverError + " You will be returned to lot details.");
             this.router.navigate(["/lots", this.lot!.id]);
           }
         },
@@ -149,9 +151,9 @@ export class LotStatusComponent implements OnInit {
 
   statusLabel(status: LotStatus): string {
     const map: Record<LotStatus, string> = {
-      Quarantine: "Quarantaine",
-      Released: "Goedgekeurd",
-      Rejected: "Afgekeurd",
+      Quarantine: "Quarantine",
+      Released: "Released",
+      Rejected: "Rejected",
     };
     return map[status];
   }

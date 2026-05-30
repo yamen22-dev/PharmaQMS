@@ -2,7 +2,7 @@
 <header class="page-header">
   <div class="w-full">
     <p class="eyebrow">
-      Grondstoffen & Lots
+      Raw Materials & Lots
       <span *ngIf="detail"> / {{ detail.name }}</span>
     </p>
     <nav class="breadcrumb" aria-label="Breadcrumb">
@@ -14,13 +14,13 @@
     </nav>
 
     <div class="flex flex-row justify-between items-center w-full">
-      <h1 class="text-xl font-semibold">Grondstof detail</h1>
+      <h1 class="text-xl font-semibold">Raw material detail</h1>
       <button
         routerLink="/raw-materials/{{detail?.id}}/lots/new"
         class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors flex items-center gap-2"
-        aria-label="Nieuw lot aanmaken"
+        aria-label="Create new lot"
       >
-        + Nieuw Lot
+        + New Lot
       </button>
     </div>
 
@@ -28,7 +28,7 @@
 </header>
 
 
-  <div *ngIf="isLoading" class="state-card">Laden...</div>
+  <div *ngIf="isLoading" class="state-card">Loading...</div>
   <div *ngIf="errorMessage" class="state-card state-card--error">
     {{ errorMessage }}
   </div>
@@ -36,20 +36,20 @@
   <ng-container *ngIf="detail && !isLoading">
     <section class="detail-grid">
       <div class="content-card detail-card">
-        <h2>Stamgegevens</h2>
+        <h2>Master data</h2>
         <div class="detail-rows">
           <div class="detail-row">
-            <span class="detail-label">Naam</span>
+            <span class="detail-label">Name</span>
             <span class="detail-value">{{ detail.name }}</span>
           </div>
           <div class="detail-row">
-            <span class="detail-label">Farmaceutische API</span>
+            <span class="detail-label">Pharmaceutical API</span>
             <span class="detail-value">
               {{ detail.pharmaceuticalApi || "-" }}
             </span>
           </div>
           <div class="detail-row">
-            <span class="detail-label">Categorie</span>
+            <span class="detail-label">Category</span>
             <span class="detail-value">
               <span [ngClass]="getCategoryClass(detail.category)">
                 {{ getCategoryLabel(detail.category) }}
@@ -57,11 +57,11 @@
             </span>
           </div>
           <div class="detail-row">
-            <span class="detail-label">Eenheid</span>
+            <span class="detail-label">Unit</span>
             <span class="detail-value">{{ detail.unit }}</span>
           </div>
           <div class="detail-row">
-            <span class="detail-label">Specgrens (min/max)</span>
+            <span class="detail-label">Spec limits (min/max)</span>
             <span class="detail-value">
               {{
                 formatSpecLimits(
@@ -75,7 +75,7 @@
       </div>
 
       <div class="content-card detail-card">
-        <h2>Lotoverzicht</h2>
+        <h2>Lots overview</h2>
         <div class="lots-list" *ngIf="detail.lots.length; else emptyLots">
           <div class="lot-row" *ngFor="let lot of detail.lots">
             <span class="lot-number">{{ lot.lotNumber }}</span>
@@ -85,13 +85,13 @@
           </div>
         </div>
         <ng-template #emptyLots>
-          <p class="empty-text">Geen lots gevonden.</p>
+          <p class="empty-text">No lots found.</p>
         </ng-template>
       </div>
     </section>
 
     <section class="content-card detail-card description-card">
-      <h2>Omschrijving</h2>
+      <h2>Description</h2>
       <p class="description-text">{{ getDescription(detail.notes) }}</p>
     </section>
   </ng-container>

@@ -52,10 +52,10 @@ export class BmrStepVerificationComponent implements OnInit {
     this.targetStepId = this.route.snapshot.paramMap.get("stepId");
     this.verifier.name = this.authStorage.getSessionDisplayName();
     this.verifier.role =
-      this.authService.getSession()?.roles?.[0] ?? "Onbekende rol";
+      this.authService.getSession()?.roles?.[0] ?? "Unknown role";
 
     if (!this.bmrId) {
-      this.errorMessage = "Ongeldige BMR-id.";
+      this.errorMessage = "Invalid BMR id.";
       this.isLoading = false;
       return;
     }
@@ -75,15 +75,14 @@ export class BmrStepVerificationComponent implements OnInit {
         }
 
         if (!s) {
-          this.errorMessage =
-            "Geen stappen gevonden die verificatie nodig hebben.";
+          this.errorMessage = "No steps found that require verification.";
           this.isLoading = false;
           this.cdr.detectChanges();
           return;
         }
 
         this.targetStepId = s.id;
-        this.stepTitle = `Stap ${s.stepNumber}: ${s.stepName}`;
+        this.stepTitle = `Step ${s.stepNumber}: ${s.stepName}`;
         const entered = s.enteredData
           ? (() => {
               try {
@@ -115,7 +114,7 @@ export class BmrStepVerificationComponent implements OnInit {
       },
       error: (err) => {
         console.error(err);
-        this.errorMessage = "Kon stapgegevens niet laden.";
+        this.errorMessage = "Could not load step data.";
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -142,7 +141,7 @@ export class BmrStepVerificationComponent implements OnInit {
     this.verificationMessageType = "";
 
     if (!this.verificationPassword.trim()) {
-      this.verificationMessage = "Vul je wachtwoord in om te verifiëren.";
+      this.verificationMessage = "Enter your password to verify.";
       this.verificationMessageType = "error";
       this.cdr.detectChanges();
       return;
@@ -151,8 +150,8 @@ export class BmrStepVerificationComponent implements OnInit {
     const req: VerifyStepRequest = { Password: this.verificationPassword };
 
     this.bmrService.verifyStep(this.bmrId, this.targetStepId, req).subscribe({
-      next: () => {
-        this.verificationMessage = "Verificatie geslaagd.";
+        next: () => {
+        this.verificationMessage = "Verification succeeded.";
         this.verificationMessageType = "success";
         this.verificationPassword = "";
         this.cdr.detectChanges();
@@ -160,7 +159,7 @@ export class BmrStepVerificationComponent implements OnInit {
       error: (err) => {
         console.error(err);
         this.verificationMessage =
-          "Verificatie mislukt. Controleer je wachtwoord.";
+          "Verification failed. Check your password.";
         this.verificationMessageType = "error";
         this.cdr.detectChanges();
       },
