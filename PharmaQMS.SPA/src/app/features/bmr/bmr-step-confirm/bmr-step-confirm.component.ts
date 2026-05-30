@@ -37,6 +37,7 @@ export class BmrStepConfirmationComponent implements OnInit {
   private readonly authService = inject(AuthService);
 
   protected bmrId: string | null = null;
+  protected canVerifySteps = false;
 
   batchNumber = "";
   steps: UiStep[] = [];
@@ -54,6 +55,7 @@ export class BmrStepConfirmationComponent implements OnInit {
 
   ngOnInit(): void {
     this.bmrId = this.route.snapshot.paramMap.get("id") ?? "";
+    this.canVerifySteps = this.authService.hasRole("QAManager");
     this.loadSteps();
   }
 

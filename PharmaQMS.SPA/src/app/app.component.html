@@ -12,26 +12,17 @@
 
       <nav class="sidebar-nav">
         <h3 class="nav-title">NAVIGATIE</h3>
-        <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
-          <span class="nav-icon">📊</span>
-          <span>Dashboard</span>
-        </a>
-        <a routerLink="/raw-materials" routerLinkActive="active" class="nav-item">
-          <span class="nav-icon">🏭</span>
-          <span>Grondstoffen & Lots</span>
-        </a>
-        <a routerLink="/bmr" routerLinkActive="active" class="nav-item">
-          <span class="nav-icon">📝</span>
-          <span>BMR</span>
-        </a>
-        <a routerLink="/qc" routerLinkActive="active" class="nav-item">
-          <span class="nav-icon">✓</span>
-          <span>Quality Control</span>
-        </a>
-        <a routerLink="/audit-trail" routerLinkActive="active" class="nav-item">
-          <span class="nav-icon">🔍</span>
-          <span>Audit Trail</span>
-        </a>
+        <ng-container *ngFor="let item of navigationItems">
+          <a
+            *ngIf="canShowNavigationItem(item)"
+            [routerLink]="item.route"
+            routerLinkActive="active"
+            class="nav-item"
+          >
+            <span class="nav-icon">{{ item.icon }}</span>
+            <span>{{ item.label }}</span>
+          </a>
+        </ng-container>
       </nav>
 
       <div class="sidebar-footer">

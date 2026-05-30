@@ -55,7 +55,7 @@ public sealed class BmrController(IBmrService bmrService, IMasterRecipeService _
     }
 
     [HttpPost("{bmrId:guid}/steps/{stepId:guid}/confirm")]
-    [Authorize(Roles = "QAManager,ProductionOperator")]
+    [Authorize(Roles = "QAManager,ProductionAnalyst")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]

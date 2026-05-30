@@ -8,6 +8,7 @@ public static class QcSeeder
 {
     private const string SeedLotNumber = "LOT-QC-SEED-2026-001";
     private const string SeedBatchNumber = "BATCH-QC-SEED-777";
+    private const string SeedReleasedLotNumber = "LOT-BMR-SEED-2026-001";
 
     private sealed record SeedQcTestParameter(
         int Id,
@@ -69,6 +70,7 @@ public static class QcSeeder
     {
         await EnsureSeedLotForQcCreateAsync(db, cancellationToken);
         await EnsureSeedBatchForQcCreateAsync(db, cancellationToken);
+        await EnsureReleasedLotForBmrCreateAsync(db, cancellationToken);
 
         foreach (var seedTest in SeedTests)
         {
@@ -140,6 +142,7 @@ public static class QcSeeder
             if (existingSeedLot.Status != LotStatus.Quarantine)
             {
                 existingSeedLot.Status = LotStatus.Quarantine;
+                db.Lots.Update(existingSeedLot);
             }
 
             return;
@@ -194,6 +197,7 @@ public static class QcSeeder
             if (existingSeedBatch.Status != BmrStatus.InQc)
             {
                 existingSeedBatch.Status = BmrStatus.InQc;
+                db.Bmrs.Update(existingSeedBatch);
             }
 
             return;
@@ -227,6 +231,61 @@ public static class QcSeeder
             Status = BmrStatus.InQc,
             CreatedById = "seed-system",
             CreatedAt = DateTime.UtcNow
+        });
+    }
+
+    private static async Task EnsureReleasedLotForBmrCreateAsync(
+        DomainDbContext db,
+        CancellationToken cancellationToken)
+    {
+        var existingReleasedLot = await db.Lots
+            .FirstOrDefaultAsync(l => l.LotNumber == SeedReleasedLotNumber, cancellationToken);
+
+        if (existingReleasedLot is not null)
+        {
+            if (existingReleasedLot.Status != LotStatus.Released)
+            {
+                existingReleasedLot.Status = LotStatus.Released;
+                db.Lots.Update(existingReleasedLot);
+            }
+
+            return;
+        }
+
+        var rawMaterial = await db.RawMaterials
+            .OrderBy(r => r.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (rawMaterial is null)
+        {
+            rawMaterial = new RawMaterial
+            {
+                Name = "BMR Seed API",
+                PharmaceuticalApi = "AMOXICILLIN",
+                Category = RawMaterialCategory.ActivePharmaceuticalIngredient,
+                Unit = "kg",
+                MinSpecificationLimit = 98.0m,
+                MaxSpecificationLimit = 102.0m,
+                Supplier = "Seed Supplier",
+                CepNumber = "CEP-BMR-SEED",
+                Notes = "Automatisch seed record voor BMR-aanmaak.",
+                CreatedUtc = DateTime.UtcNow
+            };
+
+            db.RawMaterials.Add(rawMaterial);
+            await db.SaveChangesAsync(cancellationToken);
+        }
+
+        db.Lots.Add(new Lot
+        {
+            RawMaterialId = rawMaterial.Id,
+            LotNumber = SeedReleasedLotNumber,
+            ReceivedDateUtc = DateTime.UtcNow.Date.AddDays(-5),
+            Quantity = 200.0m,
+            Status = LotStatus.Released,
+            ExpiryDateUtc = DateTime.UtcNow.Date.AddYears(1),
+            PurchaseOrderNumber = "PO-BMR-SEED-001",
+            AnalysisCertificate = "COA-BMR-SEED-001"
         });
     }
 }

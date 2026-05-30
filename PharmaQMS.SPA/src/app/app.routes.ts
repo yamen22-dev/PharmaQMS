@@ -111,7 +111,7 @@ export const routes: Routes = [
       },
       {
         path: "new",
-        canActivate: [roleGuard(["QAManager", "ProductionOperator"], "/bmr")],
+        canActivate: [roleGuard(["QAManager", "ProductionAnalyst"], "/bmr")],
         loadComponent: () =>
           import("./features/bmr/bmr-create/bmr-create.component").then(
             (m) => m.BmrCreateComponent,
@@ -126,7 +126,7 @@ export const routes: Routes = [
       },
       {
         path: ":id/steps",
-        canActivate: [roleGuard(["QAManager", "ProductionOperator"], "/bmr")],
+        canActivate: [roleGuard(["QAManager", "ProductionAnalyst"], "/bmr")],
         loadComponent: () =>
           import("./features/bmr/bmr-step-confirm/bmr-step-confirm.component").then(
             (m) => m.BmrStepConfirmationComponent,
