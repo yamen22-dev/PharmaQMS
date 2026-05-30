@@ -66,57 +66,52 @@ public class AuthService : IAuthService
                 return AuthenticationResult.Failure("Invalid email or password.", StatusCodes.Status401Unauthorized);
             }
 
-        var lockoutEnabled = await _userManager.GetLockoutEnabledAsync(user);
-        if (!lockoutEnabled)
-        {
-            var setLockoutEnabledResult = await _userManager.SetLockoutEnabledAsync(user, true);
-            if (!setLockoutEnabledResult.Succeeded)
+            var lockoutEnabled = await _userManager.GetLockoutEnabledAsync(user);
+            if (!lockoutEnabled)
             {
-                return AuthenticationResult.Failure("Failed to update account lockout state.", StatusCodes.Status500InternalServerError);
-            }
-
-            user = await _userManager.FindByIdAsync(user.Id) ?? user;
-        }
-
-        if (await _userManager.IsLockedOutAsync(user))
-        {
-            _logger.LogWarning("Login blocked because account {UserId} is locked.", user.Id);
-            return AuthenticationResult.Failure("Account is temporarily locked. Try again later.", StatusCodes.Status423Locked);
-        }
-
-        if (!await _userManager.CheckPasswordAsync(user, request.Password))
-        {
-            var accessFailedResult = await _userManager.AccessFailedAsync(user);
-            if (!accessFailedResult.Succeeded)
-            {
-                return AuthenticationResult.Failure("Failed to update account lockout state.", StatusCodes.Status500InternalServerError);
-            }
-
-            user = await _userManager.FindByIdAsync(user.Id) ?? user;
-
-            if (await _userManager.IsLockedOutAsync(user))
-            {
-                _logger.LogWarning("Account {UserId} locked after failed login attempts.", user.Id);
-                return AuthenticationResult.Failure("Account is temporarily locked. Try again later.", StatusCodes.Status423Locked);
-            }
-
-            var accessFailedCount = await _userManager.GetAccessFailedCountAsync(user);
-            if (_maxFailedAccessAttempts > 0 && accessFailedCount >= _maxFailedAccessAttempts)
-            {
-                var lockoutEndUtc = DateTimeOffset.UtcNow.Add(_defaultLockoutTimeSpan);
-                var forceLockoutResult = await _userManager.SetLockoutEndDateAsync(user, lockoutEndUtc);
-                if (!forceLockoutResult.Succeeded)
+                var setLockoutEnabledResult = await _userManager.SetLockoutEnabledAsync(user, true);
+                if (!setLockoutEnabledResult.Succeeded)
                 {
                     return AuthenticationResult.Failure("Failed to update account lockout state.", StatusCodes.Status500InternalServerError);
                 }
 
-                _logger.LogWarning("Account {UserId} force-locked after reaching failed attempt threshold.", user.Id);
+                user = await _userManager.FindByIdAsync(user.Id) ?? user;
+            }
+
+            if (await _userManager.IsLockedOutAsync(user))
+            {
+                _logger.LogWarning("Login blocked because account {UserId} is locked.", user.Id);
                 return AuthenticationResult.Failure("Account is temporarily locked. Try again later.", StatusCodes.Status423Locked);
             }
 
-            _logger.LogWarning("Invalid password attempt for user {UserId}.", user.Id);
-            return AuthenticationResult.Failure("Invalid email or password.", StatusCodes.Status401Unauthorized);
-        }
+            if (!await _userManager.CheckPasswordAsync(user, request.Password))
+            {
+                var newFailedCount = user.AccessFailedCount + 1;
+                user.AccessFailedCount = newFailedCount;
+
+                var isLockedOut = false;
+                if (_maxFailedAccessAttempts > 0 && newFailedCount > _maxFailedAccessAttempts)
+                {
+                    user.LockoutEnd = DateTimeOffset.UtcNow.Add(_defaultLockoutTimeSpan);
+                    user.AccessFailedCount = 0;
+                    isLockedOut = true;
+                }
+
+                var updateResult = await _userManager.UpdateAsync(user);
+                if (!updateResult.Succeeded)
+                {
+                    return AuthenticationResult.Failure("Failed to update account lockout state.", StatusCodes.Status500InternalServerError);
+                }
+
+                if (isLockedOut)
+                {
+                    _logger.LogWarning("Account {UserId} locked after failed login attempts.", user.Id);
+                    return AuthenticationResult.Failure("Account is temporarily locked. Try again later.", StatusCodes.Status423Locked);
+                }
+
+                _logger.LogWarning("Invalid password attempt for user {UserId}.", user.Id);
+                return AuthenticationResult.Failure("Invalid email or password.", StatusCodes.Status401Unauthorized);
+            }
 
             var resetFailedCountResult = await _userManager.ResetAccessFailedCountAsync(user);
             if (!resetFailedCountResult.Succeeded)

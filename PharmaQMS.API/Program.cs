@@ -91,6 +91,8 @@ try
             await context.HttpContext.Response.WriteAsync("Too many requests. Please retry later.", token);
         };
 
+        var authLoginLimit = builder.Environment.IsDevelopment() ? 100 : 5;
+
         options.AddPolicy("auth", httpContext =>
         {
             var clientIp = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
@@ -108,7 +110,7 @@ try
             var clientIp = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
             return RateLimitPartition.GetFixedWindowLimiter(clientIp, _ => new FixedWindowRateLimiterOptions
             {
-                PermitLimit = 5,
+                PermitLimit = authLoginLimit,
                 Window = TimeSpan.FromMinutes(1),
                 QueueLimit = 0,
                 QueueProcessingOrder = QueueProcessingOrder.OldestFirst

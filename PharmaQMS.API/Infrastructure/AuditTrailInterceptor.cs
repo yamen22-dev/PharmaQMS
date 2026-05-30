@@ -52,7 +52,27 @@ public sealed class AuditTrailInterceptor : SaveChangesInterceptor
                 continue;
             }
 
-            _pendingEntries.Add(new PendingAuditEntry(entry, now, userId, ipAddress));
+            var action = entry.State switch
+            {
+                EntityState.Added => "CREATE",
+                EntityState.Modified => "UPDATE",
+                EntityState.Deleted => "DELETE",
+                _ => "UNKNOWN"
+            };
+
+            var oldValues = entry.State == EntityState.Added
+                ? null
+                : JsonSerializer.Serialize(entry.OriginalValues.Properties.ToDictionary(
+                    p => p.Name,
+                    p => entry.OriginalValues[p]));
+
+            var newValues = entry.State == EntityState.Deleted
+                ? null
+                : JsonSerializer.Serialize(entry.CurrentValues.Properties.ToDictionary(
+                    p => p.Name,
+                    p => entry.CurrentValues[p]));
+
+            _pendingEntries.Add(new PendingAuditEntry(entry, now, userId, ipAddress, action, oldValues, newValues));
         }
 
         return base.SavingChangesAsync(eventData, result, cancellationToken);
@@ -95,37 +115,30 @@ public sealed class AuditTrailInterceptor : SaveChangesInterceptor
         private readonly DateTime _tijdstip;
         private readonly string _gebruikerId;
         private readonly string _ipAdres;
+        private readonly string _actie;
+        private readonly string? _oudeWaarde;
+        private readonly string? _nieuweWaarde;
 
-        public PendingAuditEntry(EntityEntry entry, DateTime tijdstip, string gebruikerId, string ipAdres)
+        public PendingAuditEntry(
+            EntityEntry entry,
+            DateTime tijdstip,
+            string gebruikerId,
+            string ipAdres,
+            string actie,
+            string? oudeWaarde,
+            string? nieuweWaarde)
         {
             _entry = entry;
             _tijdstip = tijdstip;
             _gebruikerId = gebruikerId;
             _ipAdres = ipAdres;
+            _actie = actie;
+            _oudeWaarde = oudeWaarde;
+            _nieuweWaarde = nieuweWaarde;
         }
 
         public AuditLog ToAuditLog()
         {
-            var action = _entry.State switch
-            {
-                EntityState.Added => "CREATE",
-                EntityState.Modified => "UPDATE",
-                EntityState.Deleted => "DELETE",
-                _ => "UNKNOWN"
-            };
-
-            var oldValues = _entry.State == EntityState.Added
-                ? null
-                : JsonSerializer.Serialize(_entry.OriginalValues.Properties.ToDictionary(
-                    p => p.Name,
-                    p => _entry.OriginalValues[p]));
-
-            var newValues = _entry.State == EntityState.Deleted
-                ? null
-                : JsonSerializer.Serialize(_entry.CurrentValues.Properties.ToDictionary(
-                    p => p.Name,
-                    p => _entry.CurrentValues[p]));
-
             var key = _entry.Metadata.FindPrimaryKey();
             var keyValue = key is null
                 ? string.Empty
@@ -135,11 +148,11 @@ public sealed class AuditTrailInterceptor : SaveChangesInterceptor
             {
                 Tijdstip = _tijdstip,
                 GebruikerId = _gebruikerId,
-                Actie = action,
+                Actie = _actie,
                 EntiteitType = _entry.Metadata.ClrType.Name,
                 EntiteitId = keyValue,
-                OudWaarde = oldValues,
-                NieuweWaarde = newValues,
+                OudWaarde = _oudeWaarde,
+                NieuweWaarde = _nieuweWaarde,
                 IPAdres = _ipAdres
             };
         }

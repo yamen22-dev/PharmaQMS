@@ -78,8 +78,9 @@
         <div class="p-6 space-y-5">
           <!-- Temperature -->
           <div>
-            <label class="block text-sm font-medium text-slate-700">TEMPERATUUR (°C)</label>
+            <label for="temperature" class="block text-sm font-medium text-slate-700">TEMPERATUUR (°C)</label>
             <input
+              id="temperature"
               type="number"
               [(ngModel)]="stepForm.temperature"
               class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
@@ -88,8 +89,9 @@
 
           <!-- Duration -->
           <div>
-            <label class="block text-sm font-medium text-slate-700">DUUR (MIN)</label>
+            <label for="duration" class="block text-sm font-medium text-slate-700">DUUR (MIN)</label>
             <input
+              id="duration"
               type="number"
               [(ngModel)]="stepForm.duration"
               class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
@@ -98,8 +100,9 @@
 
           <!-- Remark -->
           <div>
-            <label class="block text-sm font-medium text-slate-700">OPMERKING</label>
+            <label for="remark" class="block text-sm font-medium text-slate-700">OPMERKING</label>
             <textarea
+              id="remark"
               rows="3"
               [(ngModel)]="stepForm.remark"
               placeholder="Eventuele afwijkingen..."

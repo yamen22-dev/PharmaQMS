@@ -41,6 +41,8 @@ export class BmrStepVerificationComponent implements OnInit {
   verificationPassword = "";
   isLoading = true;
   errorMessage = "";
+  verificationMessage = "";
+  verificationMessageType: "success" | "error" | "" = "";
 
   private bmrId: string | null = null;
   private targetStepId: string | null = null;
@@ -136,8 +138,13 @@ export class BmrStepVerificationComponent implements OnInit {
 
   confirmVerification(): void {
     if (!this.bmrId || !this.targetStepId) return;
+    this.verificationMessage = "";
+    this.verificationMessageType = "";
+
     if (!this.verificationPassword.trim()) {
-      alert("Vul je wachtwoord in om te verifiëren.");
+      this.verificationMessage = "Vul je wachtwoord in om te verifiëren.";
+      this.verificationMessageType = "error";
+      this.cdr.detectChanges();
       return;
     }
 
@@ -145,14 +152,17 @@ export class BmrStepVerificationComponent implements OnInit {
 
     this.bmrService.verifyStep(this.bmrId, this.targetStepId, req).subscribe({
       next: () => {
-        alert("Verificatie geslaagd.");
-        if (this.bmrId) {
-          this.router.navigate(["/bmr", this.bmrId, "steps"]);
-        }
+        this.verificationMessage = "Verificatie geslaagd.";
+        this.verificationMessageType = "success";
+        this.verificationPassword = "";
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error(err);
-        alert("Verificatie mislukt. Controleer je wachtwoord.");
+        this.verificationMessage =
+          "Verificatie mislukt. Controleer je wachtwoord.";
+        this.verificationMessageType = "error";
+        this.cdr.detectChanges();
       },
     });
   }

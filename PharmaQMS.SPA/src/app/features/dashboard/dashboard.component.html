@@ -4,7 +4,7 @@
 >
   <div class="session-info">
     <p class="session-note">
-      💡 Sessie verloopt automatisch na 15 minuten inactiviteit.
+      Sessie verloopt automatisch na 15 minuten inactiviteit.
     </p>
   </div>
 
@@ -30,12 +30,12 @@
     <div>
       <h3>Token expiry</h3>
       <p>
-        Access token expires at
-        {{ session.accessTokenExpiresUtc | date: "medium" }}
+        <span>Access token expires at</span>
+        <span>{{ session.accessTokenExpiresUtc | date: "medium" }}</span>
       </p>
       <p>
-        Refresh token expires at
-        {{ session.refreshTokenExpiresUtc | date: "medium" }}
+        <span>Refresh token expires at</span>
+        <span>{{ session.refreshTokenExpiresUtc | date: "medium" }}</span>
       </p>
     </div>
   </div>
