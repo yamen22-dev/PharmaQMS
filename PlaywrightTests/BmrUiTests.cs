@@ -1,10 +1,7 @@
-using Microsoft.Playwright.Xunit.v3;
 using Microsoft.Playwright;
 using System.Text.Json;
 using static Microsoft.Playwright.Assertions;
 using System.Text.RegularExpressions;
-using Serilog.Core;
-using Serilog;
 
 namespace PlaywrightTests;
 
@@ -155,11 +152,12 @@ public sealed class BmrUiTests
         });
 
         await page.GetByLabel("Batch size (kg)").FillAsync("250");
-        await page.GetByLabel("Production line").SelectOptionAsync(new SelectOptionValue
-        {
-            Label = "Lijn A",
-        });
-
+        await page.GetByLabel("Production line").SelectOptionAsync(
+            new SelectOptionValue
+            {
+                Label = "Line A",
+            }
+        );
         var lotCheckbox = page.Locator("input[type='checkbox']").First;
         await Expect(lotCheckbox).ToBeVisibleAsync();
         await lotCheckbox.CheckAsync();
