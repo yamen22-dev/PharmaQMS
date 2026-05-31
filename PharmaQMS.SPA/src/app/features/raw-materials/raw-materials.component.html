@@ -37,6 +37,7 @@
   <section class="content-card table-card">
     <div class="table-toolbar">
       <div class="search-field">
+        <label for="materialSearch" class="sr-only">Search raw materials</label>
         <span class="search-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
             <path
@@ -45,6 +46,7 @@
           </svg>
         </span>
         <input
+          id="materialSearch"
           type="text"
           class="search-input"
           placeholder="Search by name or API..."
@@ -53,7 +55,13 @@
         />
       </div>
       <div class="filter-field">
-        <select [(ngModel)]="selectedCategory" (ngModelChange)="applyFilters()">
+        <label for="categoryFilter" class="sr-only">Filter by category</label>
+        <select
+          id="categoryFilter"
+          class="filter-select"
+          [(ngModel)]="selectedCategory"
+          (ngModelChange)="applyFilters()"
+        >
           <option *ngFor="let option of categoryOptions" [value]="option.value">
             {{ option.label }}
           </option>
@@ -135,12 +143,14 @@
   <section class="content-card table-card">
     <div class="table-toolbar">
       <div class="search-field">
+        <label for="lotSearch" class="sr-only">Search lots</label>
         <span class="search-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
             <path d="M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16Zm0-14a6 6 0 1 0 0 12 6 6 0 0 0 0-12Zm9.7 15.3-3.6-3.6a1 1 0 0 0-1.4 1.4l3.6 3.6a1 1 0 0 0 1.4-1.4Z"/>
           </svg>
         </span>
         <input
+          id="lotSearch"
           type="text"
           class="search-input"
           placeholder="Search by lot number..."
@@ -149,9 +159,13 @@
         />
       </div>
       <div class="filter-field">
-        <select [(ngModel)]="selectedStatus" (ngModelChange)="applyFilters_lot()"
-          class="appearance-none bg-white border border-gray-200 rounded-md px-3 py-2 pr-8 text-sm text-gray-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
->
+        <label for="statusFilter" class="sr-only">Filter by lot status</label>
+        <select
+          id="statusFilter"
+          class="filter-select"
+          [(ngModel)]="selectedStatus"
+          (ngModelChange)="applyFilters_lot()"
+        >
           <option value="">All statuses</option>
           <option value="Released">Released</option>
           <option value="Quarantine">Quarantine</option>
@@ -159,9 +173,13 @@
         </select>
       </div>
       <div class="filter-field">
-        <select [(ngModel)]="selectedRawMaterial" (ngModelChange)="applyFilters_lot()"
-          class="appearance-none bg-white border border-gray-200 rounded-md px-3 py-2 pr-8 text-sm text-gray-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
->
+        <label for="rawMaterialFilter" class="sr-only">Filter by raw material</label>
+        <select
+          id="rawMaterialFilter"
+          class="filter-select"
+          [(ngModel)]="selectedRawMaterial"
+          (ngModelChange)="applyFilters_lot()"
+        >
           <option value="">All raw materials</option>
           <option *ngFor="let name of rawMaterialNames" [value]="name">
             {{ name }}
