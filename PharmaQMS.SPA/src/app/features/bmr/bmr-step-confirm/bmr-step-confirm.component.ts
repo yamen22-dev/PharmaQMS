@@ -196,4 +196,17 @@ export class BmrStepConfirmationComponent implements OnInit {
         },
       });
   }
+
+  // this function is added temporarily to translate step names for demonstration purposes before a proper solution is implemented (e.g. translate the entire codebase to English).
+  translate(key: string): string {
+    const translations: { [key: string]: string } = {
+      "Grondstoffen wegen": "Weighing raw materials",
+      "Mengen": "Mixing",
+      "Granuleren": "Granulating",
+      "Drogen": "Drying",
+      "Capsules vullen": "Filling capsules",
+      "In-process kwaliteitscheck": "In-process quality check",
+    };
+    return translations[key] || key;
+  }
 }
