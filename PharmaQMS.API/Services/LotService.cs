@@ -105,13 +105,13 @@ public sealed class LotService : ILotService
         var rawMaterial = await _db.RawMaterials
             .AsNoTracking()
             .FirstOrDefaultAsync(r => r.Id == rawMaterialId, ct)
-            ?? throw new KeyNotFoundException($"Grondstof met id {rawMaterialId} niet gevonden.");
+            ?? throw new KeyNotFoundException($"Raw material with id {rawMaterialId} not found.");
 
         // Alt-B: vervaldatum via grondstof ligt in het verleden — niet van toepassing
         // (vervaldatum zit op RawMaterial, niet op Lot)
         if (request.ExpiryDateUtc.Date <= DateTime.UtcNow.Date)
             throw new InvalidOperationException(
-                "De vervaldatum van de grondstof ligt in het verleden. Er kunnen geen nieuwe lots worden geregistreerd.");
+                "The expiry date of the raw material is in the past. No new lots can be registered.");
 
         // Alt-A: dubbel lotnummer per grondstof
         bool duplicate = await _db.Lots
@@ -121,7 +121,7 @@ public sealed class LotService : ILotService
 
         if (duplicate)
             throw new InvalidOperationException(
-                "Dit lotnummer bestaat al voor de geselecteerde grondstof.");
+                "This lot number already exists for the selected raw material.");
 
         var lot = new Lot
         {
@@ -175,18 +175,18 @@ public sealed class LotService : ILotService
         // Alt-B: elektronische handtekening verificeren
         bool signatureValid = await _authService.VerifyPasswordAsync(changedByUserId, request.Password, ct);
         if (!signatureValid)
-            throw new UnauthorizedAccessException("Elektronische handtekening incorrect.");
+            throw new UnauthorizedAccessException("Electronic signature incorrect.");
 
         var lot = await _db.Lots.FirstOrDefaultAsync(l => l.Id == id, ct)
-            ?? throw new KeyNotFoundException($"Lot met id {id} niet gevonden.");
+            ?? throw new KeyNotFoundException($"Lot with id {id} not found.");
 
         if (!Enum.TryParse<LotStatus>(request.NewStatus, ignoreCase: true, out var newStatus))
-            throw new ArgumentException($"Ongeldige status: {request.NewStatus}.");
+            throw new ArgumentException($"Invalid status: {request.NewStatus}.");
 
         // Alt-C: niet-toegestane overgang
         if (!AllowedTransitions[lot.Status].Contains(newStatus))
             throw new InvalidOperationException(
-                $"Overgang van {lot.Status} naar {newStatus} is niet toegestaan.");
+                $"Transition from {lot.Status} to {newStatus} is not allowed.");
 
         var oldStatus = lot.Status;
         lot.Status = newStatus;

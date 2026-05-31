@@ -46,7 +46,7 @@ export class RawMaterialsComponent implements OnInit {
 
   constructor(private cdr: ChangeDetectorRef) {
     this.categoryOptions = [
-      { value: "all", label: "Alle categorieen" },
+      { value: "all", label: "All categories" },
       ...Object.values(RawMaterialCategory).map((value) => ({
         value,
         label: this.getCategoryLabel(value),
@@ -150,8 +150,8 @@ export class RawMaterialsComponent implements OnInit {
           this.cdr.detectChanges();
         },
         error: () => {
-          this.errorMessage =
-            "Het overzicht kon niet worden geladen. Probeer het later opnieuw.";
+        this.errorMessage =
+          "The overview could not be loaded. Please try again later.";
         },
       });
   }
@@ -230,7 +230,7 @@ export class RawMaterialsComponent implements OnInit {
       return matchSearch && matchStatus && matchRm;
     });
 
-    // Zoek het id op basis van de geselecteerde grondstof naam
+    // Find the id based on the selected raw material name
     this.selectedRawMaterialId = this.selectedRawMaterial
       ? (this.lots.find((l) => l.rawMaterialName === this.selectedRawMaterial)
           ?.rawMaterialId ?? null)
@@ -248,9 +248,9 @@ export class RawMaterialsComponent implements OnInit {
 
   statusLabel(status: LotStatus): string {
     const map: Record<LotStatus, string> = {
-      Quarantine: "Quarantaine",
-      Released: "Goedgekeurd",
-      Rejected: "Afgekeurd",
+      Quarantine: "Quarantine",
+      Released: "Released",
+      Rejected: "Rejected",
     };
     return map[status];
   }

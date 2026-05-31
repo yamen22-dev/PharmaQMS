@@ -74,7 +74,7 @@ export class BmrStepConfirmationComponent implements OnInit {
 
   loadSteps(): void {
     if (!this.bmrId) {
-      this.errorMessage = "Ongeldige BMR-id.";
+      this.errorMessage = "Invalid BMR id.";
       this.isLoading = false;
       return;
     }
@@ -104,7 +104,7 @@ export class BmrStepConfirmationComponent implements OnInit {
       },
       error: (err) => {
         console.error(err);
-        this.errorMessage = "Fout bij laden van stappen.";
+        this.errorMessage = "Failed to load steps.";
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -139,7 +139,7 @@ export class BmrStepConfirmationComponent implements OnInit {
       case BmrStepStatus.AwaitingVerification:
       case "AwaitingVerification":
       case "1":
-        return "AwaitingVerification";
+        return "Awaiting verification";
       case BmrStepStatus.Verified:
       case "Verified":
       case "2":
@@ -186,14 +186,27 @@ export class BmrStepConfirmationComponent implements OnInit {
       .confirmStep(this.bmrId, this.selectedStep.id, confirmReq)
       .subscribe({
         next: () => {
-          alert("Stap succesvol uitgevoerd!");
+          alert("Step executed successfully!");
           this.closeForm();
           this.loadSteps();
         },
         error: (err) => {
           console.error(err);
-          alert("Fout bij uitvoeren van stap.");
+          alert("Failed to execute step.");
         },
       });
+  }
+
+  // this function is added temporarily to translate step names for demonstration purposes before a proper solution is implemented (e.g. translate the entire codebase to English).
+  translate(key: string): string {
+    const translations: { [key: string]: string } = {
+      "Grondstoffen wegen": "Weighing raw materials",
+      "Mengen": "Mixing",
+      "Granuleren": "Granulating",
+      "Drogen": "Drying",
+      "Capsules vullen": "Filling capsules",
+      "In-process kwaliteitscheck": "In-process quality check",
+    };
+    return translations[key] || key;
   }
 }

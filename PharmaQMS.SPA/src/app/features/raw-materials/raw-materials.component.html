@@ -1,8 +1,8 @@
 <section class="raw-materials-page">
   <header class="page-header">
     <div>
-      <p class="eyebrow">Grondstoffen & Lots</p>
-      <h1>Grondstoffen overzicht</h1>
+      <p class="eyebrow">Raw Materials & Lots</p>
+      <h1>Raw Materials overview</h1>
     </div>
 
   <button
@@ -10,33 +10,34 @@
     type="button"
     class="primary-button new-material-btn"
     [routerLink]="['/raw-materials/new']"
-  >
-    Nieuwe grondstof
+    >
+    New raw material
   </button>
   </header>
 
   <section class="stats-grid">
     <div class="stat-card stat-card--primary">
       <h2>{{ stats.totalRegistered }}</h2>
-      <p>Totaal geregistreerd</p>
+      <p>Total registered</p>
     </div>
     <div class="stat-card">
       <h2>{{ stats.activeSubstances }}</h2>
-      <p>Werkzame stoffen</p>
+      <p>Active substances</p>
     </div>
     <div class="stat-card">
       <h2>{{ stats.excipients }}</h2>
-      <p>Hulpstoffen</p>
+      <p>Excipients</p>
     </div>
     <div class="stat-card stat-card--warning">
       <h2>{{ stats.lotsInQuarantine }}</h2>
-      <p>Lots in quarantaine</p>
+      <p>Lots in quarantine</p>
     </div>
   </section>
 
   <section class="content-card table-card">
     <div class="table-toolbar">
       <div class="search-field">
+        <label for="materialSearch" class="sr-only">Search raw materials</label>
         <span class="search-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
             <path
@@ -45,15 +46,22 @@
           </svg>
         </span>
         <input
+          id="materialSearch"
           type="text"
           class="search-input"
-          placeholder="Zoek op naam of API..."
+          placeholder="Search by name or API..."
           [value]="searchTerm"
           (input)="onSearchInput($event)"
         />
       </div>
       <div class="filter-field">
-        <select [(ngModel)]="selectedCategory" (ngModelChange)="applyFilters()">
+        <label for="categoryFilter" class="sr-only">Filter by category</label>
+        <select
+          id="categoryFilter"
+          class="filter-select"
+          [(ngModel)]="selectedCategory"
+          (ngModelChange)="applyFilters()"
+        >
           <option *ngFor="let option of categoryOptions" [value]="option.value">
             {{ option.label }}
           </option>
@@ -61,7 +69,7 @@
       </div>
     </div>
 
-    <div *ngIf="isLoading" class="table-state">Laden...</div>
+    <div *ngIf="isLoading" class="table-state">Loading...</div>
     <div *ngIf="errorMessage" class="table-state table-state--error">
       {{ errorMessage }}
     </div>
@@ -69,11 +77,11 @@
     <table *ngIf="!isLoading && !errorMessage" class="data-table">
       <thead>
         <tr>
-          <th>Naam</th>
-          <th>Farmaceutische API</th>
-          <th>Categorie</th>
-          <th>Eenheid</th>
-          <th>Actieve lots</th>
+          <th>Name</th>
+          <th>Pharmaceutical API</th>
+          <th>Category</th>
+          <th>Unit</th>
+          <th>Active lots</th>
         </tr>
       </thead>
       <tbody>
@@ -96,7 +104,7 @@
           <td>{{ material.activeLots }}</td>
         </tr>
         <tr *ngIf="filteredMaterials.length === 0">
-          <td colspan="5" class="table-empty">Geen grondstoffen gevonden.</td>
+          <td colspan="5" class="table-empty">No raw materials found.</td>
         </tr>
       </tbody>
     </table>
@@ -109,60 +117,70 @@
 <section class="lots-page mt-4">
   <header class="page-header">
     <div>
-      <h1>Lots overzicht</h1>
+      <h1>Lots overview</h1>
     </div>
   </header>
 
   <section class="stats-grid py-4 ">
     <div class="stat-card stat-card--primary">
       <h2>{{ lots.length }}</h2>
-      <p>Totaal lots</p>
+      <p>Total lots</p>
     </div>
     <div class="stat-card stat-card--success">
       <h2>{{ countByStatus('Released') }}</h2>
-      <p>Goedgekeurd</p>
+      <p>Released</p>
     </div>
     <div class="stat-card stat-card--warning">
       <h2>{{ countByStatus('Quarantine') }}</h2>
-      <p>Quarantaine</p>
+      <p>Quarantine</p>
     </div>
     <div class="stat-card stat-card--danger">
       <h2>{{ countByStatus('Rejected') }}</h2>
-      <p>Afgekeurd</p>
+      <p>Rejected</p>
     </div>
   </section>
 
   <section class="content-card table-card">
     <div class="table-toolbar">
       <div class="search-field">
+        <label for="lotSearch" class="sr-only">Search lots</label>
         <span class="search-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
             <path d="M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16Zm0-14a6 6 0 1 0 0 12 6 6 0 0 0 0-12Zm9.7 15.3-3.6-3.6a1 1 0 0 0-1.4 1.4l3.6 3.6a1 1 0 0 0 1.4-1.4Z"/>
           </svg>
         </span>
         <input
+          id="lotSearch"
           type="text"
           class="search-input"
-          placeholder="Zoek op lotnummer..."
+          placeholder="Search by lot number..."
           [(ngModel)]="searchQuery"
           (ngModelChange)="applyFilters_lot()"
         />
       </div>
       <div class="filter-field">
-        <select [(ngModel)]="selectedStatus" (ngModelChange)="applyFilters_lot()"
-          class="appearance-none bg-white border border-gray-200 rounded-md px-3 py-2 pr-8 text-sm text-gray-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
->
-          <option value="">Alle statussen</option>
-          <option value="Released">Goedgekeurd</option>
-          <option value="Quarantine">Quarantaine</option>
-          <option value="Rejected">Afgekeurd</option>
+        <label for="statusFilter" class="sr-only">Filter by lot status</label>
+        <select
+          id="statusFilter"
+          class="filter-select"
+          [(ngModel)]="selectedStatus"
+          (ngModelChange)="applyFilters_lot()"
+        >
+          <option value="">All statuses</option>
+          <option value="Released">Released</option>
+          <option value="Quarantine">Quarantine</option>
+          <option value="Rejected">Rejected</option>
         </select>
       </div>
       <div class="filter-field">
-        <select [(ngModel)]="selectedRawMaterial" (ngModelChange)="applyFilters_lot()"
-          class="appearance-none bg-white border border-gray-200 rounded-md px-3 py-2 pr-8 text-sm text-gray-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
->
-          <option value="">Alle grondstoffen</option>
+        <label for="rawMaterialFilter" class="sr-only">Filter by raw material</label>
+        <select
+          id="rawMaterialFilter"
+          class="filter-select"
+          [(ngModel)]="selectedRawMaterial"
+          (ngModelChange)="applyFilters_lot()"
+        >
+          <option value="">All raw materials</option>
           <option *ngFor="let name of rawMaterialNames" [value]="name">
             {{ name }}
           </option>
@@ -170,16 +188,16 @@
       </div>
     </div>
 
-    <div *ngIf="isLoadingLots" class="table-state">Laden...</div>
+    <div *ngIf="isLoadingLots" class="table-state">Loading...</div>
 
     <table *ngIf="!isLoadingLots" class="data-table">
       <thead>
         <tr>
-          <th>Lotnummer</th>
-          <th>Grondstof</th>
-          <th>Leverancier</th>
-          <th>Hoeveelheid</th>
-          <th>Vervaldatum</th>
+          <th>Lot number</th>
+          <th>Raw material</th>
+          <th>Supplier</th>
+          <th>Quantity</th>
+          <th>Expiry date</th>
           <th>Status</th>
         </tr>
       </thead>
@@ -201,7 +219,7 @@
           </td>
         </tr>
         <tr *ngIf="filtered.length === 0">
-          <td colspan="6" class="table-empty">Geen lots gevonden.</td>
+          <td colspan="6" class="table-empty">No lots found.</td>
         </tr>
       </tbody>
     </table>

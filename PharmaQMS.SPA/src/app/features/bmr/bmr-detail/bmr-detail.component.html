@@ -26,7 +26,7 @@
           {{ detail?.batchNumber || "BMR detail" }}
         </h1>
         <p class="mt-1 text-sm text-slate-500">
-          {{ detail?.recipeName || "Laden..." }}
+          {{ detail?.recipeName || "Loading..." }}
           <span *ngIf="detail">v{{ detail.recipeVersion }}</span>
         </p>
       </div>
@@ -44,7 +44,7 @@
       *ngIf="isLoading"
       class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
     >
-      Laden...
+      Loading...
     </div>
     <div
       *ngIf="errorMessage"
@@ -58,45 +58,45 @@
       *ngIf="detail && !isLoading"
       class="grid grid-cols-1 gap-6 md:grid-cols-2"
     >
-      <!-- PART 1: Batchgegevens + Status -->
+      <!-- PART 1: Batch details + Status -->
       <div
         class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
       >
         <div class="p-6">
           <h2 class="mb-4 text-base font-semibold text-slate-900">
-            Batchgegevens
+            Batch details
           </h2>
           <dl class="space-y-3 text-sm">
             <div class="flex justify-between gap-4">
-              <dt class="text-slate-500">Batchnummer</dt>
+              <dt class="text-slate-500">Batch number</dt>
               <dd class="font-medium text-slate-900">
                 {{ detail.batchNumber }}
               </dd>
             </div>
             <div class="flex justify-between gap-4">
-              <dt class="text-slate-500">Masterrecept</dt>
+              <dt class="text-slate-500">Master recipe</dt>
               <dd class="font-medium text-slate-900">
                 {{ detail.recipeName }}
               </dd>
             </div>
             <div class="flex justify-between gap-4">
-              <dt class="text-slate-500">Versie</dt>
+              <dt class="text-slate-500">Version</dt>
               <dd class="font-medium text-slate-900">
                 {{ detail.recipeVersion }}
               </dd>
             </div>
             <div class="flex justify-between gap-4">
-              <dt class="text-slate-500">Productielijn</dt>
+              <dt class="text-slate-500">Production line</dt>
               <dd class="font-medium text-slate-900">
                 {{ detail.productionLineName }}
               </dd>
             </div>
             <div class="flex justify-between gap-4">
-              <dt class="text-slate-500">Batchgrootte</dt>
+              <dt class="text-slate-500">Batch size</dt>
               <dd class="font-medium text-slate-900">{{ detail.batchSize }}</dd>
             </div>
             <div class="flex justify-between gap-4">
-              <dt class="text-slate-500">Voortgang</dt>
+              <dt class="text-slate-500">Progress</dt>
               <dd class="font-medium text-slate-900">
                 {{ completedSteps }} / {{ totalSteps }}
               </dd>
@@ -107,7 +107,7 @@
                   [routerLink]="['/bmr', detail.id, 'steps']"
                   class="text-blue-500 hover:text-blue-700"
                 >
-                  Stappenplan
+                  Steps
                 </a>
               </dt>
             </div>
@@ -115,13 +115,13 @@
         </div>
       </div>
 
-      <!-- PART 2: Gekoppelde lots -->
+      <!-- PART 2: Linked lots -->
       <div
         class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
       >
         <div class="p-6">
           <h2 class="mb-4 text-base font-semibold text-slate-900">
-            Gekoppelde lots
+            Linked lots
           </h2>
 
           <div
@@ -145,7 +145,7 @@
             <div
               class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-500"
             >
-              Geen lots gekoppeld.
+              No linked lots.
             </div>
           </ng-template>
         </div>

@@ -131,7 +131,7 @@ export class RawMaterialFormComponent {
         this.submitted = false;
         this.form.reset();
         this.showSuccessAlert = true;
-        this.successMessage = `Grondstof "${response.name}" succesvol geregistreerd.`;
+        this.successMessage = `Raw material "${response.name}" registered successfully.`;
       },
       error: (error) => {
         this.onSubmitError(error);
@@ -146,16 +146,16 @@ export class RawMaterialFormComponent {
 
     if (error.status === 409) {
       this.serverError =
-        "Er bestaat al een grondstof met deze naam en farmaceutische API.";
+        "A raw material with this name and pharmaceutical API already exists.";
     } else if (error.status === 400) {
       this.serverError =
-        error.error?.detail || "Ongeldige invoer. Controleer de velden.";
+        error.error?.detail || "Invalid input. Please check the fields.";
     } else if (error.status === 403) {
       this.serverError =
-        "Je hebt geen rechten om grondstoffen te registreren.";
+        "You do not have permission to register raw materials.";
     } else {
       this.serverError =
-        "Er ging iets mis bij het registreren. Probeer het opnieuw.";
+        "An error occurred while registering. Please try again.";
     }
   }
 
@@ -166,16 +166,16 @@ export class RawMaterialFormComponent {
     }
 
     if (control.hasError("required")) {
-      return `${this.formatFieldName(fieldName)} is verplicht.`;
+      return `${this.formatFieldName(fieldName)} is required.`;
     }
     if (control.hasError("minlength") || control.hasError("minLength")) {
-      return `${this.formatFieldName(fieldName)} moet minimaal 2 tekens zijn.`;
+      return `${this.formatFieldName(fieldName)} must be at least 2 characters.`;
     }
     if (control.hasError("pattern")) {
-      return `${this.formatFieldName(fieldName)} moet een geldig getal zijn.`;
+      return `${this.formatFieldName(fieldName)} must be a valid number.`;
     }
     if (control.hasError("minMaxInvalid")) {
-      return "Minimum specificatiegrens moet kleiner of gelijk zijn aan maximum.";
+      return "Minimum specification limit must be less than or equal to maximum.";
     }
 
     return null;
@@ -183,13 +183,13 @@ export class RawMaterialFormComponent {
 
   private formatFieldName(field: string): string {
     const labels: Record<string, string> = {
-      name: "Naam grondstof",
-      pharmaceuticalApi: "Farmaceutische API",
-      category: "Categorie",
-      unit: "Eenheid",
-      minSpecificationLimit: "Min. specificatiegrens",
-      maxSpecificationLimit: "Max. specificatiegrens",
-      notes: "Omschrijving",
+      name: "Raw material name",
+      pharmaceuticalApi: "Pharmaceutical API",
+      category: "Category",
+      unit: "Unit",
+      minSpecificationLimit: "Min. specification limit",
+      maxSpecificationLimit: "Max. specification limit",
+      notes: "Description",
     };
 
     return labels[field] ?? field;
@@ -202,15 +202,15 @@ export class RawMaterialFormComponent {
   getCategoryLabel(category: string): string {
     switch (category) {
       case RawMaterialCategory.ActivePharmaceuticalIngredient:
-        return "Werkzame stof";
+        return "Active pharmaceutical ingredient";
       case RawMaterialCategory.Excipient:
-        return "Hulpstof";
+        return "Excipient";
       case RawMaterialCategory.Packaging:
-        return "Verpakking";
+        return "Packaging";
       case RawMaterialCategory.Solvent:
-        return "Oplosmiddel";
+        return "Solvent";
       case RawMaterialCategory.Other:
-        return "Overig";
+        return "Other";
       default:
         return category;
     }

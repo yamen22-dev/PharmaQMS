@@ -76,6 +76,12 @@
   border-left: 3px solid transparent;
 }
 
+.nav-item:focus-visible,
+.logout-btn:focus-visible {
+  outline: 3px solid #93c5fd;
+  outline-offset: 2px;
+}
+
 .nav-item:hover {
   background: rgba(30, 90, 150, 0.2);
   color: #f1f5f9;

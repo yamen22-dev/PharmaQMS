@@ -30,7 +30,7 @@ export class RawMaterialDetailComponent implements OnInit {
     const id = Number(idParam);
 
     if (!idParam || Number.isNaN(id)) {
-      this.errorMessage = "Ongeldig grondstof ID.";
+      this.errorMessage = "Invalid raw material ID.";
       this.isLoading = false;
       return;
     }
@@ -41,15 +41,15 @@ export class RawMaterialDetailComponent implements OnInit {
   getCategoryLabel(category: string): string {
     switch (category) {
       case RawMaterialCategory.ActivePharmaceuticalIngredient:
-        return "Werkzame stof";
+        return "Active pharmaceutical ingredient";
       case RawMaterialCategory.Excipient:
-        return "Hulpstof";
+        return "Excipient";
       case RawMaterialCategory.Packaging:
-        return "Verpakking";
+        return "Packaging";
       case RawMaterialCategory.Solvent:
-        return "Oplosmiddel";
+        return "Solvent";
       case RawMaterialCategory.Other:
-        return "Overig";
+        return "Other";
       default:
         return category;
     }
@@ -73,11 +73,11 @@ export class RawMaterialDetailComponent implements OnInit {
   getStatusLabel(status: LotStatus): string {
     switch (status) {
       case "Quarantine":
-        return "Quarantaine";
+        return "Quarantine";
       case "Released":
-        return "Goedgekeurd";
+        return "Released";
       case "Rejected":
-        return "Afgekeurd";
+        return "Rejected";
       default:
         return status;
     }
@@ -102,11 +102,11 @@ export class RawMaterialDetailComponent implements OnInit {
 
   getDescription(text: string | null | undefined): string {
     if (!text) {
-      return "Geen omschrijving beschikbaar.";
+      return "No description available.";
     }
 
     const trimmed = text.trim();
-    return trimmed.length ? trimmed : "Geen omschrijving beschikbaar.";
+    return trimmed.length ? trimmed : "No description available.";
   }
 
   private loadDetail(id: number): void {
@@ -121,10 +121,10 @@ export class RawMaterialDetailComponent implements OnInit {
       },
       error: (error) => {
         if (error?.status === 404) {
-          this.errorMessage = "Grondstof niet gevonden.";
+          this.errorMessage = "Raw material not found.";
         } else {
           this.errorMessage =
-            "Het detailoverzicht kon niet worden geladen. Probeer het later opnieuw.";
+            "The detail view could not be loaded. Please try again later.";
         }
         this.isLoading = false;
       },
@@ -132,7 +132,7 @@ export class RawMaterialDetailComponent implements OnInit {
   }
 
   private formatSpecValue(value: number): string {
-    return value.toLocaleString("nl-NL", {
+    return value.toLocaleString("en-GB", {
       minimumFractionDigits: 1,
       maximumFractionDigits: 2,
     });

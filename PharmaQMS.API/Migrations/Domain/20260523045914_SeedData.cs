@@ -27,9 +27,9 @@ namespace PharmaQMS.API.Migrations.Domain
                 columns: new[] { "Id", "IsActive", "LineName", "Location" },
                 values: new object[,]
                 {
-                    { new Guid("11111111-0000-0000-0000-000000000001"), true, "Lijn A", "Hal 1" },
-                    { new Guid("11111111-0000-0000-0000-000000000002"), true, "Lijn B", "Hal 1" },
-                    { new Guid("11111111-0000-0000-0000-000000000003"), true, "Lijn C", "Hal 2" }
+                    { new Guid("11111111-0000-0000-0000-000000000001"), true, "Line A", "Hall 1" },
+                    { new Guid("11111111-0000-0000-0000-000000000002"), true, "Line B", "Hall 1" },
+                    { new Guid("11111111-0000-0000-0000-000000000003"), true, "Line C", "Hall 2" }
                 });
 
             migrationBuilder.InsertData(
@@ -37,16 +37,16 @@ namespace PharmaQMS.API.Migrations.Domain
                 columns: new[] { "Id", "ExpectedFields", "IsCritical", "MasterRecipeId", "StepName", "StepNumber" },
                 values: new object[,]
                 {
-                    { new Guid("33333333-0000-0000-0000-000000000001"), "Gewicht (kg)", true, new Guid("22222222-0000-0000-0000-000000000001"), "Grondstoffen wegen", 1 },
-                    { new Guid("33333333-0000-0000-0000-000000000002"), "Mengtijd (min)", false, new Guid("22222222-0000-0000-0000-000000000001"), "Mengen", 2 },
-                    { new Guid("33333333-0000-0000-0000-000000000003"), "Temperatuur (°C); Tijd (min)", true, new Guid("22222222-0000-0000-0000-000000000001"), "Granuleren", 3 },
-                    { new Guid("33333333-0000-0000-0000-000000000004"), "Vochtigheid (%)", false, new Guid("22222222-0000-0000-0000-000000000001"), "Drogen", 4 },
-                    { new Guid("33333333-0000-0000-0000-000000000005"), "Vulgewicht (mg)", true, new Guid("22222222-0000-0000-0000-000000000001"), "Capsules vullen", 5 },
-                    { new Guid("33333333-0000-0000-0000-000000000006"), "Resultaat", true, new Guid("22222222-0000-0000-0000-000000000001"), "In-process kwaliteitscheck", 6 },
-                    { new Guid("33333333-0000-0000-0000-000000000007"), "Gewicht (kg)", true, new Guid("22222222-0000-0000-0000-000000000002"), "Grondstoffen wegen", 1 },
-                    { new Guid("33333333-0000-0000-0000-000000000008"), "Mengtijd (min)", false, new Guid("22222222-0000-0000-0000-000000000002"), "Mengen", 2 },
-                    { new Guid("33333333-0000-0000-0000-000000000009"), "Vulgewicht (mg)", true, new Guid("22222222-0000-0000-0000-000000000002"), "Capsules vullen", 3 },
-                    { new Guid("33333333-0000-0000-0000-000000000010"), "Resultaat", true, new Guid("22222222-0000-0000-0000-000000000002"), "In-process kwaliteitscheck", 4 }
+                    { new Guid("33333333-0000-0000-0000-000000000001"), "Weight (kg)", true, new Guid("22222222-0000-0000-0000-000000000001"), "Weigh raw materials", 1 },
+                    { new Guid("33333333-0000-0000-0000-000000000002"), "Mix time (min)", false, new Guid("22222222-0000-0000-0000-000000000001"), "Mixing", 2 },
+                    { new Guid("33333333-0000-0000-0000-000000000003"), "Temperature (°C); Time (min)", true, new Guid("22222222-0000-0000-0000-000000000001"), "Granulation", 3 },
+                    { new Guid("33333333-0000-0000-0000-000000000004"), "Moisture (%)", false, new Guid("22222222-0000-0000-0000-000000000001"), "Drying", 4 },
+                    { new Guid("33333333-0000-0000-0000-000000000005"), "Fill weight (mg)", true, new Guid("22222222-0000-0000-0000-000000000001"), "Capsule filling", 5 },
+                    { new Guid("33333333-0000-0000-0000-000000000006"), "Result", true, new Guid("22222222-0000-0000-0000-000000000001"), "In-process quality check", 6 },
+                    { new Guid("33333333-0000-0000-0000-000000000007"), "Weight (kg)", true, new Guid("22222222-0000-0000-0000-000000000002"), "Weigh raw materials", 1 },
+                    { new Guid("33333333-0000-0000-0000-000000000008"), "Mix time (min)", false, new Guid("22222222-0000-0000-0000-000000000002"), "Mixing", 2 },
+                    { new Guid("33333333-0000-0000-0000-000000000009"), "Fill weight (mg)", true, new Guid("22222222-0000-0000-0000-000000000002"), "Capsule filling", 3 },
+                    { new Guid("33333333-0000-0000-0000-000000000010"), "Result", true, new Guid("22222222-0000-0000-0000-000000000002"), "In-process quality check", 4 }
                 });
         }
 

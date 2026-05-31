@@ -18,7 +18,7 @@ const NAVIGATION_ITEMS: NavigationItem[] = [
   },
   {
     route: "/raw-materials",
-    label: "Grondstoffen & Lots",
+    label: "Raw Materials & Lots",
     icon: "🏭",
     allowedRoles: ["QAManager", "WarehouseOperator"],
   },

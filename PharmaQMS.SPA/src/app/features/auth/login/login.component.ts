@@ -91,7 +91,7 @@ export class LoginComponent {
 
       // Last resort based on status
       if (error.status === 401) {
-        return "Ongeldige gebruikersnaam of wachtwoord.";
+        return "Invalid username or password.";
       }
     }
 

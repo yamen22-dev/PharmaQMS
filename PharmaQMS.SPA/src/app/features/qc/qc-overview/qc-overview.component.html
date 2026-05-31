@@ -26,7 +26,9 @@
   </div>
 
   <div class="flex gap-2 mb-4">
+    <label for="qcSearch" class="sr-only">Search by batch or lot</label>
     <input
+      id="qcSearch"
       type="text"
       placeholder="Search by batch or lot..."
       [(ngModel)]="searchQuery"
@@ -34,7 +36,9 @@
       class="border rounded px-3 py-2 flex-1"
     />
 
+    <label for="qcResultFilter" class="sr-only">Filter by result</label>
     <select
+      id="qcResultFilter"
       [(ngModel)]="selectedResult"
       (change)="applyFilters()"
       class="border rounded px-3 py-2"

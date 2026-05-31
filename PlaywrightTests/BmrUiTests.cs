@@ -1,10 +1,7 @@
-using Microsoft.Playwright.Xunit.v3;
 using Microsoft.Playwright;
 using System.Text.Json;
 using static Microsoft.Playwright.Assertions;
 using System.Text.RegularExpressions;
-using Serilog.Core;
-using Serilog;
 
 namespace PlaywrightTests;
 
@@ -24,7 +21,7 @@ public sealed class BmrUiTests
     {
         var (page, batchNumber) = await CreateBmrAsync(ProductionAnalystEmail);
 
-        await Expect(page.GetByText("In uitvoering", new() { Exact = true })).ToBeVisibleAsync(new() { Timeout = 3000 });
+        await Expect(page.GetByText("In progress", new() { Exact = true })).ToBeVisibleAsync(new() { Timeout = 3000 });
         Console.WriteLine($"Created BMR with batch number: {batchNumber}");
         await Expect(page.Locator("main h1")).ToContainTextAsync(batchNumber,
             new() { Timeout = 3000, UseInnerText = true }
@@ -41,10 +38,10 @@ public sealed class BmrUiTests
         var page = await CreatePageAsync();
 
         await page.GotoAsync("/login");
-        await page.GetByLabel("GEBRUIKERSNAAM").FillAsync(ProductionAnalystEmail);
-        await page.GetByRole(AriaRole.Button, new() { Name = "Aanmelden" }).ClickAsync();
+        await page.GetByLabel("USERNAME").FillAsync(ProductionAnalystEmail);
+        await page.GetByRole(AriaRole.Button, new() { Name = "Sign in" }).ClickAsync();
 
-        await Expect(page.GetByText("Wachtwoord is vereist.", new() { Exact = true })).ToBeVisibleAsync();
+        await Expect(page.GetByText("Password is required.", new() { Exact = true })).ToBeVisibleAsync();
     }
 
     [Fact]
@@ -56,13 +53,13 @@ public sealed class BmrUiTests
         await AssertNavigationAsync(
             analystPage,
             ["Dashboard", "BMR"],
-            ["Grondstoffen & Lots", "Quality Control", "Audit Trail"]);
+            ["Raw Materials & Lots", "Quality Control", "Audit Trail"]);
 
         var managerPage = await CreatePageAsync();
         await LoginAsync(managerPage, QaManagerEmail);
         await AssertNavigationAsync(
             managerPage,
-            ["Dashboard", "Grondstoffen & Lots", "BMR", "Quality Control", "Audit Trail"],
+            ["Dashboard", "Raw Materials & Lots", "BMR", "Quality Control", "Audit Trail"],
             Array.Empty<string>());
     }
 
@@ -75,17 +72,17 @@ public sealed class BmrUiTests
 
         await page.GotoAsync($"/bmr/{bmrId}");
         await Expect(page.GetByRole(AriaRole.Heading, new() { NameRegex = new Regex(batchNumber, RegexOptions.IgnoreCase) })).ToBeVisibleAsync();
-        await page.GetByRole(AriaRole.Link, new() { NameRegex = new Regex("Stappenplan", RegexOptions.IgnoreCase) }).ClickAsync();
-        await Expect(page.GetByRole(AriaRole.Heading, new() { NameRegex = new Regex("Productiestap uitvoeren", RegexOptions.IgnoreCase) })).ToBeVisibleAsync();
+        await page.GetByRole(AriaRole.Link, new() { NameRegex = new Regex("Steps", RegexOptions.IgnoreCase) }).ClickAsync();
+        await Expect(page.GetByRole(AriaRole.Heading, new() { NameRegex = new Regex("Execute production step", RegexOptions.IgnoreCase) })).ToBeVisibleAsync();
 
         await ExecuteFirstOpenStepAsync(page);
-        await Expect(page.GetByText("AwaitingVerification", new() { Exact = true })).ToBeVisibleAsync();
-        await Expect(page.GetByRole(AriaRole.Link, new() { NameRegex = new Regex("Verification", RegexOptions.IgnoreCase) })).ToHaveCountAsync(0);
+        await Expect(page.GetByText("Awaiting verification", new() { Exact = true })).ToBeVisibleAsync();
+        await Expect(page.GetByRole(AriaRole.Link, new() { NameRegex = new Regex("Verify", RegexOptions.IgnoreCase) })).ToHaveCountAsync(0);
 
         var qaPage = await CreatePageAsync();
         await LoginAsync(qaPage, QaManagerEmail);
         await qaPage.GotoAsync($"/bmr/{bmrId}/steps");
-        await Expect(qaPage.GetByRole(AriaRole.Link, new() { NameRegex = new Regex("Verification", RegexOptions.IgnoreCase) })).ToBeVisibleAsync();
+        await Expect(qaPage.GetByRole(AriaRole.Link, new() { NameRegex = new Regex("Verify", RegexOptions.IgnoreCase) })).ToBeVisibleAsync();
 
         await VerifyFirstAwaitingStepAsync(qaPage);
 
@@ -103,13 +100,13 @@ public sealed class BmrUiTests
 
         await analystPage.GotoAsync($"/bmr/{bmrId}/steps");
         await ExecuteFirstOpenStepAsync(analystPage);
-        await Expect(analystPage.GetByRole(AriaRole.Link, new() { Name = "Verification" })).ToHaveCountAsync(0);
+        await Expect(analystPage.GetByRole(AriaRole.Link, new() { Name = "Verify" })).ToHaveCountAsync(0);
 
         var qaPage = await CreatePageAsync();
         await LoginAsync(qaPage, QaManagerEmail);
         await qaPage.GotoAsync($"/bmr/{bmrId}/steps");
 
-        await Expect(qaPage.GetByRole(AriaRole.Link, new() { Name = "Verification" })).ToBeVisibleAsync();
+        await Expect(qaPage.GetByRole(AriaRole.Link, new() { Name = "Verify" })).ToBeVisibleAsync();
     }
 
     [Fact]
@@ -119,7 +116,7 @@ public sealed class BmrUiTests
         var page = await CreatePageAsync();
 
         await LoginAsync(page, ProductionAnalystEmail);
-        await Expect(page.GetByText("Sessie verloopt automatisch na 15 minuten inactiviteit.", new() { Exact = true })).ToBeVisibleAsync();
+        await Expect(page.GetByText("Session expires automatically after 15 minutes of inactivity.", new() { Exact = true })).ToBeVisibleAsync();
         await Expect(page.GetByText("Access token expires at", new() { Exact = true })).ToBeVisibleAsync();
         await Expect(page.GetByText("Refresh token expires at", new() { Exact = true })).ToBeVisibleAsync();
     }
@@ -130,10 +127,10 @@ public sealed class BmrUiTests
         await LoginAsync(page, userEmail);
 
         await page.GotoAsync("/bmr/new");
-        await Expect(page.GetByRole(AriaRole.Heading, new() { Name = "Batch Manufacturing Record aanmaken" })).ToBeVisibleAsync(new() { Timeout = 5000 });
+        await Expect(page.GetByRole(AriaRole.Heading, new() { Name = "Create Batch Manufacturing Record" })).ToBeVisibleAsync(new() { Timeout = 5000 });
         var createHeading = page.GetByRole(AriaRole.Heading, new()
         {
-            Name = "Batch Manufacturing Record aanmaken"
+            Name = "Create Batch Manufacturing Record"
         });
 
         try
@@ -149,22 +146,23 @@ public sealed class BmrUiTests
             await createHeading.WaitForAsync(new() { State = WaitForSelectorState.Visible, Timeout = 5000 });
         }
 
-        await page.GetByLabel("Masterrecept").SelectOptionAsync(new SelectOptionValue
+        await page.GetByLabel("Master recipe").SelectOptionAsync(new SelectOptionValue
         {
             Label = "AMOX-500MG-CAP",
         });
 
-        await page.GetByLabel("Batchgrootte (kg)").FillAsync("250");
-        await page.GetByLabel("Productielijn").SelectOptionAsync(new SelectOptionValue
-        {
-            Label = "Lijn A",
-        });
-
+        await page.GetByLabel("Batch size (kg)").FillAsync("250");
+        await page.GetByLabel("Production line").SelectOptionAsync(
+            new SelectOptionValue
+            {
+                Label = "Line A",
+            }
+        );
         var lotCheckbox = page.Locator("input[type='checkbox']").First;
         await Expect(lotCheckbox).ToBeVisibleAsync();
         await lotCheckbox.CheckAsync();
 
-        var createButton = page.GetByRole(AriaRole.Button, new() { Name = "BMR aanmaken & starten" });
+        var createButton = page.GetByRole(AriaRole.Button, new() { Name = "Create & start BMR" });
         await Expect(createButton).ToBeEnabledAsync();
         await createButton.ClickAsync();
 
@@ -206,9 +204,9 @@ public sealed class BmrUiTests
 
         await page.GotoAsync("/login");
 
-        await page.GetByLabel("GEBRUIKERSNAAM").FillAsync(email);
-        await page.GetByLabel("WACHTWOORD").FillAsync(password);
-        await page.GetByRole(AriaRole.Button, new() { Name = "Aanmelden" }).ClickAsync();
+        await page.GetByLabel("USERNAME").FillAsync(email);
+        await page.GetByLabel("PASSWORD").FillAsync(password);
+        await page.GetByRole(AriaRole.Button, new() { Name = "Sign in" }).ClickAsync();
 
         await Expect(page).ToHaveURLAsync(new Regex(@".*/dashboard/?$"));
     }
@@ -233,23 +231,25 @@ public sealed class BmrUiTests
 
     private static async Task ExecuteFirstOpenStepAsync(IPage page)
     {
-        var executeButton = page.GetByRole(AriaRole.Button, new() { Name = "Execution" }).First;
+        var executeButton = page.GetByRole(AriaRole.Button, new() { Name = "Execute" }).First;
+
         await Expect(executeButton).ToBeVisibleAsync();
 
         page.Dialog += async (_, dialog) => await dialog.AcceptAsync();
 
         await executeButton.ClickAsync();
-        await page.GetByLabel("TEMPERATUUR (°C)").FillAsync("42");
-        await page.GetByLabel("DUUR (MIN)").FillAsync("15");
-        await page.GetByLabel("OPMERKING").FillAsync("Playwright execution");
+        await page.GetByLabel("TEMPERATURE (°C)").FillAsync("42");
+        await page.GetByLabel("DURATION (MIN)").FillAsync("15");
+        await page.GetByLabel("REMARK").FillAsync("Playwright execution");
 
-        await page.GetByRole(AriaRole.Button, new() { Name = "Uitvoeren" }).ClickAsync();
-        await Expect(page.GetByText("AwaitingVerification", new() { Exact = true })).ToBeVisibleAsync( new() { Timeout = 5000 });
+        await page.Locator("#confirm-execute-button").ClickAsync();
+        // await page.GetByRole(AriaRole.Button, new() { Name = "Execute" }).ClickAsync();
+        await Expect(page.GetByText("Awaiting verification", new() { Exact = true })).ToBeVisibleAsync(new() { Timeout = 5000 });
     }
 
     private static async Task VerifyFirstAwaitingStepAsync(IPage page)
     {
-        var verificationLink = page.GetByRole(AriaRole.Link, new() { Name = "Verification" }).First;
+        var verificationLink = page.GetByRole(AriaRole.Link, new() { Name = "Verify" }).First;
         await Expect(verificationLink).ToBeVisibleAsync();
 
         page.Dialog += async (_, dialog) => await dialog.AcceptAsync();
@@ -258,7 +258,7 @@ public sealed class BmrUiTests
         await Expect(page.GetByRole(AriaRole.Heading, new() { Name = "Four‑eyes verification —" })).ToBeVisibleAsync();
         await page.GetByLabel("ELECTRONIC SIGNATURE (PASSWORD)").FillAsync(ResolveProductionAnalystPassword());
         await page.GetByRole(AriaRole.Button, new() { Name = "Confirm verification" }).ClickAsync();
-        await Expect(page.GetByText("Verificatie geslaagd.", new() { Exact = true })).ToBeVisibleAsync();
+        await Expect(page.GetByText("Verification succeeded.", new() { Exact = true })).ToBeVisibleAsync();
     }
 
     private static string ExtractIdFromCurrentUrl(string url, string segment)

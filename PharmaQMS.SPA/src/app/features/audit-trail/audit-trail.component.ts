@@ -205,7 +205,7 @@ export class AuditTrailComponent implements OnInit {
   }
 
   formatValue(value: string | null): string {
-    return value?.trim() || "Geen waarde";
+    return value?.trim() || "No value";
   }
 
   trackById(_: number, entry: AuditTrailViewModel): number {
@@ -222,7 +222,7 @@ export class AuditTrailComponent implements OnInit {
   private uniqueSorted(values: string[]): string[] {
     return [
       ...new Set(values.map((value) => value.trim()).filter(Boolean)),
-    ].sort((left, right) => left.localeCompare(right, "nl"));
+    ].sort((left, right) => left.localeCompare(right, "en"));
   }
 
   private startOfDay(value: string): Date | null {

@@ -29,7 +29,7 @@ export class LotFormComponent implements OnInit {
   private readonly lotService = inject(LotService);
   private readonly rawMaterialService = inject(RawMaterialService);
 
-  /** ID of the raw material (grondstof) we are on */
+  /** ID of the raw material we are on */
   rawMaterialId!: number;
 
   /** UI state */
@@ -111,7 +111,7 @@ export class LotFormComponent implements OnInit {
       receivedDateUtc: new Date(form.receivedDate!).toISOString(),
       purchaseOrderNumber: form.purchaseOrderNumber!,
       analysisCertificate: form.analysisCertificate ?? null,
-      // NOTE: status is NOT sent – the backend forces it to 'Quarantaine'
+      // NOTE: status is NOT sent – the backend forces it to 'Quarantine'
     };
 
     // Call the service – the backend will do all validation & audit logging
@@ -127,15 +127,15 @@ export class LotFormComponent implements OnInit {
             // Duplicate lot number – message defined by the backend
             this.serverError =
               err.error?.message ||
-              "Dit lotnummer bestaat al voor de geselecteerde grondstof.";
-            this.submitError = "Er is een fout opgetreden. Probeer opnieuw.";
+              "This lot number already exists for the selected raw material.";
+            this.submitError = "An error occurred. Please try again.";
           } else if (err.status === 400 && err.error?.message) {
             // Other validation errors (e.g. expiry in the past)
             this.serverError = err.error.message;
             this.submitError = err.error.message;
           } else {
-            this.submitError = "Er is een fout opgetreden. Probeer opnieuw.";
-            this.serverError = "Er is een fout opgetreden. Probeer opnieuw.";
+            this.submitError = "An error occurred. Please try again.";
+            this.serverError = "An error occurred. Please try again.";
           }
           return of(null); // swallow so the observable completes
         }),
@@ -148,7 +148,7 @@ export class LotFormComponent implements OnInit {
       .subscribe({
         next: (createdLot) => {
           // Success – navigate to the newly created lot detail page
-          this.submitSuccess = "Lot succesvol aangemaakt";
+          this.submitSuccess = "Lot created successfully";
 
           this.router.navigate(["/raw-materials", this.rawMaterialId]);
         },
