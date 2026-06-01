@@ -18,5 +18,5 @@ public sealed record SubmitQcTestResultParameterRequest
     public int ParameterId { get; init; }
 
     [Required]
-    public decimal MeasuredValue { get; init; }
+    public decimal? MeasuredValue { get; init; }
 }

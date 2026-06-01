@@ -22,7 +22,7 @@ public sealed class QcTestServiceTests
         var oosScenario = await RunScenarioAsync(5m);
 
         Assert.Equal(QcTestStatus.Approved, passScenario.Test.Status);
-        Assert.Equal(LotStatus.Released, passScenario.Lot.Status);
+        Assert.Equal(LotStatus.Released, passScenario.Lot!.Status);
         Assert.True(passScenario.Response.CoaStarted);
         Assert.False(passScenario.Response.NotificationQueued);
         Assert.All(passScenario.Response.Parameters, parameter => Assert.True(parameter.IsWithinSpecification));
@@ -30,7 +30,31 @@ public sealed class QcTestServiceTests
         Assert.Single(passScenario.AuditLogs);
 
         Assert.Equal(QcTestStatus.Rejected, oosScenario.Test.Status);
-        Assert.Equal(LotStatus.Rejected, oosScenario.Lot.Status);
+        Assert.Equal(LotStatus.Rejected, oosScenario.Lot!.Status);
+        Assert.False(oosScenario.Response.CoaStarted);
+        Assert.True(oosScenario.Response.NotificationQueued);
+        Assert.All(oosScenario.Response.Parameters, parameter => Assert.False(parameter.IsWithinSpecification));
+        Assert.Contains(oosScenario.AuditLogs, log => log.Actie == "QC_RESULTS_SUBMITTED");
+        Assert.Contains(oosScenario.AuditLogs, log => log.Actie == "QA_MANAGER_ALERT");
+        Assert.Equal(2, oosScenario.AuditLogs.Count);
+    }
+
+    [Fact]
+    public async Task SubmitResultsAsync_WithWithinAndOutOfSpecificationValues_ApprovesOrRejectsTestAndBatchAndWritesAuditEntries()
+    {
+        var passScenario = await RunBatchScenarioAsync(15m);
+        var oosScenario = await RunBatchScenarioAsync(5m);
+
+        Assert.Equal(QcTestStatus.Approved, passScenario.Test.Status);
+        Assert.Equal(BmrStatus.Completed, passScenario.Bmr!.Status);
+        Assert.True(passScenario.Response.CoaStarted);
+        Assert.False(passScenario.Response.NotificationQueued);
+        Assert.All(passScenario.Response.Parameters, parameter => Assert.True(parameter.IsWithinSpecification));
+        Assert.Contains(passScenario.AuditLogs, log => log.Actie == "QC_RESULTS_SUBMITTED");
+        Assert.Single(passScenario.AuditLogs);
+
+        Assert.Equal(QcTestStatus.Rejected, oosScenario.Test.Status);
+        Assert.Equal(BmrStatus.Rejected, oosScenario.Bmr!.Status);
         Assert.False(oosScenario.Response.CoaStarted);
         Assert.True(oosScenario.Response.NotificationQueued);
         Assert.All(oosScenario.Response.Parameters, parameter => Assert.False(parameter.IsWithinSpecification));
@@ -136,13 +160,121 @@ public sealed class QcTestServiceTests
             .OrderBy(log => log.Id)
             .ToListAsync(cancellationToken);
 
-        return new QcScenarioResult(submitResult, savedTest, savedLot, auditLogs);
+        return new QcScenarioResult(submitResult, savedTest, savedLot, null, auditLogs);
+    }
+
+    private static async Task<QcScenarioResult> RunBatchScenarioAsync(decimal measuredValue)
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+
+        await using var connection = new SqliteConnection("Filename=:memory:");
+        await connection.OpenAsync(cancellationToken);
+
+        var services = new ServiceCollection();
+        services.AddDbContext<DomainDbContext>(options => options.UseSqlite(connection));
+
+        using var provider = services.BuildServiceProvider();
+        using var scope = provider.CreateScope();
+
+        var dbContext = scope.ServiceProvider.GetRequiredService<DomainDbContext>();
+        await dbContext.Database.EnsureCreatedAsync(cancellationToken);
+
+        var masterRecipe = new MasterRecipe
+        {
+            Id = Guid.NewGuid(),
+            RecipeName = "Seed Batch Recipe",
+            Version = "1.0",
+            IsApproved = true,
+        };
+
+        var productionLine = new ProductionLine
+        {
+            Id = Guid.NewGuid(),
+            LineName = "Seed Line",
+            Location = "Main",
+            IsActive = true,
+        };
+
+        var bmr = new Bmr
+        {
+            Id = Guid.NewGuid(),
+            BatchNumber = "BATCH-QC-SEED-777",
+            MasterRecipeId = masterRecipe.Id,
+            BatchSize = 250m,
+            ProductionLineId = productionLine.Id,
+            Status = BmrStatus.InQc,
+            CreatedById = "qc-user-1",
+            CreatedAt = new DateTime(2026, 5, 24, 9, 0, 0, DateTimeKind.Utc),
+        };
+
+        dbContext.MasterRecipes.Add(masterRecipe);
+        dbContext.ProductionLines.Add(productionLine);
+        dbContext.Bmrs.Add(bmr);
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        var auditService = new TestAuditService(dbContext);
+        var qcService = new QcTestService(dbContext, new TestAuthService(), auditService);
+
+        var qcTest = new QcTest
+        {
+            TestObjectType = "Batch",
+            TestObjectId = 777,
+            Status = QcTestStatus.InBehandeling,
+            CreatedAt = new DateTimeOffset(2026, 5, 24, 9, 0, 0, TimeSpan.Zero),
+            CreatedBy = "qc-user-1",
+            Parameters =
+            [
+                new QcTestParameter
+                {
+                    Name = "Assay",
+                    Unit = "%",
+                    Min = 10m,
+                    Max = 20m,
+                }
+            ]
+        };
+
+        dbContext.QcTests.Add(qcTest);
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        var parameterId = qcTest.Parameters.Single().Id;
+        var response = await qcService.SubmitResultsAsync(
+            qcTest.Id,
+            new SubmitQcTestResultsRequest
+            {
+                Password = "correct-password",
+                Parameters =
+                [
+                    new SubmitQcTestResultParameterRequest
+                    {
+                        ParameterId = parameterId,
+                        MeasuredValue = measuredValue,
+                    }
+                ]
+            },
+            "qc-user-1",
+            cancellationToken);
+
+        Assert.True(response.IsSuccess);
+        var submitResult = Assert.IsType<SubmitQcTestResultsResponse>(response.Value);
+
+        var savedTest = await dbContext.QcTests
+            .Include(test => test.Parameters)
+            .SingleAsync(test => test.Id == qcTest.Id, cancellationToken);
+
+        var savedBmr = await dbContext.Bmrs.SingleAsync(entity => entity.Id == bmr.Id, cancellationToken);
+        var auditLogs = await dbContext.AuditLogs
+            .OrderBy(log => log.Id)
+            .ToListAsync(cancellationToken);
+
+        return new QcScenarioResult(submitResult, savedTest, null, savedBmr, auditLogs);
     }
 
     private sealed record QcScenarioResult(
         SubmitQcTestResultsResponse Response,
         QcTest Test,
-        Lot Lot,
+        Lot? Lot,
+        Bmr? Bmr,
         IReadOnlyList<AuditLog> AuditLogs);
 
     private sealed class TestAuthService : IAuthService

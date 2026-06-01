@@ -412,18 +412,19 @@ public sealed class QcTestService(
             ? QcTestStatus.Approved
             : QcTestStatus.Rejected;
 
-        var testObjectUpdated = await ApplyTestObjectStatusAsync(
+        var testObjectUpdateError = await ApplyTestObjectStatusAsync(
             test.TestObjectType,
             test.TestObjectId,
             allWithinSpecification,
             ct);
 
-        if (!testObjectUpdated)
+        if (testObjectUpdateError is not null)
         {
             return Result<SubmitQcTestResultsResponse>.Failure(
-                "Test object could not be updated for this QC result.");
+                testObjectUpdateError);
         }
 
+        db.QcTests.Update(test);
         await db.SaveChangesAsync(ct);
 
         await auditService.LogAsync(
@@ -526,7 +527,7 @@ public sealed class QcTestService(
         return $"{testObjectType} #{testObjectId}";
     }
 
-    private async Task<bool> ApplyTestObjectStatusAsync(
+    private async Task<string?> ApplyTestObjectStatusAsync(
         string testObjectType,
         int testObjectId,
         bool passed,
@@ -537,11 +538,12 @@ public sealed class QcTestService(
             var lot = await db.Lots.FirstOrDefaultAsync(l => l.Id == testObjectId, ct);
             if (lot is null)
             {
-                return false;
+                return "Test object could not be updated for this QC result.";
             }
 
             lot.Status = passed ? LotStatus.Released : LotStatus.Rejected;
-            return true;
+            db.Lots.Update(lot);
+            return null;
         }
 
         if (testObjectType.Equals("Batch", StringComparison.OrdinalIgnoreCase))
@@ -550,14 +552,15 @@ public sealed class QcTestService(
             var matchingBmr = bmrList.FirstOrDefault(bmr => MatchesBatchId(bmr.BatchNumber, testObjectId));
             if (matchingBmr is null)
             {
-                return false;
+                return "Test object could not be updated for this QC result.";
             }
 
             matchingBmr.Status = passed ? BmrStatus.Completed : BmrStatus.Rejected;
-            return true;
+            db.Bmrs.Update(matchingBmr);
+            return null;
         }
 
-        return false;
+        return "Test object could not be updated for this QC result.";
     }
 
     private static QcTestParameterResponse ToParameterResponse(QcTestParameter parameter)

@@ -9,6 +9,9 @@
     "AuthDb": "Server=localhost;Database=pharma_auth_dev;User=YOUR_USER;Password=YOUR_PASSWORD;Pooling=true;MinimumPoolSize=5;MaximumPoolSize=50;",
     "DomainDb": "Server=localhost;Database=pharma_domain_dev;User=YOUR_USER;Password=YOUR_PASSWORD;Pooling=true;MinimumPoolSize=5;MaximumPoolSize=100;"
   },
+  "environmentVariables": {
+    "ASPNETCORE_ENVIRONMENT": "Development"
+  },
   "Jwt": {
     "Issuer": "pharma-qms",
     "Audience": "pharma-qms-spa",
