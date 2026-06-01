@@ -1,50 +1,170 @@
-<section
-  class="card dashboard-card"
-  *ngIf="session$ | async as session; else anonymous"
->
-  <div class="session-info">
-    <p class="session-note">
-      Session expires automatically after 15 minutes of inactivity.
-    </p>
-  </div>
+<ng-container *ngIf="session$ | async as session; else anonymous">
+  <section class="dashboard-shell">
+    <header class="dashboard-hero card">
+      <div class="hero-copy">
+        <p class="eyebrow">Main dashboard</p>
+        <h1>Command center</h1>
+        <p class="hero-description">
+          A live view of raw materials, lots, BMR batches, QC tests, and audit
+          activity in one place.
+        </p>
 
-  <div class="dashboard-header">
-    <div>
-      <p class="eyebrow">Authenticated session</p>
-      <h2>{{ session.firstName }} {{ session.lastName }}</h2>
-    </div>
+        <div class="hero-meta">
+          <span>Roles: {{ session.roles.join(" · ") }}</span>
+          <span>Expires: {{ session.accessTokenExpiresUtc | date: "medium" }}</span>
+        </div>
+      </div>
 
-    <button class="secondary-button" type="button" (click)="logout()">
-      Logout
-    </button>
-  </div>
+      <div class="hero-actions">
+        <div class="session-panel">
+          <span class="session-name">{{ session.firstName }} {{ session.lastName }}</span>
+          <span class="session-role">{{ session.roles[0] }}</span>
+          <p>Focus the dashboard below to inspect each operational area.</p>
+        </div>
 
-  <div class="grid-2 details-grid">
-    <div>
-      <h3>Roles</h3>
-      <ul>
-        <li *ngFor="let role of session.roles">{{ role }}</li>
-      </ul>
-    </div>
+        <button class="secondary-button hero-logout" type="button" (click)="logout()">
+          Logout
+        </button>
+      </div>
+    </header>
 
-    <div>
-      <h3>Token expiry</h3>
-      <p>
-        <span>Access token expires at</span>
-        <span>{{ session.accessTokenExpiresUtc | date: "medium" }}</span>
-      </p>
-      <p>
-        <span>Refresh token expires at</span>
-        <span>{{ session.refreshTokenExpiresUtc | date: "medium" }}</span>
-      </p>
-    </div>
-  </div>
-</section>
+    <section *ngIf="loading" class="card state-card">Loading dashboard data...</section>
+
+    <section *ngIf="errorMessage" class="card state-card state-card--error">
+      {{ errorMessage }}
+    </section>
+
+    <section class="section-switcher" aria-label="Dashboard sections">
+      <button
+        *ngFor="let option of sectionOptions; trackBy: trackBySection"
+        type="button"
+        class="section-switcher__button"
+        [class.is-active]="selectedSection === option.id"
+        (click)="selectSection(option.id)"
+      >
+        <span>{{ option.label }}</span>
+        <small>{{ option.description }}</small>
+      </button>
+    </section>
+
+    <section class="summary-grid">
+      <button
+        *ngFor="let card of summaryCards"
+        type="button"
+        class="summary-card"
+        [class.is-active]="selectedSection === card.id"
+        (click)="selectSection(card.id)"
+      >
+        <span class="summary-card__label">{{ card.label }}</span>
+        <strong class="summary-card__value">{{ card.value }}</strong>
+        <span class="summary-card__description">{{ card.description }}</span>
+      </button>
+    </section>
+
+    <section class="panel-grid">
+      <article class="panel card">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Graph</p>
+            <h2>{{ selectedSectionOption.label }}</h2>
+            <p class="panel-subtitle">{{ selectedSectionOption.description }}</p>
+          </div>
+
+          <span class="panel-pill">{{ distributionBuckets.length }} buckets</span>
+        </div>
+
+        <div class="distribution-list">
+          <div *ngFor="let bucket of distributionBuckets" class="distribution-row">
+            <div class="distribution-row__meta">
+              <div>
+                <strong>{{ bucket.label }}</strong>
+                <p>{{ bucket.detail }}</p>
+              </div>
+              <span>{{ bucket.count }}</span>
+            </div>
+
+            <div class="distribution-track" aria-hidden="true">
+              <div
+                class="distribution-fill"
+                [ngClass]="'tone-' + bucket.tone"
+                [style.width.%]="bucket.percent"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel card">
+        <div class="panel-header panel-header--stacked">
+          <div>
+            <p class="eyebrow">Timeline</p>
+            <h2>{{ selectedSectionOption.label }} activity</h2>
+            <p class="panel-subtitle">
+              Recent records and changes pulled from the underlying tabs.
+            </p>
+          </div>
+
+          <label class="timeline-search">
+            <span class="sr-only">Search timeline</span>
+            <input
+              type="search"
+              placeholder="Search timeline..."
+              [(ngModel)]="timelineSearch"
+            />
+          </label>
+        </div>
+
+        <div *ngIf="selectedTimelineItems.length === 0" class="empty-state">
+          No timeline entries match the current search.
+        </div>
+
+        <div *ngIf="selectedTimelineItems.length > 0" class="timeline-list">
+          <article
+            *ngFor="let item of selectedTimelineItems; trackBy: trackByTimeline"
+            class="timeline-item"
+          >
+            <div class="timeline-marker" [ngClass]="'tone-' + item.tone"></div>
+
+            <div class="timeline-content">
+              <div class="timeline-topline">
+                <strong>{{ item.title }}</strong>
+                <span>{{ item.timestampLabel }}</span>
+              </div>
+              <p>{{ item.subtitle }}</p>
+              <small>{{ item.detail }}</small>
+            </div>
+
+            <a *ngIf="item.route" [routerLink]="item.route" class="timeline-link">
+              Open
+            </a>
+          </article>
+        </div>
+      </article>
+    </section>
+
+    <section class="card quick-actions">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">Shortcuts</p>
+          <h2>Jump to related work</h2>
+        </div>
+      </div>
+
+      <div class="quick-actions__grid">
+        <a routerLink="/raw-materials" class="quick-action">Raw materials</a>
+        <a routerLink="/lots" class="quick-action">Lots</a>
+        <a routerLink="/bmr" class="quick-action">BMR</a>
+        <a routerLink="/qc" class="quick-action">Quality control</a>
+        <a routerLink="/audit-trail" class="quick-action">Audit trail</a>
+      </div>
+    </section>
+  </section>
+</ng-container>
 
 <ng-template #anonymous>
-  <section class="card dashboard-card">
-    <h2>Session unavailable</h2>
-    <p>Use the login page to authenticate.</p>
+  <section class="card anonymous-card">
+    <p class="eyebrow">Session unavailable</p>
+    <h2>Use the login page to authenticate.</h2>
     <a routerLink="/login" class="primary-button">Go to login</a>
   </section>
 </ng-template>
