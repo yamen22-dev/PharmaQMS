@@ -25,6 +25,11 @@
   white-space: nowrap;
 }
 
+.hint-text {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+}
 .content-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;

@@ -3,14 +3,14 @@ import { CommonModule } from "@angular/common";
 import { RouterModule } from "@angular/router";
 import { FormsModule } from "@angular/forms";
 import { LotService } from "../../../core/services/lot.service";
-import { RawMaterialService } from "../../../core/services/raw-material.service";
 import { LotSummary, LotStatus } from "../../../core/models/lot.model";
 
 @Component({
   selector: "app-lots-overview",
   standalone: true,
   imports: [CommonModule, RouterModule, FormsModule],
-  template: '../lot-form/lot-form.component.html',
+  templateUrl: "./lots-overview.component.html",
+  styleUrl: "./lots-overview.component.css",
 })
 export class LotsOverviewComponent implements OnInit {
   private readonly lotService = inject(LotService);
@@ -24,6 +24,10 @@ export class LotsOverviewComponent implements OnInit {
   selectedStatus = "";
   selectedRawMaterial = "";
   selectedRawMaterialId: number | null = null;
+
+  get canCreateLot(): boolean {
+    return this.selectedRawMaterialId !== null;
+  }
 
   ngOnInit(): void {
     this.lotService.getLots().subscribe({
@@ -55,7 +59,14 @@ export class LotsOverviewComponent implements OnInit {
       return matchSearch && matchStatus && matchRm;
     });
 
-    const selected = this.filtered[0];
+    if (!this.selectedRawMaterial) {
+      this.selectedRawMaterialId = null;
+      return;
+    }
+
+    const selected = this.lots.find(
+      (lot) => lot.rawMaterialName === this.selectedRawMaterial,
+    );
     this.selectedRawMaterialId = selected?.rawMaterialId ?? null;
   }
 

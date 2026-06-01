@@ -96,6 +96,7 @@ export class QcService {
       id: this.asNumber(source["id"]) ?? 0,
       testObject: testObjectLabel,
       testObjectType,
+      testObjectId: testObjectId ?? 0,
       createdAt: this.asString(source["createdAt"]) || "",
       createdBy: this.asString(source["createdBy"]) || "",
       status: this.normalizeStatus(source["status"]),

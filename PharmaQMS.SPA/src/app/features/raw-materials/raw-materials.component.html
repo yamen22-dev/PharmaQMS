@@ -119,7 +119,30 @@
     <div>
       <h1>Lots overview</h1>
     </div>
+
+    <a
+      *ngIf="canCreateLot"
+      [routerLink]="['/raw-materials', selectedRawMaterialId, 'lots', 'new']"
+      class="primary-button new-material-btn"
+      aria-label="Create new lot"
+    >
+      New lot
+    </a>
+
+    <button
+      *ngIf="canCreate && !canCreateLot"
+      type="button"
+      class="primary-button new-material-btn"
+      disabled
+      title="Select a raw material first"
+    >
+      New lot
+    </button>
   </header>
+
+  <p class="hint-text" *ngIf="canCreate && !canCreateLot">
+    Select a raw material from the filter to create a lot.
+  </p>
 
   <section class="stats-grid py-4 ">
     <div class="stat-card stat-card--primary">

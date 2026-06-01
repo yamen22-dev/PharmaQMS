@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit, inject } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
-import { Router } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 
 import { QcService } from "../../../core/services/qc.service";
 import {
@@ -21,6 +21,7 @@ import {
 export class QcCreateComponent implements OnInit {
   private readonly qcService = inject(QcService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly cdr = inject(ChangeDetectorRef);
 
   readonly objectTypes: Array<"Lot" | "Batch"> = ["Lot", "Batch"];
@@ -48,7 +49,7 @@ export class QcCreateComponent implements OnInit {
           ? response.batches
           : [];
 
-        this.resetSelectedObject();
+        this.applyInitialSelectionFromQuery();
         this.loading = false;
         this.cdr.detectChanges();
       },
@@ -138,8 +139,7 @@ export class QcCreateComponent implements OnInit {
       error: (error) => {
         this.submitting = false;
         this.errorMessage =
-          error?.error?.error ??
-          "Failed to create QC test. Check the input.";
+          error?.error?.error ?? "Failed to create QC test. Check the input.";
         this.cdr.detectChanges();
       },
     });
@@ -148,5 +148,28 @@ export class QcCreateComponent implements OnInit {
   private resetSelectedObject(): void {
     const firstOption = this.testObjectOptions[0];
     this.selectedTestObjectId = firstOption?.testObjectId ?? null;
+  }
+
+  private applyInitialSelectionFromQuery(): void {
+    const typeParam =
+      this.route.snapshot.queryParamMap.get("testObjectType") ?? "";
+    const idParam = Number(
+      this.route.snapshot.queryParamMap.get("testObjectId"),
+    );
+
+    if (typeParam === "Lot" || typeParam === "Batch") {
+      this.testObjectType = typeParam;
+    }
+
+    const options = this.testObjectOptions;
+    if (
+      Number.isFinite(idParam) &&
+      options.some((o) => o.testObjectId === idParam)
+    ) {
+      this.selectedTestObjectId = idParam;
+      return;
+    }
+
+    this.resetSelectedObject();
   }
 }
