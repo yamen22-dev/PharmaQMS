@@ -150,8 +150,8 @@ export class RawMaterialsComponent implements OnInit {
           this.cdr.detectChanges();
         },
         error: () => {
-        this.errorMessage =
-          "The overview could not be loaded. Please try again later.";
+          this.errorMessage =
+            "The overview could not be loaded. Please try again later.";
         },
       });
   }
@@ -218,13 +218,18 @@ export class RawMaterialsComponent implements OnInit {
   selectedRawMaterial = "";
   selectedRawMaterialId: number | null = null;
 
+  get canCreateLot(): boolean {
+    return this.canCreate && this.selectedRawMaterialId !== null;
+  }
+
   applyFilters_lot(): void {
     this.filtered = this.lots.filter((l) => {
       const matchSearch = this.searchQuery
         ? l.lotNumber.toLowerCase().includes(this.searchQuery.toLowerCase())
         : true;
       const matchStatus = this.selectedStatus
-        ? this.normalizeStatus(l.status) === this.normalizeStatus(this.selectedStatus)
+        ? this.normalizeStatus(l.status) ===
+          this.normalizeStatus(this.selectedStatus)
         : true;
       const matchRm = this.selectedRawMaterial
         ? l.rawMaterialName === this.selectedRawMaterial
@@ -240,7 +245,9 @@ export class RawMaterialsComponent implements OnInit {
   }
 
   countByStatus(status: LotStatus): number {
-    return this.lots.filter((l) => this.normalizeStatus(l.status) === this.normalizeStatus(status)).length;
+    return this.lots.filter(
+      (l) => this.normalizeStatus(l.status) === this.normalizeStatus(status),
+    ).length;
   }
 
   onsearchInput_lot(event: Event): void {
@@ -269,26 +276,33 @@ export class RawMaterialsComponent implements OnInit {
   private normalizeCategory(category: string): string {
     const dutchToEnglishCategory: Record<string, RawMaterialCategory> = {
       "Werkzame stof": RawMaterialCategory.ActivePharmaceuticalIngredient,
-      "Hulpstof": RawMaterialCategory.Excipient,
-      "Verpakking": RawMaterialCategory.Packaging,
-      "Oplosmiddel": RawMaterialCategory.Solvent,
-      "Overig": RawMaterialCategory.Other,
+      Hulpstof: RawMaterialCategory.Excipient,
+      Verpakking: RawMaterialCategory.Packaging,
+      Oplosmiddel: RawMaterialCategory.Solvent,
+      Overig: RawMaterialCategory.Other,
     };
 
     // Keep existing English values untouched; only translate known Dutch values.
     return dutchToEnglishCategory[category] ?? category;
   }
 
-  private normalizeStatus(status: string): "Quarantine" | "Released" | "Rejected" {
-    const dutchToEnglishStatus: Record<string, "Quarantine" | "Released" | "Rejected"> = {
+  private normalizeStatus(
+    status: string,
+  ): "Quarantine" | "Released" | "Rejected" {
+    const dutchToEnglishStatus: Record<
+      string,
+      "Quarantine" | "Released" | "Rejected"
+    > = {
       Quarantaine: "Quarantine",
       Vrijgegeven: "Released",
       Afgekeurd: "Rejected",
     };
 
     // Keep existing English values untouched; only translate known Dutch values.
-    return dutchToEnglishStatus[status] ??
-      (status as "Quarantine" | "Released" | "Rejected");
+    return (
+      dutchToEnglishStatus[status] ??
+      (status as "Quarantine" | "Released" | "Rejected")
+    );
   }
 }
 

@@ -4,6 +4,7 @@ export interface QcTestSummary {
   id: number;
   testObject: string;
   testObjectType: string;
+  testObjectId: number;
   createdAt: string;
   createdBy: string;
   status: QcResult;

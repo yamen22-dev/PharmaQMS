@@ -66,16 +66,49 @@
 
   <div class="bg-white border border-gray-200 rounded-lg p-6 flex flex-col">
     <h2 class="text-base font-semibold text-gray-900 mb-2">QC-tests</h2>
-    <p class="text-sm text-gray-500 flex-1">
-      QC-testresultaten worden beschikbaar na implementatie van de QC-module (Sprint 4).
-    </p>
 
-    <a
-      routerLink="/quality-control"
-      class="mt-4 inline-flex items-center justify-center px-4 py-2 text-sm border border-indigo-300 text-indigo-600 rounded-md hover:bg-indigo-50 transition-colors w-full"
-    >
-      Naar QC-module
-    </a>
+    <div *ngIf="qcLoading" class="text-sm text-gray-500">Loading QC-tests...</div>
+
+    <div *ngIf="!qcLoading" class="flex flex-col gap-3">
+      <p class="text-sm text-gray-500" *ngIf="lotQcTests.length === 0">
+        No QC-tests found for this lot.
+      </p>
+
+      <div
+        *ngFor="let test of lotQcTests"
+        class="flex items-center justify-between rounded-md border border-gray-200 px-3 py-2"
+      >
+        <div>
+          <a [routerLink]="['/qc', test.id]" class="font-medium text-blue-700 hover:text-blue-900">
+            QC test #{{ test.id }}
+          </a>
+          <p class="text-xs text-gray-500">
+            {{ test.createdAt | date:'dd-MM-yyyy' }} by {{ test.createdBy }}
+          </p>
+        </div>
+
+        <span [ngClass]="qcBadgeClass(test.status)">
+          {{ qcStatusLabel(test.status) }}
+        </span>
+      </div>
+
+      <a
+      style="color:black;"
+        *ngIf="canCreateQcTest"
+        [routerLink]="['/qc/new']"
+        [queryParams]="{ testObjectType: 'Lot', testObjectId: lot.id }"
+        class="mt-2 inline-flex items-center justify-center px-4 py-2 text-sm bg-white border text-black rounded-md  transition-colors w-full"
+      >
+        + New QC test for this lot
+      </a>
+
+      <a
+        routerLink="/qc"
+        class="inline-flex items-center justify-center px-4 py-2 text-sm border border-indigo-300 text-indigo-600 rounded-md hover:bg-indigo-50 transition-colors w-full"
+      >
+        Open QC overview
+      </a>
+    </div>
   </div>
 </div>
 
