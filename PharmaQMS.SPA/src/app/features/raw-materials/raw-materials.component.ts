@@ -94,24 +94,24 @@ export class RawMaterialsComponent implements OnInit {
   }
 
   getCategoryLabel(category: string): string {
-    switch (category) {
+    switch (this.normalizeCategory(category)) {
       case RawMaterialCategory.ActivePharmaceuticalIngredient:
-        return "Werkzame stof";
+        return "Active pharmaceutical ingredient";
       case RawMaterialCategory.Excipient:
-        return "Hulpstof";
+        return "Excipient";
       case RawMaterialCategory.Packaging:
-        return "Verpakking";
+        return "Packaging";
       case RawMaterialCategory.Solvent:
-        return "Oplosmiddel";
+        return "Solvent";
       case RawMaterialCategory.Other:
-        return "Overig";
+        return "Other";
       default:
         return category;
     }
   }
 
   getCategoryClass(category: string): string {
-    switch (category) {
+    switch (this.normalizeCategory(category)) {
       case RawMaterialCategory.ActivePharmaceuticalIngredient:
         return "category-pill category-pill--active";
       case RawMaterialCategory.Excipient:
@@ -187,7 +187,9 @@ export class RawMaterialsComponent implements OnInit {
       // If the user chose "all" we accept every category,
       // otherwise we compare the stored category with the selected one.
       const matchesCategory =
-        categoryFilter === "all" || material.category === categoryFilter; // <-- make sure both sides are the same type
+        categoryFilter === "all" ||
+        this.normalizeCategory(material.category) ===
+          this.normalizeCategory(categoryFilter);
 
       // ---------- Text search ----------
       const name = (material.name ?? "").toLowerCase();
@@ -222,7 +224,7 @@ export class RawMaterialsComponent implements OnInit {
         ? l.lotNumber.toLowerCase().includes(this.searchQuery.toLowerCase())
         : true;
       const matchStatus = this.selectedStatus
-        ? l.status === this.selectedStatus
+        ? this.normalizeStatus(l.status) === this.normalizeStatus(this.selectedStatus)
         : true;
       const matchRm = this.selectedRawMaterial
         ? l.rawMaterialName === this.selectedRawMaterial
@@ -238,7 +240,7 @@ export class RawMaterialsComponent implements OnInit {
   }
 
   countByStatus(status: LotStatus): number {
-    return this.lots.filter((l) => l.status === status).length;
+    return this.lots.filter((l) => this.normalizeStatus(l.status) === this.normalizeStatus(status)).length;
   }
 
   onsearchInput_lot(event: Event): void {
@@ -247,21 +249,46 @@ export class RawMaterialsComponent implements OnInit {
   }
 
   statusLabel(status: LotStatus): string {
-    const map: Record<LotStatus, string> = {
+    const map: Record<"Quarantine" | "Released" | "Rejected", string> = {
       Quarantine: "Quarantine",
       Released: "Released",
       Rejected: "Rejected",
     };
-    return map[status];
+    return map[this.normalizeStatus(status)] ?? status;
   }
 
   badgeClass(status: LotStatus): string {
-    const map: Record<LotStatus, string> = {
+    const map: Record<"Quarantine" | "Released" | "Rejected", string> = {
       Quarantine: "badge-orange",
       Released: "badge-green",
       Rejected: "badge-red",
     };
-    return map[status];
+    return map[this.normalizeStatus(status)] ?? "badge-orange";
+  }
+
+  private normalizeCategory(category: string): string {
+    const dutchToEnglishCategory: Record<string, RawMaterialCategory> = {
+      "Werkzame stof": RawMaterialCategory.ActivePharmaceuticalIngredient,
+      "Hulpstof": RawMaterialCategory.Excipient,
+      "Verpakking": RawMaterialCategory.Packaging,
+      "Oplosmiddel": RawMaterialCategory.Solvent,
+      "Overig": RawMaterialCategory.Other,
+    };
+
+    // Keep existing English values untouched; only translate known Dutch values.
+    return dutchToEnglishCategory[category] ?? category;
+  }
+
+  private normalizeStatus(status: string): "Quarantine" | "Released" | "Rejected" {
+    const dutchToEnglishStatus: Record<string, "Quarantine" | "Released" | "Rejected"> = {
+      Quarantaine: "Quarantine",
+      Vrijgegeven: "Released",
+      Afgekeurd: "Rejected",
+    };
+
+    // Keep existing English values untouched; only translate known Dutch values.
+    return dutchToEnglishStatus[status] ??
+      (status as "Quarantine" | "Released" | "Rejected");
   }
 }
 

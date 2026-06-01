@@ -131,6 +131,7 @@ export class RawMaterialFormComponent {
         this.submitted = false;
         this.form.reset();
         this.showSuccessAlert = true;
+        alert(`Raw material "${response.name}" registered successfully.`);
         this.successMessage = `Raw material "${response.name}" registered successfully.`;
       },
       error: (error) => {
