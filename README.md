@@ -107,23 +107,17 @@ The SPA calls the API at:
 
 - https://localhost:7008/api/v1
 
-## 4. Start frontend SPA
+## Run UI & Playwright tests
 
-Open a second terminal:
+If you want to run the UI and Playwright tests from the repository root, open a terminal at the workspace root and run:
 
-```bash
-cd PharmaQMS.SPA
-npm install
-npm start
+```powershell
+dotnet test .\PlaywrightTests\PlaywrightTests.csproj
 ```
 
-Expected SPA URL:
-
-- http://localhost:4200
-
-The SPA calls the API at:
-
-- https://localhost:7008/api/v1
+Important:
+- Make sure the API is stopped/closed before running the tests (the test runner starts its own test server).
+- Ensure the SPA is running (from `PharmaQMS.SPA` run `npm run start`) so UI tests can connect to the frontend.
 
 ## Security Features
 
