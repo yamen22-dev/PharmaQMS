@@ -1,0 +1,245 @@
+@import "tailwindcss";
+
+.lots-page {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.page-header h1 {
+    margin: 0;
+    color: #1a2647;
+    font-size: 2rem;
+    line-height: 1.1;
+}
+
+.new-lot-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.55rem 1rem;
+    border-radius: 0.65rem;
+    background: #4f46e5;
+    color: #ffffff;
+    font-weight: 600;
+    transition: background-color 0.15s ease;
+}
+
+.new-lot-btn:hover {
+    background: #4338ca;
+}
+
+.new-lot-btn--disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+}
+
+.new-lot-btn--disabled:hover {
+    background: #94a3b8;
+}
+
+.hint-text {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.content-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 1rem;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+    overflow: hidden;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 1rem;
+}
+
+.stat-card {
+    padding: 1rem 1.25rem;
+    border-radius: 0.85rem;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+.stat-card h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #1e5a96;
+}
+
+.stat-card p {
+    margin: 0.35rem 0 0;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #475569;
+    font-weight: 700;
+}
+
+.stat-card--warning h2 {
+    color: #d97706;
+}
+
+.table-card {
+    padding: 0;
+}
+
+.table-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.search-field {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    background: #ffffff;
+    width: min(100%, 360px);
+}
+
+.search-icon {
+    display: inline-flex;
+    width: 1rem;
+    height: 1rem;
+    color: #94a3b8;
+}
+
+.search-icon svg {
+    width: 1rem;
+    height: 1rem;
+    fill: currentColor;
+}
+
+.search-input {
+    border: 0;
+    outline: none;
+    width: 100%;
+    font-size: 0.9rem;
+    background: transparent;
+    color: #1f2937;
+}
+
+.search-input:focus-visible,
+.filter-select:focus-visible {
+    outline: 3px solid #1e5a96;
+    outline-offset: 2px;
+}
+
+.filter-field {
+    min-width: 180px;
+}
+
+.filter-select {
+    width: 100%;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 0.55rem 0.8rem;
+    background: #ffffff;
+    font-size: 0.9rem;
+    color: #1f2937;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table th {
+    text-align: left;
+    padding: 0.8rem 1.25rem 0.6rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #475569;
+    font-weight: 700;
+}
+
+.data-table td {
+    padding: 0.85rem 1.25rem;
+    border-top: 1px solid #eef2f7;
+    color: #1f2937;
+}
+
+.data-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+.material-link {
+    color: #1e5a96;
+    font-weight: 600;
+}
+
+.status-badge {
+    display: inline-flex;
+    padding: 0.4rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.table-empty {
+    text-align: center;
+    padding: 1.5rem;
+    color: #64748b;
+}
+
+.table-state {
+    padding: 1.5rem;
+    text-align: center;
+    color: #64748b;
+}
+
+.badge-orange {
+    background-color: #faeeda;
+    color: #633806;
+}
+
+.badge-red {
+    background-color: #fcdcdc;
+    color: #b91c1c;
+}
+
+.badge-green {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .new-lot-btn,
+    .new-lot-btn--disabled {
+        width: 100%;
+    }
+
+    .table-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-field {
+        width: 100%;
+    }
+}
