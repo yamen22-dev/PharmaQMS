@@ -235,10 +235,7 @@ try
             IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(jwtKeyBytes)
         };
     });
-    builder.Services.AddAuthorizationBuilder()
-        .SetFallbackPolicy(new AuthorizationPolicyBuilder()
-            .RequireAuthenticatedUser()
-            .Build());
+    builder.Services.AddAuthorization();
 
     // Add Services
     builder.Services.AddScoped<IAuthService, AuthService>();
@@ -315,7 +312,6 @@ try
 
         Log.Information("Database seeded successfully");
     }
-
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
     {
@@ -360,7 +356,7 @@ try
     app.UseAuthentication();
     app.UseAuthorization();
 
-    app.MapControllers();
+    app.MapControllers().RequireAuthorization();
 
     app.Run();
 }

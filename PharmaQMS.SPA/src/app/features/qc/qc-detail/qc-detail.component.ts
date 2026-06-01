@@ -60,7 +60,7 @@ export class QcDetailComponent implements OnInit {
       password: this.password,
       parameters: this.test.parameters.map((parameter) => ({
         parameterId: parameter.id,
-        measuredValue: this.measuredValues[parameter.id] ?? 0,
+        measuredValue: this.measuredValues[parameter.id],
       })),
     };
 

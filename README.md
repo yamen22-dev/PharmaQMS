@@ -27,43 +27,39 @@ dotnet dev-certs https --trust
 
 ## 2. Setup Secrets (IMPORTANT!)
 
-Before running the API, you must configure your local secrets. This ensures sensitive data (database credentials, JWT keys) are never committed to Git.
+Before running the API, configure your local secrets so sensitive data (database credentials, JWT keys) are never committed to Git.
 
-### Run the setup script:
+Quick steps (recommended):
 
-**Windows:**
-```bash
+1. Run the setup script to create local config and init user-secrets:
+
+   Windows:
+```powershell
 setup-secrets.bat
 ```
 
-**Linux/Mac/Git Bash:**
+   Linux/macOS / Git Bash:
 ```bash
 bash setup-secrets.sh
 ```
 
-This will:
-- Create local `appsettings.json` from template
-- Create local `appsettings.Development.json` from template
-- Initialize `.NET user-secrets` for development
-
-### Configure your secrets:
-
-Edit `PharmaQMS.API/appsettings.json` and replace placeholders:
-```json
-"ConnectionStrings": {
-  "AuthDb": "Server=YOUR_SERVER;Database=pharma_auth;User=YOUR_USER;Password=YOUR_PASSWORD;..."
-},
-"Jwt": {
-  "Key": "your-32-character-minimum-secret-key-here"
-}
+2. Verify or set required values (example):
+```bash
+cd PharmaQMS.API
+dotnet user-secrets list
+dotnet user-secrets set "Seed:DefaultUserPassword" "your-strong-dev-password"
 ```
 
-**⚠️ IMPORTANT:** 
-- Do NOT commit `appsettings.json` files to Git
-- They are in `.gitignore` for security
-- Never share your actual credentials in Git, Slack, or email
+3. Edit local config only when needed:
 
-For detailed setup guide, see: [SECRETS_SETUP.md](SECRETS_SETUP.md)
+- `PharmaQMS.API/appsettings.Development.json` — for development-only settings
+- `PharmaQMS.API/appsettings.json` — avoid committing this file
+
+Critical notes:
+- Do NOT commit `appsettings.json` or any file containing real secrets (they are ignored by `.gitignore`).
+- Use `dotnet user-secrets` for development and environment variables or a secrets manager in production.
+
+For the full, step-by-step guide with examples, troubleshooting and Docker/IDE notes, see: [SECRETS_SETUP.md](SECRETS_SETUP.md)
 
 ## 3. Build & Run the API
 
@@ -111,23 +107,17 @@ The SPA calls the API at:
 
 - https://localhost:7008/api/v1
 
-## 4. Start frontend SPA
+## Run UI & Playwright tests
 
-Open a second terminal:
+If you want to run the UI and Playwright tests from the repository root, open a terminal at the workspace root and run:
 
-```bash
-cd PharmaQMS.SPA
-npm install
-npm start
+```powershell
+dotnet test .\PlaywrightTests\PlaywrightTests.csproj
 ```
 
-Expected SPA URL:
-
-- http://localhost:4200
-
-The SPA calls the API at:
-
-- https://localhost:7008/api/v1
+Important:
+- Make sure the API is stopped/closed before running the tests (the test runner starts its own test server).
+- Ensure the SPA is running (from `PharmaQMS.SPA` run `npm run start`) so UI tests can connect to the frontend.
 
 ## Security Features
 

@@ -26,7 +26,7 @@ export interface QcTestDetail extends QcTestSummary {
 
 export interface SubmitQcTestResultParameter {
   parameterId: number;
-  measuredValue: number;
+  measuredValue: number | null;
 }
 
 export interface SubmitQcTestResultsRequest {
